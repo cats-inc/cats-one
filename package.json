@@ -1,0 +1,22 @@
+{
+  "name": "cats-one",
+  "version": "0.1.0",
+  "description": "One install for the entire Cats ecosystem.",
+  "bin": {
+    "cats": "./bin/cli.js"
+  },
+  "dependencies": {
+    "@cats-inc/cats-runtime": "^0.1.0",
+    "@cats-inc/cats-platform": "^0.1.0"
+  },
+  "keywords": [
+    "cats",
+    "platform",
+    "runtime",
+    "meta"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
