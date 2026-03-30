@@ -1,9 +1,9 @@
 {
-  "name": "cats-one",
+  "name": "cats-can",
   "version": "0.1.0",
-  "description": "One-shot bootstrap installer for the Cats ecosystem.",
+  "description": "Bootstrap installer entrypoint for the Cats ecosystem.",
   "bin": {
-    "cats-one": "./bin/cli.js"
+    "cats-can": "./bin/cli.js"
   },
   "dependencies": {
     "@cats-inc/cats-platform": "^0.1.0",
@@ -11,6 +11,7 @@
   },
   "keywords": [
     "cats",
+    "can",
     "bootstrap",
     "installer",
     "platform",

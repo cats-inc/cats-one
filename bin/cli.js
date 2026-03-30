@@ -22,7 +22,7 @@ try {
 } catch (error) {
   const detail = error instanceof Error ? error.message : String(error);
   console.error(
-    `cats-one could not find @cats-inc/cats-platform. Reinstall cats-one or run npx cats-one again.\n${detail}`,
+    `cats-can could not find @cats-inc/cats-platform. Reinstall cats-can or run npx cats-can again.\n${detail}`,
   );
   process.exit(1);
 }
@@ -35,7 +35,7 @@ const result = spawnSync(process.execPath, [platformBinPath, ...process.argv.sli
 
 if (result.error) {
   const detail = result.error instanceof Error ? result.error.message : String(result.error);
-  console.error(`cats-one failed to launch Cats: ${detail}`);
+  console.error(`cats-can failed to launch Cats: ${detail}`);
   process.exit(1);
 }
 
