@@ -1,19 +1,20 @@
 {
   "name": "cats-one",
   "version": "0.1.0",
-  "description": "One install for the entire Cats ecosystem.",
+  "description": "One-shot bootstrap installer for the Cats ecosystem.",
   "bin": {
-    "cats": "./bin/cli.js"
+    "cats-one": "./bin/cli.js"
   },
   "dependencies": {
-    "@cats-inc/cats-runtime": "^0.1.0",
-    "@cats-inc/cats-platform": "^0.1.0"
+    "@cats-inc/cats-platform": "^0.1.0",
+    "cats-runtime": "^0.1.0"
   },
   "keywords": [
     "cats",
+    "bootstrap",
+    "installer",
     "platform",
-    "runtime",
-    "meta"
+    "runtime"
   ],
   "license": "MIT",
   "engines": {
