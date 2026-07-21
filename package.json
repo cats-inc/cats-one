@@ -28,5 +28,8 @@
   "homepage": "https://github.com/cats-inc/cats-one#readme",
   "bugs": {
     "url": "https://github.com/cats-inc/cats-one/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

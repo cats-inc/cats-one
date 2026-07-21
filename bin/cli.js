@@ -6,7 +6,9 @@ const { dirname, resolve } = require('node:path');
 function resolvePlatformBin() {
   const manifestPath = require.resolve('@cats-inc/cats-platform/package.json');
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
-  const relativeBin = typeof manifest.bin === 'string' ? manifest.bin : manifest.bin?.cats;
+  const relativeBin = typeof manifest.bin === 'string'
+    ? manifest.bin
+    : manifest.bin?.['cats-platform'] ?? manifest.bin?.cats ?? Object.values(manifest.bin ?? {})[0];
 
   if (!relativeBin) {
     throw new Error('Unable to resolve the cats executable from @cats-inc/cats-platform.');
