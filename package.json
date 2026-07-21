@@ -1,9 +1,9 @@
 {
-  "name": "@cats-inc/cats-can",
+  "name": "@cats-inc/cats-one",
   "version": "0.1.0",
   "description": "Bootstrap installer entrypoint for the Cats ecosystem.",
   "bin": {
-    "cats-can": "./bin/cli.js"
+    "cats-one": "./bin/cli.js"
   },
   "dependencies": {
     "@cats-inc/cats-platform": "^0.1.0",
@@ -11,7 +11,7 @@
   },
   "keywords": [
     "cats",
-    "can",
+    "one",
     "bootstrap",
     "installer",
     "platform",
@@ -23,10 +23,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cats-inc/cats-can.git"
+    "url": "git+https://github.com/cats-inc/cats-one.git"
   },
-  "homepage": "https://github.com/cats-inc/cats-can#readme",
+  "homepage": "https://github.com/cats-inc/cats-one#readme",
   "bugs": {
-    "url": "https://github.com/cats-inc/cats-can/issues"
+    "url": "https://github.com/cats-inc/cats-one/issues"
   }
 }
