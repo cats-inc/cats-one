@@ -20,5 +20,13 @@
   "license": "MIT",
   "engines": {
     "node": ">=22.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cats-inc/cats-can.git"
+  },
+  "homepage": "https://github.com/cats-inc/cats-can#readme",
+  "bugs": {
+    "url": "https://github.com/cats-inc/cats-can/issues"
   }
 }

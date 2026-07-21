@@ -1,0 +1,13 @@
+# === Node.js ===
+node_modules/
+.npm/
+*.tgz
+npm-debug.log*
+
+# === Environment ===
+.env
+.env.local
+
+# === OS ===
+.DS_Store
+Thumbs.db
