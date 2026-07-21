@@ -31,5 +31,13 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "files": [
+    "bin/",
+    "README.md",
+    "LICENSE"
+  ]
 }
