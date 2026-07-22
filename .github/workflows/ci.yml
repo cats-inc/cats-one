@@ -18,8 +18,36 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+          cache: npm
+          cache-dependency-path: package-lock.json
 
-      # No npm install: the launcher's runtime dependencies are not yet
-      # published, and the unit tests only use node built-ins.
+      - name: Install dependencies
+        run: npm ci
+
       - name: Test
         run: npm test
+
+      - name: Pack tarball
+        run: npm pack
+
+      - name: Tarball install smoke test
+        run: |
+          CONSUMER=$(mktemp -d)
+          TARBALL=$(ls "$PWD"/cats-inc-cats-one-*.tgz)
+          cd "$CONSUMER"
+          npm init -y > /dev/null
+          npm install --no-audit --no-fund "$TARBALL"
+          node -e "
+            const { pickPlatformBin } = require('@cats-inc/cats-one/bin/cli.js');
+            const manifest = require('@cats-inc/cats-platform/package.json');
+            const bin = pickPlatformBin(manifest);
+            if (bin !== './build/server/index.js') {
+              throw new Error('unexpected platform bin: ' + bin);
+            }
+            const { existsSync } = require('node:fs');
+            const path = require.resolve('@cats-inc/cats-platform/package.json').replace(/package\.json$/, '') + bin;
+            if (!existsSync(path)) {
+              throw new Error('resolved platform bin missing on disk: ' + path);
+            }
+            console.log('launcher resolution smoke OK ->', bin);
+          "
