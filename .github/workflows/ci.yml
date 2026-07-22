@@ -30,7 +30,7 @@ jobs:
       - name: Pack tarball
         run: npm pack
 
-      - name: Tarball install smoke test
+      - name: Tarball resolution smoke test
         run: |
           CONSUMER=$(mktemp -d)
           TARBALL=$(ls "$PWD"/cats-inc-cats-one-*.tgz)
@@ -38,16 +38,40 @@ jobs:
           npm init -y > /dev/null
           npm install --no-audit --no-fund "$TARBALL"
           node -e "
-            const { pickPlatformBin } = require('@cats-inc/cats-one/bin/cli.js');
-            const manifest = require('@cats-inc/cats-platform/package.json');
-            const bin = pickPlatformBin(manifest).replace(/^\.\//, '');
-            if (bin !== 'build/server/index.js') {
-              throw new Error('unexpected platform bin: ' + bin);
-            }
+            const { pickPlatformBin, pickRuntimeBin } = require('@cats-inc/cats-one/bin/cli.js');
             const { existsSync } = require('node:fs');
-            const path = require.resolve('@cats-inc/cats-platform/package.json').replace(/package\.json$/, '') + bin;
-            if (!existsSync(path)) {
-              throw new Error('resolved platform bin missing on disk: ' + path);
+            const checks = [
+              ['@cats-inc/cats-platform', pickPlatformBin, 'build/server/index.js'],
+              ['@cats-inc/cats-runtime', pickRuntimeBin, 'build/runtime/index.js'],
+            ];
+            for (const [pkg, picker, expected] of checks) {
+              const manifestPath = require.resolve(pkg + '/package.json');
+              const bin = picker(require(manifestPath)).replace(/^\.\//, '');
+              if (bin !== expected) throw new Error(pkg + ' unexpected bin: ' + bin);
+              const resolved = manifestPath.replace(/package\.json$/, '') + bin;
+              if (!existsSync(resolved)) throw new Error(pkg + ' bin missing on disk: ' + resolved);
+              console.log('resolution OK', pkg, '->', bin);
             }
-            console.log('launcher resolution smoke OK ->', bin);
           "
+          echo "CONSUMER=$CONSUMER" >> "$GITHUB_ENV"
+
+      - name: Zero-to-running smoke test
+        run: |
+          cd "$CONSUMER"
+          export HOME="$CONSUMER/home"
+          mkdir -p "$HOME"
+          export CATS_RUNTIME_DIR="$HOME/runtime"
+          export CATS_PORT=8391
+          node node_modules/@cats-inc/cats-one/bin/cli.js &
+          LAUNCHER=$!
+          PLATFORM_OK=0
+          for i in $(seq 1 90); do
+            if curl -fsS http://127.0.0.1:8391/health > /dev/null 2>&1; then PLATFORM_OK=1; break; fi
+            sleep 1
+          done
+          RUNTIME_OK=0
+          curl -fsS http://127.0.0.1:3110/health > /dev/null 2>&1 && RUNTIME_OK=1
+          kill -TERM $LAUNCHER 2>/dev/null || true
+          wait $LAUNCHER 2>/dev/null || true
+          echo "platform=$PLATFORM_OK runtime=$RUNTIME_OK"
+          test "$PLATFORM_OK" = "1" -a "$RUNTIME_OK" = "1"
