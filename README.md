@@ -7,12 +7,12 @@ Bootstrap installer entrypoint for the Cats ecosystem.
 forwarding all CLI arguments. The platform is backed by
 [`@cats-inc/cats-runtime`](https://github.com/cats-inc/cats-runtime).
 
-> **Status**: pre-release. The `@cats-inc/cats-platform` and `@cats-inc/cats-runtime`
-> dependencies are not yet published to npm, so this package is not installable yet.
-> The unscoped [`cats-one`](https://www.npmjs.com/package/cats-one) npm name is a
-> reserved alias for this package.
+> **Status**: published. `@cats-inc/cats-one` and its dependencies are live on
+> npm. The unscoped [`cats-one`](https://www.npmjs.com/package/cats-one) package
+> is a thin alias that forwards to this canonical package, so `npx cats-one`
+> works too.
 
-## Usage (once published)
+## Usage
 
 ```bash
 npx @cats-inc/cats-one
