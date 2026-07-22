@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const { pickPlatformBin, pickRuntimeBin, waitForHealth, isHealthy } = require('../bin/cli.js');
+const { pickPlatformBin, pickRuntimeBin, resolveRuntimeEndpoint, waitForHealth, isHealthy } = require('../bin/cli.js');
 
 test('accepts a string bin declaration', () => {
   assert.equal(pickPlatformBin({ bin: 'build/server/index.js' }), 'build/server/index.js');
@@ -95,4 +95,41 @@ test('waitForHealth gives up on timeout and on shouldStop', async () => {
 test('isHealthy swallows connection errors', async () => {
   assert.equal(await isHealthy('http://127.0.0.1:9/health', async () => { throw new Error('x'); }), false);
   assert.equal(await isHealthy('http://127.0.0.1:9/health', async () => ({ ok: true })), true);
+});
+
+test('resolveRuntimeEndpoint defaults to local 127.0.0.1:3110', () => {
+  const endpoint = resolveRuntimeEndpoint({});
+  assert.equal(endpoint.baseUrl, 'http://127.0.0.1:3110');
+  assert.equal(endpoint.healthUrl, 'http://127.0.0.1:3110/health');
+  assert.equal(endpoint.isLocal, true);
+  assert.deepEqual(endpoint.spawnEnv, { CATS_RUNTIME_HOST: '127.0.0.1', CATS_RUNTIME_PORT: '3110' });
+});
+
+test('resolveRuntimeEndpoint derives spawn env from a custom base URL', () => {
+  const endpoint = resolveRuntimeEndpoint({ CATS_RUNTIME_BASE_URL: 'http://127.0.0.1:38110/' });
+  assert.equal(endpoint.healthUrl, 'http://127.0.0.1:38110/health');
+  assert.deepEqual(endpoint.spawnEnv, { CATS_RUNTIME_HOST: '127.0.0.1', CATS_RUNTIME_PORT: '38110' });
+});
+
+test('resolveRuntimeEndpoint honours CATS_RUNTIME_PORT/HOST when no base URL is set', () => {
+  const endpoint = resolveRuntimeEndpoint({ CATS_RUNTIME_PORT: '38110' });
+  assert.equal(endpoint.baseUrl, 'http://127.0.0.1:38110');
+  assert.deepEqual(endpoint.spawnEnv, { CATS_RUNTIME_HOST: '127.0.0.1', CATS_RUNTIME_PORT: '38110' });
+
+  const hosted = resolveRuntimeEndpoint({ CATS_RUNTIME_HOST: 'localhost', CATS_RUNTIME_PORT: '4000' });
+  assert.equal(hosted.baseUrl, 'http://localhost:4000');
+  assert.equal(hosted.isLocal, true);
+});
+
+test('resolveRuntimeEndpoint probes wildcard binds via loopback', () => {
+  const endpoint = resolveRuntimeEndpoint({ CATS_RUNTIME_BASE_URL: 'http://0.0.0.0:3110' });
+  assert.equal(endpoint.healthUrl, 'http://127.0.0.1:3110/health');
+  assert.deepEqual(endpoint.spawnEnv, { CATS_RUNTIME_HOST: '0.0.0.0', CATS_RUNTIME_PORT: '3110' });
+});
+
+test('resolveRuntimeEndpoint marks remote hosts as non-startable', () => {
+  const endpoint = resolveRuntimeEndpoint({ CATS_RUNTIME_BASE_URL: 'http://runtime.internal:3110' });
+  assert.equal(endpoint.isLocal, false);
+  assert.equal(endpoint.spawnEnv, null);
+  assert.equal(endpoint.healthUrl, 'http://runtime.internal:3110/health');
 });

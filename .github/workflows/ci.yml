@@ -55,13 +55,14 @@ jobs:
           "
           echo "CONSUMER=$CONSUMER" >> "$GITHUB_ENV"
 
-      - name: Zero-to-running smoke test
+      - name: Zero-to-running smoke test (non-default runtime port)
         run: |
           cd "$CONSUMER"
           export HOME="$CONSUMER/home"
           mkdir -p "$HOME"
           export CATS_RUNTIME_DIR="$HOME/runtime"
           export CATS_PORT=8391
+          export CATS_RUNTIME_BASE_URL=http://127.0.0.1:34110
           node node_modules/@cats-inc/cats-one/bin/cli.js &
           LAUNCHER=$!
           PLATFORM_OK=0
@@ -70,8 +71,22 @@ jobs:
             sleep 1
           done
           RUNTIME_OK=0
-          curl -fsS http://127.0.0.1:3110/health > /dev/null 2>&1 && RUNTIME_OK=1
+          curl -fsS http://127.0.0.1:34110/health > /dev/null 2>&1 && RUNTIME_OK=1
           kill -TERM $LAUNCHER 2>/dev/null || true
           wait $LAUNCHER 2>/dev/null || true
           echo "platform=$PLATFORM_OK runtime=$RUNTIME_OK"
           test "$PLATFORM_OK" = "1" -a "$RUNTIME_OK" = "1"
+
+      - name: Shutdown releases both ports
+        run: |
+          PLATFORM_DOWN=0
+          RUNTIME_DOWN=0
+          for i in $(seq 1 15); do
+            PLATFORM_DOWN=1; RUNTIME_DOWN=1
+            curl -fsS http://127.0.0.1:8391/health > /dev/null 2>&1 && PLATFORM_DOWN=0
+            curl -fsS http://127.0.0.1:34110/health > /dev/null 2>&1 && RUNTIME_DOWN=0
+            if [ "$PLATFORM_DOWN" = "1" ] && [ "$RUNTIME_DOWN" = "1" ]; then break; fi
+            sleep 1
+          done
+          echo "platform_down=$PLATFORM_DOWN runtime_down=$RUNTIME_DOWN"
+          test "$PLATFORM_DOWN" = "1" -a "$RUNTIME_DOWN" = "1"

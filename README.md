@@ -21,11 +21,17 @@ npx @cats-inc/cats-one
 
 ## Behavior
 
-- If a runtime already answers at `CATS_RUNTIME_BASE_URL` (default
-  `http://127.0.0.1:3110`), it is reused instead of starting a second one.
-- Otherwise `cats-one` starts `cats-runtime`, waits up to 60s for `/health`,
-  then starts `cats-platform`; startup fails loudly if the runtime never
-  becomes healthy.
+- The runtime endpoint comes from `CATS_RUNTIME_BASE_URL`, or
+  `CATS_RUNTIME_HOST`/`CATS_RUNTIME_PORT`, defaulting to
+  `http://127.0.0.1:3110`. The same endpoint drives the health probe, the
+  runtime `cats-one` starts, and the platform's runtime client, so they always
+  agree (wildcard binds like `0.0.0.0` are probed via loopback).
+- If a runtime already answers there, it is reused instead of starting a
+  second one.
+- Otherwise, for local endpoints `cats-one` starts `cats-runtime`, waits up to
+  60s for `/health`, then starts `cats-platform`; startup fails loudly if the
+  runtime never becomes healthy. For non-local endpoints `cats-one` refuses to
+  auto-start and exits with an error instead.
 - If a runtime that `cats-one` started dies while the platform is running, the
   launcher shuts the platform down and exits non-zero (automatic restart /
   supervision is future work).
