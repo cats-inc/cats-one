@@ -32,12 +32,6 @@ jobs:
       - name: Update npm for trusted publishing
         run: npm install -g npm@^11.5.1
 
-      - name: OIDC diagnostics
-        run: |
-          echo "id-token env present: ${ACTIONS_ID_TOKEN_REQUEST_URL:+yes}${ACTIONS_ID_TOKEN_REQUEST_URL:-no}"
-          npm --version
-          npm config get registry
-
       # No install step yet: runtime dependencies are unpublished and the
       # unit tests only use node built-ins. Once @cats-inc/cats-platform and
       # @cats-inc/cats-runtime are on npm, add a lockfile, npm ci, and a
@@ -46,4 +40,4 @@ jobs:
         run: npm test
 
       - name: Publish package
-        run: npm publish --tag "${{ inputs.dist_tag }}" --loglevel silly 2>&1 | grep -iE "oidc|audience|token|exchange|http fetch|error" | head -40
+        run: npm publish --tag "${{ inputs.dist_tag }}"
