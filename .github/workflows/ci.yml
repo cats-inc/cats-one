@@ -40,8 +40,8 @@ jobs:
           node -e "
             const { pickPlatformBin } = require('@cats-inc/cats-one/bin/cli.js');
             const manifest = require('@cats-inc/cats-platform/package.json');
-            const bin = pickPlatformBin(manifest);
-            if (bin !== './build/server/index.js') {
+            const bin = pickPlatformBin(manifest).replace(/^\.\//, '');
+            if (bin !== 'build/server/index.js') {
               throw new Error('unexpected platform bin: ' + bin);
             }
             const { existsSync } = require('node:fs');

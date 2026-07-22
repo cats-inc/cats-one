@@ -3,7 +3,7 @@
   "version": "0.1.1-rc.0",
   "description": "Bootstrap installer entrypoint for the Cats ecosystem.",
   "bin": {
-    "cats-one": "./bin/cli.js"
+    "cats-one": "bin/cli.js"
   },
   "dependencies": {
     "@cats-inc/cats-platform": "^0.1.0",

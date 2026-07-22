@@ -4,13 +4,13 @@ const assert = require('node:assert/strict');
 const { pickPlatformBin } = require('../bin/cli.js');
 
 test('accepts a string bin declaration', () => {
-  assert.equal(pickPlatformBin({ bin: './build/server/index.js' }), './build/server/index.js');
+  assert.equal(pickPlatformBin({ bin: 'build/server/index.js' }), 'build/server/index.js');
 });
 
 test('resolves the canonical cats-platform bin key', () => {
   assert.equal(
-    pickPlatformBin({ bin: { 'cats-platform': './build/server/index.js' } }),
-    './build/server/index.js',
+    pickPlatformBin({ bin: { 'cats-platform': 'build/server/index.js' } }),
+    'build/server/index.js',
   );
 });
 
@@ -28,5 +28,5 @@ test('matches the real @cats-inc/cats-platform contract when the sibling checkou
     t.skip('sibling cats-platform checkout not available');
     return;
   }
-  assert.equal(pickPlatformBin(manifest), './build/server/index.js');
+  assert.equal(pickPlatformBin(manifest), 'build/server/index.js');
 });
