@@ -13,6 +13,11 @@ all CLI arguments to the platform.
 > is a thin alias that forwards to this canonical package, so `npx cats-one`
 > works too.
 
+## Requirements
+
+- Node.js 22+
+- npm 12+
+
 ## Usage
 
 ```bash
