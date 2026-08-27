@@ -34,6 +34,24 @@ policy/supervision is future work. `--platform-only` skips the runtime.
 
 - Test: `npm test` (node:test, no dependencies needed)
 
+## Pull Requests
+
+- Non-trivial changes go through a branch and a PR: `git checkout -b <type>/<slug>`,
+  push, open the PR, then `gh pr merge <n> --auto --squash`. The head branch is
+  deleted on merge. PR titles follow Conventional Commits.
+- `main` requires a pull request and **zero approvals**. This project is
+  maintained from a single account, so there is no second reviewer to ask and CI
+  is the gate, not peer review. A direct push to `main` succeeds only because
+  `enforce_admins` is off; reserve that for trivial changes such as a docs typo
+  or a version bump.
+- The `test` status check is required on `main` with "branch must be up to date"
+  on. Several machines develop this repo at once, so a PR opened before another
+  machine's merge has to be updated before it can land — catching that is the
+  reason to use a PR here.
+- `gh pr merge --auto` returns success once auto-merge is *armed*, not once the
+  PR is *merged*. Check `gh pr view <n> --json state,mergeStateStatus` rather
+  than assuming it landed.
+
 ## Rules
 
 - Update `test/cli.test.js` when touching `bin/cli.js`.
