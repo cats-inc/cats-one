@@ -43,6 +43,24 @@ npx @cats-inc/cats-one
 - `--platform-only` skips runtime orchestration entirely.
 - Ctrl+C / SIGTERM stops both processes.
 
+## Developer Workspace (Proposed)
+
+`cats-one` is proposed to also own the development workspace definition for
+sibling `cats-one`, `cats-runtime`, `cats-platform`, and `cats-apps` checkouts.
+Their parent directory can remain outside Git: tracked templates and a separate
+developer command would regenerate its root agent guidance and maintenance-skill
+discovery copies on each machine.
+
+This is a documentation-stage proposal. The workspace command is not implemented;
+the current launcher and repository-local skill sync helpers retain their existing
+behavior. App installation, App version selection and Desktop packaging remain
+owned by `cats-platform`.
+
+- [ADR-001: Ownership and boundaries](docs/decisions/ADR-001-own-developer-workspace-bootstrap.md)
+- [SPEC-001: Behavior and acceptance criteria](docs/specs/SPEC-001-developer-workspace-bootstrap.md)
+- [PLAN-001: Implementation phases and follow-ups](docs/plans/PLAN-001-developer-workspace-bootstrap.md)
+- [Progress](PROGRESS.md), [roadmap](ROADMAP.md), and [documentation index](docs/README.md)
+
 ## License
 
 MIT
