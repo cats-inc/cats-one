@@ -52,6 +52,14 @@ policy/supervision is future work. `--platform-only` skips the runtime.
   PR is *merged*. Check `gh pr view <n> --json state,mergeStateStatus` rather
   than assuming it landed.
 
+## Agent Skills
+
+- Canonical skills live in `skills/`; edit them there, not in discovery copies.
+  Run `scripts/windows/Sync-AgentSkills.ps1` (or `scripts/linux/sync-agent-skills.sh`)
+  after changes; see `skills/README.md` for discovery paths.
+- Discovery copies under `.claude/` and `.agents/` are Git-ignored, so run the sync
+  once after a fresh checkout. Do not assume optional skills exist.
+
 ## Rules
 
 - Update `test/cli.test.js` when touching `bin/cli.js`.
