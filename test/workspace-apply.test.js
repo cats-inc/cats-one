@@ -35,6 +35,33 @@ test('AC-1/3/5/8: materializes complete copies and ownership; repeat sync is a b
   assert.deepEqual(await snapshot(workspace.base), before);
 });
 
+test('relocates recorded runtime developer skill ownership through normal protected sync', async t => {
+  const workspace = await fixture(t);
+  const entries = await arrangeManaged(workspace, await inspect(workspace, 'all'));
+  for (const entry of entries.filter(entry => entry.member === 'cats-runtime')) {
+    entry.source = 'developer-skills/maintain-provider-model-catalogs';
+  }
+  await write(workspace.root, '.cats-workspace/managed.json', JSON.stringify({ schemaVersion: 1, entries }));
+  const before = await snapshot(workspace.base);
+  const preview = await inspect(workspace, 'all');
+  assert.equal(preview.actions.filter(action => action.action === 'update').length, 2);
+  assert.deepEqual(await snapshot(workspace.base), before);
+
+  // Selecting one agent retains valid historical provenance for the other.
+  await sync(workspace, { agent: 'codex' });
+  const remaining = await inspect(workspace, 'all');
+  assert.equal(remaining.actions.filter(action => action.action === 'update').length, 1);
+  const output = '.claude/skills/maintain-provider-model-catalogs/SKILL.md';
+  const original = await fs.readFile(relative(workspace.root, output));
+  await write(workspace.root, output, 'Local edit');
+  assert.equal((await inspect(workspace, 'all')).hasConflicts, true);
+  assert.equal((await sync(workspace, { agent: 'all' })).hasConflicts, true);
+  assert.equal(await fs.readFile(relative(workspace.root, output), 'utf8'), 'Local edit');
+  await write(workspace.root, output, original);
+  await sync(workspace, { agent: 'all' });
+  assert.equal((await inspect(workspace, 'all')).hasDrift, false);
+});
+
 test('recreates a missing managed output even when ownership bytes do not change', async t => {
   const workspace = await fixture(t);
   await sync(workspace);

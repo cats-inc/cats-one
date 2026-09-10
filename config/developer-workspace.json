@@ -12,7 +12,7 @@
       "id": "cats-runtime",
       "path": "cats-runtime",
       "packageName": "@cats-inc/cats-runtime",
-      "skillRoots": ["developer-skills"],
+      "skillRoots": ["skills"],
       "role": "Provider execution, telemetry and general product workspace substrate"
     },
     {

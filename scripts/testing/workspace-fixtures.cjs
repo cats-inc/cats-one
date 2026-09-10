@@ -36,10 +36,10 @@ async function fixture(t, { cli = false, yaml = true, skills = true } = {}) {
   await write(checkoutRoot, 'config/developer-workspace.json', JSON.stringify(manifest, null, 2));
   await write(checkoutRoot, 'templates/workspace/AGENTS.md.template', await fs.readFile(path.join(repository, 'templates/workspace/AGENTS.md.template')));
   if (skills) {
-    await addSkill(root, 'cats-runtime', 'developer-skills', 'maintain-provider-model-catalogs', '>\n  Audit model catalogs\n  with fixture evidence.');
+    await addSkill(root, 'cats-runtime', 'skills', 'maintain-provider-model-catalogs', '>\n  Audit model catalogs\n  with fixture evidence.');
     await addSkill(root, 'cats-platform', 'skills/orchestration', 'a2a-handoff');
     await addSkill(root, 'cats-platform', 'skills/orchestration', 'project-memory-sync');
-    await addSkill(root, 'cats-runtime', 'skills', 'product-only');
+    await addSkill(root, 'cats-runtime', 'runtime-skills', 'product-only');
     await write(root, 'cats-platform/skills/pending.bootstrap/SKILL.md', 'An unfinished proposal is not a skill yet.');
     await write(root, 'cats-platform/skills/orchestration/a2a-handoff/references/SKILL.md', 'A bundled resource, not another skill.');
     await write(root, 'cats-platform/skills/orchestration/a2a-handoff/data/binary.bin', Buffer.from([0, 255, 13, 10, 128]));
