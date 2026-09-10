@@ -47,6 +47,21 @@ test('CLI validates usage and rejects materialization without writing', async t 
   assert.deepEqual(await snapshot(workspace.base), before);
 });
 
+test('CLI resolves its entrypoint through a linked ancestor such as macOS temporary paths', async t => {
+  const workspace = await fixture(t, { cli: true });
+  const alias = path.join(workspace.base, 'workspace-alias');
+  await fs.symlink(workspace.root, alias, process.platform === 'win32' ? 'junction' : 'dir');
+  const throughAlias = { ...workspace, checkoutRoot: path.join(alias, 'cats-one') };
+  const before = await snapshot(workspace.base);
+  const help = run(throughAlias, ['--help']);
+  assert.equal(help.status, 0, help.stderr);
+  assert.match(help.stdout, /read-only phase/);
+  const check = run(throughAlias, ['check', '--root', workspace.root]);
+  assert.equal(check.status, 1, check.stderr);
+  assert.match(check.stdout, /4 members, 3 canonical skills/);
+  assert.deepEqual(await snapshot(workspace.base), before);
+});
+
 test('AC-8 CLI: fresh previews succeed, checks report drift, all targets stay read-only from arbitrary cwd', async t => {
   const workspace = await fixture(t, { cli: true });
   const before = await snapshot(workspace.base);

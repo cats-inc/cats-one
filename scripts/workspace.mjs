@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import path from 'node:path';
+import { realpath } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { inspectWorkspace } from './shared/workspace-plan.mjs';
@@ -53,6 +53,9 @@ export async function main(args = process.argv.slice(2)) {
   }
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+// Node resolves module URLs physically; argv can retain an ancestor alias
+// (for example /var versus /private/var on macOS). Compare the same form.
+const entryPath = process.argv[1] ? await realpath(process.argv[1]).catch(() => null) : null;
+if (entryPath === await realpath(fileURLToPath(import.meta.url))) {
   process.exitCode = await main();
 }

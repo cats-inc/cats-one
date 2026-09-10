@@ -40,6 +40,9 @@ one resource-collision fixture is skipped there (and on case-insensitive macOS).
 The separate case-alias destination test runs on every platform. Directory links
 use Windows junctions and Unix symlinks.
 
+The CLI is also exercised through a linked ancestor directory, covering macOS
+temporary paths whose invocation name differs from the module's physical path.
+
 ## Launcher and Package Contract
 
 `test/cli.test.js` covers the existing launcher's resolution and health behavior.
@@ -63,8 +66,10 @@ Windows/macOS/Linux with Node 22 and 24; it does not start product services.
 ## Validation Record
 
 On 2026-09-11, the Windows full suite completed 62 tests: 61 passed and one
-case-sensitive-resource fixture skipped. This includes 47 workspace tests and 15
-existing launcher tests. Offline npm pack inspection contained only the four
+case-sensitive-resource fixture skipped. That initial run included 47 workspace
+tests and 15 existing launcher tests. The added entrypoint-alias regression and
+all five CLI tests also passed on Windows after the path-resolution fix.
+Offline npm pack inspection contained only the four
 allowed files. A read-only preview of the real four-member workspace found the
 expected three canonical maintenance skills. CI results belong in the
 implementation PR. Author-run tests are automated validation, not independent
