@@ -31,6 +31,29 @@ executing cats-one checkout, which must be the member of the selected workspace.
 
 ## Generate, Preview and Check
 
+After the one-time dependency setup, run the helper for your OS from `cats-one`:
+
+| OS | Sync both agents and check, with no parameters |
+| --- | --- |
+| Windows (PowerShell 5.1 or 7) | `.\scripts\windows\Sync-WorkspaceSkills.ps1` |
+| macOS | `./scripts/macos/sync-workspace-skills.sh` |
+| Linux | `./scripts/linux/sync-workspace-skills.sh` |
+
+The helpers find the workspace parent from their own location, regardless of the
+calling shell's working directory. Outputs go beside `cats-one`, at the shared
+parent. Both `.agents/skills` and `.claude/skills` are synchronized by default,
+followed by a check; a failed sync stops before the check. Node exit codes are
+preserved. The Bash scripts are committed as executable (`100755`).
+
+For a read-only preview, add `-WhatIf` on Windows or `--dry-run` on Bash.
+For a read-only check, add `-Check` or `--check`. Help is available with
+`-Help` or `--help` without Node or installed dependencies. Check and preview
+cannot be combined. These helpers do not install dependencies automatically.
+
+If running from the shared parent, prefix the helper path with `cats-one/`.
+For example, on Windows: `.\cats-one\scripts\windows\Sync-WorkspaceSkills.ps1`.
+
+The explicit Node interface remains available for choosing a single agent.
 From the shared parent on Windows, macOS or Linux:
 
 ```sh
@@ -43,7 +66,7 @@ node ./cats-one/scripts/workspace.mjs check --root . --agent codex
 From cats-one, use `--root ..`. From elsewhere, provide both the script path and
 an explicit parent path; quote paths containing spaces.
 
-The default agent is `codex` (`.agents/skills`). Choose `claude`
+The Node interface defaults to `codex` (`.agents/skills`). Choose `claude`
 (`.claude/skills`) or `all` for both. Root `AGENTS.md` is shared. Sync copies
 complete skills/resources and writes `.cats-workspace/managed.json` to record
 ownership. The tool maintains ownership and recovery files; do not create or
@@ -61,8 +84,10 @@ After sync, a repeat with unchanged inputs/outputs performs no writes.
 
 ## Pulling Changes and Resolving Conflicts
 
-Pull the relevant member's changes and rerun preview/sync. Edit canonical skill
-sources or cats-one's manifest/template to share changes with other machines.
+Pull the relevant member's changes and rerun the same OS helper. If cats-one's
+dependency lockfile changed, run `npm ci --include=dev` in cats-one first.
+Edit canonical skill sources or cats-one's manifest/template to share changes
+with other machines.
 Platform's nested maintenance skills are discovered recursively; runtime's
 separate product `skills/` library is excluded.
 

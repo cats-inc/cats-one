@@ -24,6 +24,12 @@ Use kebab-case:
 - `run-tests.sh`
 - `lint.sh`
 
+Commit Bash entrypoints with executable mode `100755` so a fresh clone can run
+`./scripts/<os>/<name>.sh` directly. On Windows, stage the bit explicitly with
+`git add --chmod=+x -- <script.sh>` and verify it with
+`git ls-files --stage -- <script.sh>`. Keep shell files LF as required by
+`.gitattributes`; test direct execution on Linux/macOS in CI.
+
 ## Directory Structure
 
 ```
@@ -93,4 +99,4 @@ echo "Starting..."
 
 ---
 
-*Last updated: 2026-01-03
+*Last updated: 2026-09-11*

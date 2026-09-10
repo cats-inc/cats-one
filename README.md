@@ -51,18 +51,23 @@ can remain outside Git. The checkout command inventories canonical maintenance
 skills and synchronizes root guidance and discovery copies.
 
 Prepare developer dependencies once with `npm ci --include=dev` in `cats-one`,
-then run from the shared parent:
+then use the helper for your OS from that checkout, with no parameters:
 
-```sh
-node ./cats-one/scripts/workspace.mjs sync --root . --agent codex --dry-run
-node ./cats-one/scripts/workspace.mjs sync --root . --agent codex
-node ./cats-one/scripts/workspace.mjs check --root . --agent codex
-```
+| OS | Command |
+| --- | --- |
+| Windows | `.\scripts\windows\Sync-WorkspaceSkills.ps1` |
+| macOS | `./scripts/macos/sync-workspace-skills.sh` |
+| Linux | `./scripts/linux/sync-workspace-skills.sh` |
 
-Use `--agent claude` or `--agent all` to select other mirrors. Sync copies complete
-skills, records their ownership, preserves local edits and unrelated files, and
-recovers interrupted operations on the next sync. Repeating an unchanged sync
-does not rewrite files or metadata.
+Each helper locates the parent workspace from its script path, synchronizes both
+`.agents/skills` and `.claude/skills`, then checks the result. Use `-WhatIf` on
+Windows or `--dry-run` on Bash to preview; `-Check` / `--check` only checks.
+Node.js and the four sibling checkouts are still required.
+
+Sync copies complete skills, records their ownership, preserves local edits and
+unrelated files, and recovers interrupted operations on the next sync. Repeating
+an unchanged sync does not rewrite files or metadata. The underlying
+`scripts/workspace.mjs` interface remains available for selecting a single agent.
 
 `check` and `sync --dry-run` stay read-only. Sync/preview exit `0` on success;
 a check with drift exits `1`; invalid input or conflicts exit `2`. See the

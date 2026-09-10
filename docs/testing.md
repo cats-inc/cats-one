@@ -11,7 +11,7 @@ npm test
 For the complete workspace suites:
 
 ```sh
-node --test test/workspace-inventory.test.js test/workspace-cli.test.js test/workspace-apply.test.js
+node --test test/workspace-inventory.test.js test/workspace-cli.test.js test/workspace-apply.test.js test/workspace-wrappers.test.js
 ```
 
 Tests use Node's built-in runner. CLI, crash and lock tests need permission to
@@ -50,6 +50,14 @@ A separate destination-alias case runs everywhere. Windows skips Unix executable
 permission assertions; directory links use Windows junctions or Unix symlinks.
 CLI invocation through a linked ancestor covers macOS temporary-path aliases.
 
+`test/workspace-wrappers.test.js` exercises the new OS entrypoints in the same
+isolated fixtures. Windows runs the PowerShell script through both Windows
+PowerShell 5.1 and PowerShell 7 (`powershell.exe` and `pwsh.exe` on PATH).
+Linux/macOS directly execute both Bash entrypoints, so missing executable bits
+fail the tests. Coverage includes unrelated working directories, both skill
+mirrors and resources, automatic post-sync check, no-op repeats, read-only modes,
+missing dependencies, conflicts and propagation of failures from either command.
+
 ## Launcher, Payload and CI
 
 `test/cli.test.js` retains the existing launcher's resolution/health contract.
@@ -63,7 +71,7 @@ The payload must contain only `bin/cli.js`, README, LICENSE and npm's automatic
 `package.json`. Workspace tooling and generated files remain checkout-only.
 
 The Ubuntu `test` CI job runs the full suite and isolated tarball
-resolution/startup/shutdown checks. The `workspace` matrix runs all three
+resolution/startup/shutdown checks. The `workspace` matrix runs all four
 workspace suites on Windows/macOS/Linux with Node 22 and 24, without live services.
 
 ## Validation Record
@@ -73,6 +81,8 @@ The Windows full suite passed 85 tests with two filesystem-specific skips
 ownership and cleanup, partial staging, repeated recovery, concurrent edits,
 unsafe recovery input and two-process writer exclusion. Offline npm pack inspection
 contains only the four allowed files. The implementation PR records OS-matrix results.
+The wrapper change adds ten integration cases per OS; its implementation PR
+records the full suite and OS-matrix results.
 Author-run tests are automated validation, not independent code review. Live
 parent-root Codex/Claude discovery remains a separate, unclaimed check.
 

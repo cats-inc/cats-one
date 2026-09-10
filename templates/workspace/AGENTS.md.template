@@ -4,9 +4,17 @@ Generated from `cats-one/templates/workspace/AGENTS.md.template`, the workspace
 manifest and member skill inventory. Edit those tracked sources to share changes
 with other development machines.
 
-Refresh from this parent directory:
-`node ./cats-one/scripts/workspace.mjs sync --root . --agent codex`.
-Add `--dry-run` to preview; choose `--agent claude` or `--agent all` for other mirrors.
+Refresh both agents and check the result from this parent directory:
+
+| OS | Command (no parameters needed) |
+| --- | --- |
+| Windows | `.\cats-one\scripts\windows\Sync-WorkspaceSkills.ps1` |
+| macOS | `./cats-one/scripts/macos/sync-workspace-skills.sh` |
+| Linux | `./cats-one/scripts/linux/sync-workspace-skills.sh` |
+
+Add `-WhatIf` on Windows or `--dry-run` on Bash to preview. The explicit
+`cats-one/scripts/workspace.mjs` interface supports individual agent targets;
+see `cats-one/docs/setup-guide.md`.
 
 ## Choose the owning repository
 

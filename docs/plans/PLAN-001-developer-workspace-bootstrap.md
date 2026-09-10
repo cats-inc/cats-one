@@ -92,6 +92,9 @@ recoverable failures. Cover AC-1, AC-3, AC-5, AC-7, AC-8 and AC-9.
 - [x] Write executable setup/update/check instructions only after the command
   exists. Explain how to resolve custom-root-file conflicts and rerun sync after
   pulling changes to any member's canonical skills.
+- [x] Add no-argument Windows/macOS/Linux helpers that locate the workspace from
+  the script, sync both agents and check automatically; preserve read-only modes,
+  failure codes and Bash executable permissions.
 - [ ] Validate Codex discovery in a temporary parent-root session with generated
   test skills. For Claude, verify the selected filesystem mirror; claim live
   discovery only if that host has actually been tested.
@@ -105,13 +108,14 @@ SPEC-001 checklist. Fixtures never write to the user's real workspace or state.
 
 The implementation supplies manifest/template, CLI, inventory/planning, safe
 filesystem writes, journal/recovery and behavioral/fault tests. The Node command
-is the portable interface; add shell wrappers only when useful to an actual workflow.
+is the portable implementation; OS wrappers provide the requested no-argument workflow.
 
 | Path relative to cats-one | Action | Responsibility |
 |--------------------------|--------|----------------|
 | `config/developer-workspace.json` | Create | Versioned Cats member/source definition |
 | `templates/workspace/AGENTS.md.template` | Create | Small parent-level routing document |
 | `scripts/workspace.mjs` | Create | CLI and explicit sync/check dispatch |
+| `scripts/windows/Sync-WorkspaceSkills.ps1`, `scripts/{linux,macos}/sync-workspace-skills.sh` | Create | No-argument sync and check for both agents, with script-relative workspace discovery |
 | `scripts/shared/workspace-*.mjs` | Create as needed | Inventory, planning and managed apply |
 | `package.json`, `package-lock.json` | Update in Phases 1–2 | Direct YAML/writer-lock development dependencies; retain production dependency ranges and npm files allowlist |
 | `test/workspace-*.test.js` | Create | Behavioral fixture coverage using node:test |
@@ -185,5 +189,6 @@ published or change dependencies as an incidental part of skill synchronization.
 | 2026-09-11 | Implemented Phase 1: schema v1, routing template, direct yaml dependency, recursive inventory, ownership preflight and pure read-only action planning. |
 | 2026-09-11 | Phase 1 Windows full suite: 61 pass, one filesystem-dependent skip. Offline npm payload has only the four allowed files; real-parent preview finds three skills. Node 22/24 OS matrix added. |
 | 2026-09-11 | Implemented managed copies/ownership, fixed writer locking, journal/commit markers, restartable rollback and trash cleanup. Windows full suite: 85 pass, two filesystem-specific skips (87 total, including 24 apply/recovery tests). Offline package inspection passes. See the implementation PR for OS-matrix results. Live-host discovery remains pending. |
+| 2026-09-11 | Added the requested Windows/macOS/Linux no-argument sync/check entrypoints for both agents. Windows PowerShell 5.1 and PowerShell 7 wrapper tests pass; Bash scripts are tracked as executable and are directly exercised in the OS matrix. |
 
 *Created: 2026-09-11*

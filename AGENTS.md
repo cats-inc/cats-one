@@ -17,7 +17,8 @@ Developer workspace bootstrap is defined in
 [PLAN-001](docs/plans/PLAN-001-developer-workspace-bootstrap.md). The checkout
 command `scripts/workspace.mjs sync` materializes parent guidance/skills and
 ownership with interruption recovery. `check` and `sync --dry-run` remain
-strictly read-only. All commands require an explicit `--root` and four members.
+strictly read-only. The Node CLI requires an explicit `--root` and four members.
+OS helpers infer that root from the cats-one checkout and select both agents.
 
 - Canonical npm name: `@cats-inc/cats-one` (the unscoped `cats-one` npm name is
   a reserved alias stub).
@@ -42,8 +43,10 @@ strictly read-only. All commands require an explicit `--root` and four members.
 
 - Developer setup: `npm ci --include=dev` (includes direct YAML and writer-lock dependencies).
 - Test: `npm test` (node:test); see `docs/testing.md` for isolated workspace tests.
-- Workspace preview from this checkout: `node scripts/workspace.mjs sync --root .. --dry-run`.
-- Workspace apply from this checkout: `node scripts/workspace.mjs sync --root ..`.
+- Workspace sync and check from this checkout: `scripts/windows/Sync-WorkspaceSkills.ps1`,
+  `./scripts/linux/sync-workspace-skills.sh`, or the macOS equivalent. No arguments
+  are needed; both agents are selected. Use `-WhatIf` / `--dry-run` for preview,
+  or `-Check` / `--check` for a read-only check.
 
 ## Pull Requests
 
@@ -72,7 +75,7 @@ strictly read-only. All commands require an explicit `--root` and four members.
   once after a fresh checkout. Do not assume optional skills exist.
 - These existing helpers synchronize this repository's `skills/` source. A
   `-ProjectRoot` override selects another whole project's source and destination;
-  use `scripts/workspace.mjs` for the multi-repository workspace instead.
+  use the workspace helpers above for the multi-repository workspace.
 
 ## Developer Workspace Boundaries
 
