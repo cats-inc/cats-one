@@ -41,7 +41,7 @@ $ScriptsDirectory = Split-Path -Parent $PSScriptRoot
 $CheckoutRoot = Split-Path -Parent $ScriptsDirectory
 $WorkspaceRoot = Split-Path -Parent $CheckoutRoot
 $WorkspaceCommand = Join-Path $ScriptsDirectory 'workspace.mjs'
-$NodeCommand = Get-Command node -CommandType Application -ErrorAction SilentlyContinue
+$NodeCommand = Get-Command node -CommandType Application -TotalCount 1 -ErrorAction SilentlyContinue
 if (-not $NodeCommand) {
     [Console]::Error.WriteLine('Node.js 22+ is required. Install it and reopen your terminal.')
     exit 2

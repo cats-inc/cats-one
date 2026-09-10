@@ -41,8 +41,17 @@ for (const wrapper of wrappers) {
 
   test(`${label}: no arguments sync and check both agents from any cwd; repeat is a no-op`, async t => {
     const workspace = await prepare(t, wrapper);
+    const env = {};
+    if (windows) {
+      // PATH may contain several Node installations or version-manager shims.
+      // The first application must win, even when command discovery finds more.
+      await write(workspace.base, 'first node/node.cmd', `@echo off\r\n"${process.execPath}" %*\r\n`);
+      await write(workspace.base, 'second node/node.cmd', '@echo off\r\nexit /b 37\r\n');
+      const pathKey = Object.keys(process.env).find(key => key.toLowerCase() === 'path') || 'PATH';
+      env[pathKey] = [path.join(workspace.base, 'first node'), path.join(workspace.base, 'second node'), process.env[pathKey]].join(path.delimiter);
+    }
     const beforeMembers = await Promise.all(workspace.manifest.members.map(member => snapshot(relative(workspace.root, member.path))));
-    const applied = run(workspace, wrapper);
+    const applied = run(workspace, wrapper, [], { env });
     assert.equal(applied.status, 0, `${applied.stdout}\n${applied.stderr}`);
     assert.match(applied.stdout, /Sync: 4 members, 3 canonical skills, target all/);
     assert.match(applied.stdout, /Read-only check: 4 members, 3 canonical skills, target all/);
@@ -55,7 +64,7 @@ for (const wrapper of wrappers) {
     }
     assert.deepEqual(await Promise.all(workspace.manifest.members.map(member => snapshot(relative(workspace.root, member.path)))), beforeMembers);
     const settled = await snapshot(workspace.base);
-    const repeated = run(workspace, wrapper, [], { cwd: workspace.checkoutRoot });
+    const repeated = run(workspace, wrapper, [], { cwd: workspace.checkoutRoot, env });
     assert.equal(repeated.status, 0, repeated.stderr);
     assert.deepEqual(await snapshot(workspace.base), settled);
   });

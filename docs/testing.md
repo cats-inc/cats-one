@@ -56,7 +56,8 @@ PowerShell 5.1 and PowerShell 7 (`powershell.exe` and `pwsh.exe` on PATH).
 Linux/macOS directly execute both Bash entrypoints, so missing executable bits
 fail the tests. Coverage includes unrelated working directories, both skill
 mirrors and resources, automatic post-sync check, no-op repeats, read-only modes,
-missing dependencies, conflicts and propagation of failures from either command.
+multiple Node installations on PATH, missing dependencies, conflicts and propagation
+of failures from either command.
 
 ## Launcher, Payload and CI
 
