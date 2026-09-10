@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "members": [
+    {
+      "id": "cats-one",
+      "path": "cats-one",
+      "packageName": "@cats-inc/cats-one",
+      "skillRoots": ["skills"],
+      "role": "Cats launch orchestration and developer workspace composition"
+    },
+    {
+      "id": "cats-runtime",
+      "path": "cats-runtime",
+      "packageName": "@cats-inc/cats-runtime",
+      "skillRoots": ["developer-skills"],
+      "role": "Provider execution, telemetry and general product workspace substrate"
+    },
+    {
+      "id": "cats-platform",
+      "path": "cats-platform",
+      "packageName": "@cats-inc/cats-platform",
+      "skillRoots": ["skills"],
+      "role": "Product and Desktop host, App SDK, selection, installation and packaging"
+    },
+    {
+      "id": "cats-apps",
+      "path": "cats-apps",
+      "packageName": "@cats-inc/cats-apps",
+      "skillRoots": ["skills"],
+      "role": "Official utility sources and versioned .catsapp artifacts"
+    }
+  ]
+}

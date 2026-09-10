@@ -1,0 +1,36 @@
+# Cats developer workspace
+
+Generated from `cats-one/templates/workspace/AGENTS.md.template`, the workspace
+manifest and member skill inventory. Edit those tracked sources to share changes
+with other development machines.
+
+Preview refresh from this parent directory:
+`node ./cats-one/scripts/workspace.mjs sync --root . --agent codex --dry-run`.
+The current command is read-only; materialization is a later implementation phase.
+
+## Choose the owning repository
+
+{{MEMBERS}}
+
+Before changing a member, read its `AGENTS.md`, your own agent-specific file when
+present (for example, `CODEX.md` for Codex), and relevant member guides. Read only
+your own agent-specific file. Apply each member's rules within its scope; a task
+spanning repositories can require reading several members' instructions.
+
+Run repository-relative commands with the owning checkout as the working
+directory. Each checkout has independent Git state; this parent need not be a
+repository. Runtime owns generic product workspace capabilities; platform owns
+Desktop/App selection and installation; apps owns utility artifact production.
+
+## Maintenance skills
+
+{{SKILLS}}
+
+Interpret a skill's repository-relative paths and commands in its owning member.
+Skill-local resource links remain relative to the skill directory. Edit canonical
+sources listed above, then rerun the workspace preview after pulling changes.
+Runtime's separate product `skills/` library is outside this developer inventory.
+
+Repository-local sessions retain their own setup. Changing a shell command's
+working directory does not reload the active conversation's skills. Reopen a
+parent-root session when the agent host requires it to discover changed skills.

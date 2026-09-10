@@ -49,7 +49,7 @@ Use [000-template.md](./000-template.md) as the starting point for new specs.
 | Spec | Title | Status | Related Plan |
 |------|-------|--------|--------------|
 | [000-template](./000-template.md) | Template | - | - |
-| [SPEC-001](./SPEC-001-developer-workspace-bootstrap.md) | Developer workspace bootstrap | Draft | [PLAN-001](../plans/PLAN-001-developer-workspace-bootstrap.md) |
+| [SPEC-001](./SPEC-001-developer-workspace-bootstrap.md) | Developer workspace bootstrap | Phase 1 implemented; apply/recovery pending | [PLAN-001](../plans/PLAN-001-developer-workspace-bootstrap.md) |
 <!-- Add new specs above this line -->
 
 ## For AI Agents

@@ -1,102 +1,84 @@
-# Setup Guide
+# Developer Setup
 
-> Environment setup and installation instructions.
+## Requirements
 
-## Prerequisites
+Use Node.js 22+ and npm 12+. Product launcher usage is in the [README](../README.md).
+The developer workspace command runs from a cats-one source checkout and requires
+all four sibling checkouts, regardless of which agent mirror is selected:
 
-- [ ] Prerequisite 1 (e.g., Python 3.10+)
-- [ ] Prerequisite 2 (e.g., Node.js 18+)
-- [ ] Prerequisite 3 (e.g., Docker)
-
-## Installation
-
-### 1. Clone Repository
-
-```bash
-git clone https://github.com/username/project-name.git
-cd project-name
+```text
+<chosen parent>/
+  cats-one/       skills/
+  cats-runtime/   developer-skills/
+  cats-platform/  skills/
+  cats-apps/      skills/
 ```
 
-### 2. Environment Setup
+The parent can have any name and need not be a Git repository. Each member must
+have its expected package name, `AGENTS.md`, Git metadata and declared skill root.
+Empty skill roots are valid. Git worktrees with a `.git` file are supported.
+Source/output links and junctions are rejected in this initial copy-oriented mode.
 
-```bash
-# Copy environment template
-cp .env.example .env
+Install developer dependencies explicitly once in the cats-one checkout:
 
-# Edit .env with your values
-# (Add specific variables that need to be configured)
+```sh
+npm ci --include=dev
 ```
 
-### 3. Dependencies
+This provides the directly declared `yaml` parser. Subsequent workspace commands
+run offline, without installing dependencies or starting services. They resolve
+configuration, templates and dependencies from their own cats-one checkout.
 
-#### Python Project
+## Preview and Check
 
-```bash
-# Create virtual environment
-python -m venv .venv
+From the shared parent, on Windows, macOS or Linux:
 
-# Activate (Windows)
-.venv\Scripts\activate
-
-# Activate (Linux/macOS)
-source .venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-# or
-pip install -e ".[dev]"
+```sh
+node ./cats-one/scripts/workspace.mjs --help
+node ./cats-one/scripts/workspace.mjs sync --root . --agent codex --dry-run
+node ./cats-one/scripts/workspace.mjs check --root . --agent codex
 ```
 
-#### Node.js Project
+From cats-one itself, use `--root ..`. From elsewhere, give the script path and
+an explicit parent path; quote paths containing spaces. The executing cats-one
+checkout must be the member of the selected root.
 
-```bash
-npm install
-# or
-yarn install
-```
+`--agent` defaults to `codex` (`.agents/skills`). Choose `claude`
+(`.claude/skills`) or `all` for both. Root `AGENTS.md` is shared and always
+included. Output lists each planned path, action and canonical source owner.
 
-### 4. Database Setup (if applicable)
+| Exit | Meaning |
+| --- | --- |
+| 0 | Successful preview, or a check with matching content and ownership |
+| 1 | Check found drift, including missing outputs or adoption |
+| 2 | Invalid input, conflict, active/interrupted apply or filesystem error |
 
-```bash
-# (Add database setup commands)
-```
+Both available commands are strictly read-only, even when destinations and
+metadata do not exist. A fresh workspace therefore normally previews `create`
+actions and returns `1` from `check`. Phase 1 does not install discovery copies:
+`sync` without `--dry-run` currently fails with a clear error. Managed writes and
+recovery will arrive in [PLAN-001 Phase 2](plans/PLAN-001-developer-workspace-bootstrap.md).
 
-### 5. Verify Installation
+## Updating Sources and Resolving Reports
 
-```bash
-# Run tests to verify setup
-pytest  # Python
-npm test  # Node.js
-```
+Pull the relevant member's changes and rerun the preview. Edit canonical skill
+sources or cats-one's manifest/template to share changes across development
+machines. Keep skill-local resources in the skill directory; platform's nested
+skills are discovered recursively. Runtime's product `skills/` is excluded.
 
-## Running the Project
+A different existing root `AGENTS.md` or unmanaged target skill is a conflict.
+Reconcile personal changes deliberately with the tracked sources, or preserve
+the personal copy outside the generated destination before a future apply.
+Locally edited managed entries also conflict, including entries whose source was
+removed. A byte-identical unmanaged destination reports `adopt`: a future apply
+would take ownership of it. Preview itself never adopts or overwrites files.
 
-### Development Mode
+Missing members or skill roots are errors, not evidence that stale copies should
+be removed. Correct the checkout layout before retrying. Unknown/malformed
+ownership records fail; do not hand-edit metadata to bypass a conflict.
+An active writer or pending recovery record is reported without repair.
 
-```bash
-# Python
-python main.py
+The existing per-repository PowerShell/Bash helpers remain single-project
+commands. Do not run them against a shared destination to compose this workspace.
 
-# Node.js
-npm run dev
-```
-
-### Production Mode
-
-```bash
-# (Add production run commands)
-```
-
-## Common Issues
-
-### Issue 1: [Problem Description]
-
-**Solution**: (How to fix)
-
-### Issue 2: [Problem Description]
-
-**Solution**: (How to fix)
-
----
-
-*Last updated: YYYY-MM-DD*
+*Last updated: 2026-09-11*

@@ -2,8 +2,9 @@
 
 ## Status
 
-Proposed — planning requested on 2026-09-11. This record proposes ownership and
-scope; implementation has not started.
+Accepted — the repository owner requested implementation on 2026-09-11 after
+the planning PR merged. Phase 1 supplies read-only inventory and planning;
+materialization and recovery remain pending in PLAN-001.
 
 ## Context
 
@@ -132,4 +133,4 @@ capabilities rather than duplicating that service here.
 
 Sibling links resolve in the proposed four-repository checkout layout.
 
-*Proposed: 2026-09-11*
+*Accepted: 2026-09-11*

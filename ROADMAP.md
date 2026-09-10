@@ -2,7 +2,7 @@
 
 ## Direction
 
-Keep `cats-one` as the Cats ecosystem entrypoint and propose a reproducible
+Keep `cats-one` as the Cats ecosystem entrypoint and deliver a reproducible
 developer workspace for its source repositories. Preserve the runtime, platform
 and official-app boundaries described in [architecture](docs/architecture.md).
 
@@ -19,8 +19,9 @@ Planning is recorded in [ADR-001](docs/decisions/ADR-001-own-developer-workspace
 [PLAN-001](docs/plans/PLAN-001-developer-workspace-bootstrap.md).
 
 - [x] Prepare the ownership proposal, behavior contract and implementation plan.
-- [ ] Define all four members and root routing instructions in tracked inputs.
-- [ ] Add read-only check/preview and repeatable local synchronization.
+- [x] Define all four members and root routing instructions in tracked inputs.
+- [x] Add read-only check/preview with conflict and provenance reporting.
+- [ ] Enable repeatable local synchronization after apply/recovery validation.
 - [ ] Preserve custom files, reconcile managed entries and verify failure recovery.
 - [ ] Validate Windows/macOS/Linux and document setup on another machine.
 
