@@ -22,6 +22,8 @@
 - [x] Cover forced process termination, restartable recovery/cleanup and writer exclusion.
 - [ ] Validate live parent-root skill discovery in an agent-host session.
 - [x] Publish sync/check/setup instructions and isolated fixture evidence.
+- [x] Add no-argument Windows/macOS/Linux sync-and-check helpers for both agents,
+  with script-relative root discovery and executable Bash entrypoints.
 
 Use [PLAN-001](docs/plans/PLAN-001-developer-workspace-bootstrap.md) for the
 detailed task checklist and [SPEC-001](docs/specs/SPEC-001-developer-workspace-bootstrap.md)
@@ -45,6 +47,10 @@ conflict protection. Sync preserves resources and executable permissions,
 maintains stable ownership, serializes writers and recovers interrupted work.
 YAML and proper-lockfile are direct development dependencies; npm's product
 payload and launcher contract remain unchanged.
+
+`Sync-WorkspaceSkills.ps1` and the Linux/macOS `sync-workspace-skills.sh` helpers
+now provide the routine workflow without root/agent arguments. They synchronize
+both agents, check after success, and preserve the Node CLI's failure codes.
 
 Fixtures cover read-only behavior, ownership conflicts, worktrees, resources,
 unsafe inputs, forced termination at multiple transaction boundaries, interrupted

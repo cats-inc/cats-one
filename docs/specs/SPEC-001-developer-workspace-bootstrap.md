@@ -102,8 +102,8 @@ node ./cats-one/scripts/workspace.mjs sync --root . --agent codex
 node ./cats-one/scripts/workspace.mjs check --root . --agent codex
 ```
 
-- Require an existing explicit `--root`; do not assume its name is `cats-inc` or
-  change the process working directory to redirect output implicitly.
+- The Node CLI requires an existing explicit `--root`; do not assume its name is
+  `cats-inc` or change the process working directory to redirect output implicitly.
 - Support `codex`, `claude` and `all`; default to `codex`. Codex writes
   `.agents/skills`, Claude writes `.claude/skills`, and `all` targets both.
   Other agents may consume a shared path, but are not separately certified here.
@@ -119,6 +119,20 @@ node ./cats-one/scripts/workspace.mjs check --root . --agent codex
   repeated arguments fail explicitly; `--dry-run` is only accepted with `sync`.
 - The executable is a developer command from a checkout. The existing `cats-one`
   npm bin keeps forwarding platform arguments and is not the dispatch surface.
+
+Convenience entrypoints are `scripts/windows/Sync-WorkspaceSkills.ps1` and
+`scripts/{linux,macos}/sync-workspace-skills.sh`. With no arguments they derive
+the workspace parent from their script location, pass an explicit root and
+`--agent all` to Node `sync`, and run Node `check` only after a successful sync.
+The caller's working directory cannot redirect their outputs. Both commands'
+exit codes propagate. They reuse the complete Node validation/recovery protocol.
+
+`-WhatIf` / `--dry-run` runs only read-only preview; `-Check` / `--check` runs only
+read-only check. Combining those modes fails without writing. `-Help` / `--help`
+needs no Node installation or developer dependencies. Unknown options fail.
+The PowerShell helper supports Windows PowerShell 5.1 and PowerShell 7; Bash
+entrypoints are committed with mode `100755` and support direct execution on
+Linux/macOS. Setup remains explicit and the wrappers never install dependencies.
 
 ### FR-3: Root routing instructions
 
@@ -147,8 +161,9 @@ Repository-local sessions continue to use each repository's local setup.
 The template has exactly one `{{MEMBERS}}` and one `{{SKILLS}}` placeholder;
 unknown placeholders fail. Tables include member responsibilities and each
 skill's relative canonical origin. Template CRLF is normalized to LF; skill
-bytes are not normalized. The notice provides the sync command and explains how
-to preview and select agent targets. The same rendering feeds preview and apply.
+bytes are not normalized. The notice provides the OS sync helpers and explains
+preview, with setup guidance for individual targets. The same rendering feeds
+preview and apply.
 
 ### FR-4: Canonical skill discovery and materialization
 
