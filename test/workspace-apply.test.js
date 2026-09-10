@@ -26,7 +26,7 @@ test('AC-1/3/5/8: materializes complete copies and ownership; repeat sync is a b
   const metadata = JSON.parse(await fs.readFile(relative(workspace.root, '.cats-workspace/managed.json'), 'utf8'));
   assert.equal(metadata.entries.length, 7);
   const { readSnapshot } = await import('../scripts/shared/workspace-fs.mjs');
-  for (const desired of report.desired) assert.equal((await readSnapshot(workspace.root, desired.path)).digest, desired.snapshot.digest);
+  for (const desired of report.desired) assert.equal((await readSnapshot(report.root, desired.path)).digest, desired.snapshot.digest);
   for (const member of workspace.manifest.members) assert.deepEqual(await snapshot(relative(workspace.root, member.path)), members.get(member.id));
   await assertSettled(workspace);
   const before = await snapshot(workspace.base);

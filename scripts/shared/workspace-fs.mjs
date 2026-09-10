@@ -46,6 +46,7 @@ export async function maybeStat(filename) {
 
 // Check every existing ancestor without following links, including when the
 // final destination is absent. Detect case aliases before they become writes.
+// root is the physical path returned by canonicalRoot, not a caller's alias.
 export async function inspectPath(root, relative, { optional = false, kind } = {}) {
   relativePath(relative);
   let current = root;
