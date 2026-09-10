@@ -189,6 +189,6 @@ published or change dependencies as an incidental part of skill synchronization.
 | 2026-09-11 | Implemented Phase 1: schema v1, routing template, direct yaml dependency, recursive inventory, ownership preflight and pure read-only action planning. |
 | 2026-09-11 | Phase 1 Windows full suite: 61 pass, one filesystem-dependent skip. Offline npm payload has only the four allowed files; real-parent preview finds three skills. Node 22/24 OS matrix added. |
 | 2026-09-11 | Implemented managed copies/ownership, fixed writer locking, journal/commit markers, restartable rollback and trash cleanup. Windows full suite: 85 pass, two filesystem-specific skips (87 total, including 24 apply/recovery tests). Offline package inspection passes. See the implementation PR for OS-matrix results. Live-host discovery remains pending. |
-| 2026-09-11 | Added the requested Windows/macOS/Linux no-argument sync/check entrypoints for both agents. Windows PowerShell 5.1 and PowerShell 7 wrapper tests pass; Bash scripts are tracked as executable and are directly exercised in the OS matrix. |
+| 2026-09-11 | Added the requested Windows/macOS/Linux no-argument sync/check entrypoints for both agents. Windows full suite: 95 pass, two filesystem-specific skips (97 total), including ten PowerShell 5.1/7 wrapper tests. Both Bash scripts pass syntax checks, are tracked as executable and are directly exercised in the OS matrix. |
 
 *Created: 2026-09-11*

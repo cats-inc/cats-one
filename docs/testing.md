@@ -76,13 +76,11 @@ workspace suites on Windows/macOS/Linux with Node 22 and 24, without live servic
 
 ## Validation Record
 
-The Windows full suite passed 85 tests with two filesystem-specific skips
-(87 total, including 24 apply/recovery tests). It covers forced termination through
+The Windows full suite passed 95 tests with two filesystem-specific skips
+(97 total, including 24 apply/recovery and 10 wrapper tests). It covers forced termination through
 ownership and cleanup, partial staging, repeated recovery, concurrent edits,
 unsafe recovery input and two-process writer exclusion. Offline npm pack inspection
 contains only the four allowed files. The implementation PR records OS-matrix results.
-The wrapper change adds ten integration cases per OS; its implementation PR
-records the full suite and OS-matrix results.
 Author-run tests are automated validation, not independent code review. Live
 parent-root Codex/Claude discovery remains a separate, unclaimed check.
 
