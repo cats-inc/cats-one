@@ -5,8 +5,20 @@ project-specific procedures that are too detailed for always-loaded instructions
 
 ## Project Context
 
-<!-- TODO: Document domain constraints, important entrypoints and operational facts.
-Link to architecture/decisions instead of duplicating them. -->
+- Read [architecture](architecture.md) for the current npm launcher and proposed
+  developer-workspace boundary.
+- Workspace planning follows [ADR-001](decisions/ADR-001-own-developer-workspace-bootstrap.md),
+  [SPEC-001](specs/SPEC-001-developer-workspace-bootstrap.md), and
+  [PLAN-001](plans/PLAN-001-developer-workspace-bootstrap.md). These are proposals;
+  implementation has not started.
+- Track delivered versus planned work in [PROGRESS.md](../PROGRESS.md). Planning
+  completion is not implementation completion.
+- The current entrypoint is `bin/cli.js`; tests use `node:test` in `test/` through
+  `npm test`. Generic setup/testing templates are not evidence of extra scripts.
+- Repository-local skill helpers exist, but the parent-level workspace command
+  does not. Do not generate parent files during documentation-only planning.
+- Sibling links in the planning package assume the four checkouts share a parent.
+  They document ownership and do not authorize modifying a sibling repository.
 
 ## Workflows
 
@@ -68,3 +80,5 @@ Report the affected behavior, commands actually tested, independent-review statu
 documentation updates, and any remaining blockers. Update progress/status only
 within the role ownership rules in `AGENTS.md`. Never label placeholder tests or
 unrun deployment/runtime checks as passing.
+
+*Last updated: 2026-09-11*

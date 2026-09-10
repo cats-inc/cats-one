@@ -11,6 +11,13 @@ serves `CATS_RUNTIME_BASE_URL`), waits for its `/health`, then launches
 started dies, it tears the platform down and exits non-zero; restart
 policy/supervision is future work. `--platform-only` skips the runtime.
 
+Developer workspace bootstrap is proposed in
+[ADR-001](docs/decisions/ADR-001-own-developer-workspace-bootstrap.md), with
+[SPEC-001](docs/specs/SPEC-001-developer-workspace-bootstrap.md) and
+[PLAN-001](docs/plans/PLAN-001-developer-workspace-bootstrap.md). It would assemble
+parent-level instructions and maintenance skills for the four Cats checkouts.
+The command is not implemented; do not present planned commands as available.
+
 - Canonical npm name: `@cats-inc/cats-one` (the unscoped `cats-one` npm name is
   a reserved alias stub).
 - Bin command: `cats-one`.
@@ -59,12 +66,32 @@ policy/supervision is future work. `--platform-only` skips the runtime.
   after changes; see `skills/README.md` for discovery paths.
 - Discovery copies under `.claude/` and `.agents/` are Git-ignored, so run the sync
   once after a fresh checkout. Do not assume optional skills exist.
+- These existing helpers synchronize this repository's `skills/` source. A
+  `-ProjectRoot` override selects another whole project's source and destination;
+  it is not the proposed multi-repository workspace aggregation command.
+
+## Developer Workspace Planning Boundaries
+
+- Keep workspace definitions/templates in version control here and generated
+  parent outputs outside member repositories. Read `docs/AGENT-GUIDE.md` and
+  the linked proposal before implementing the workspace feature.
+- Member instructions and canonical skills remain member-owned. Runtime's
+  maintenance source is `developer-skills/`; its separate `skills/` library is
+  product-delivered and must not be aggregated as developer instructions.
+- Runtime owns general product workspace-substrate capabilities. Platform owns
+  Desktop packaging, App selection and install/load; Apps owns utility source
+  and versioned `.catsapp` artifacts. Do not move these responsibilities into
+  the developer workspace command.
+- Keep the existing launcher's argument-forwarding contract. Dependency/lockfile
+  alignment and build/dev orchestration are separate work packages in PLAN-001.
 
 ## Rules
 
 - Update `test/cli.test.js` when touching `bin/cli.js`.
 - Runtime dependencies (`@cats-inc/cats-platform`, `@cats-inc/cats-runtime`)
-  are not yet published; `package-lock.json` cannot be generated until they
-  are. Do not "fix" installs by pointing dependencies at other sources.
+  are declared in `package.json` and recorded in the existing `package-lock.json`.
+  Keep both consistent when dependency updates are in scope. Do not replace
+  declared package sources with sibling imports or local-path dependencies as
+  an incidental installation fix.
 - Do not modify other agents' files (CLAUDE.md is Claude's, CODEX.md is
   Codex's, etc.).

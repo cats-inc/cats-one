@@ -47,7 +47,11 @@ Use [000-template.md](./000-template.md) as the starting point for new plans.
 | Plan | Title | Status | Related Spec |
 |------|-------|--------|--------------|
 | [000-template](./000-template.md) | Template | - | - |
+| [PLAN-001](./PLAN-001-developer-workspace-bootstrap.md) | Developer workspace bootstrap | Draft; implementation not started | [SPEC-001](../specs/SPEC-001-developer-workspace-bootstrap.md) |
 <!-- Add new plans above this line -->
+
+PLAN-001 was drafted with SPEC-001 at the owner's request for planning. Its
+presence does not mean the draft specification is approved or implemented.
 
 ## For AI Agents
 
@@ -58,3 +62,5 @@ Use [000-template.md](./000-template.md) as the starting point for new plans.
 ---
 
 *See also: [specs/](../specs/) for feature specifications*
+
+*Last updated: 2026-09-11*

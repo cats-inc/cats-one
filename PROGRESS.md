@@ -1,92 +1,46 @@
 # Progress
 
-> Implementation status and work package tracking.
-
 ## Current Status
 
-| Component | Status | Description |
-|-----------|--------|-------------|
-| Core | Not Started | (Main functionality) |
-| API | Not Started | (API endpoints) |
-| Tests | Not Started | (Test coverage) |
-| Docs | Not Started | (Documentation) |
+| Component | Status | Evidence / next step |
+|-----------|--------|----------------------|
+| npm runtime/platform launcher | Implemented | Existing `bin/cli.js`, `test/cli.test.js` and package CI |
+| Repository-local agent base layer | Implemented | Agent guidance, templates and single-project skill helpers from the bootstrap adoption |
+| Developer workspace planning | Documentation prepared | ADR-001 proposed; SPEC-001 and PLAN-001 draft |
+| Developer workspace command | Not started | Manifest/template, inventory, managed apply and validation remain planned |
+| Launcher dependency alignment | Follow-up identified | Declared/locked package versions need a separate compatibility assessment |
+| Cross-repository build/dev and release coordination | Deferred | Outside the first workspace synchronization slice |
 
-**Legend**: Not Started | In Progress | Completed | Blocked
+## WP-1: Developer Workspace Bootstrap
 
-## Work Packages
+**Owner**: cats-one maintainers. **Implementation**: not started.
 
-### WP-1: (Name)
+- [x] Identify the four member repositories and their canonical skill roots.
+- [x] Record ownership boundaries, requirements, acceptance criteria and phases.
+- [ ] Implement manifest validation and read-only inventory/check/preview.
+- [ ] Implement generated root instructions and managed skill reconciliation.
+- [ ] Validate failure recovery, cross-platform behavior and parent-root discovery.
+- [ ] Publish actual setup instructions and record implementation evidence.
 
-**Status**: Not Started
-**Assigned**: (Agent or developer)
-**Priority**: P0
+Use [PLAN-001](docs/plans/PLAN-001-developer-workspace-bootstrap.md) for the
+detailed task checklist and [SPEC-001](docs/specs/SPEC-001-developer-workspace-bootstrap.md)
+for acceptance criteria. Documentation delivery does not mark those criteria met.
 
-#### Tasks
+## WP-2: Launcher Dependency Alignment
 
-| Task | Status | Notes |
-|------|--------|-------|
-| Task 1 | [ ] | |
-| Task 2 | [ ] | |
-| Task 3 | [ ] | |
+**Status**: follow-up; no dependency edits in the planning change.
 
-#### Acceptance Criteria
+The 2026-09-11 local snapshot shows platform declared as `^0.1.0`, locked at
+`0.1.1`, and checked out at `0.2.3`; runtime is declared as `^0.1.2`, locked at
+`0.1.2`, and checked out at `0.1.21`. Assess published artifacts and compatibility
+separately before updating both package files and running isolated consumer tests.
 
-- [ ] Criterion 1
-- [ ] Criterion 2
+## Planning Delivery
 
----
+The 2026-09-11 change adds [ADR-001](docs/decisions/ADR-001-own-developer-workspace-bootstrap.md),
+SPEC-001 and PLAN-001 and connects the project documentation. It does not
+implement workspace generation, modify sibling repositories or change the launcher.
+Documentation validation covers links and formatting; implementation acceptance
+remains pending.
 
-### WP-2: (Name)
-
-**Status**: Not Started
-**Assigned**: (Agent or developer)
-**Priority**: P1
-**Depends on**: WP-1
-
-#### Tasks
-
-| Task | Status | Notes |
-|------|--------|-------|
-| Task 1 | [ ] | |
-| Task 2 | [ ] | |
-
-#### Acceptance Criteria
-
-- [ ] Criterion 1
-- [ ] Criterion 2
-
----
-
-## Completion Notes
-
-### WP-X: (Name)
-
-**Completed**: YYYY-MM-DD
-
-#### Files Created/Modified
-
-- `path/to/file.py` - Description
-- `path/to/another.py` - Description
-
-#### Key Decisions
-
-- Decision 1: Reason
-- Decision 2: Reason
-
-#### Remaining Items
-
-- [ ] Follow-up task 1
-- [ ] Follow-up task 2
-
----
-
-## How to Use This File
-
-1. **Planning**: Define work packages with clear scope and acceptance criteria
-2. **Tracking**: Update task status as work progresses
-3. **Handoff**: Use completion notes to document what was done
-4. **Multi-agent**: Assign work packages to different agents for parallel work
-
----
-
-*Last updated: YYYY-MM-DD*
+*Last updated: 2026-09-11*
