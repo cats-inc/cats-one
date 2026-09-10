@@ -4,7 +4,7 @@
 
 | Field | Value |
 |-------|-------|
-| Status | In progress; Phase 1 read-only inventory/planning implemented |
+| Status | Phases 1–2 implemented; live-host discovery validation pending |
 | Owner | cats-one maintainers |
 | Review | Owner requested implementation; automated validation recorded in PLAN-001 |
 | Decision | [ADR-001](../decisions/ADR-001-own-developer-workspace-bootstrap.md) |
@@ -19,9 +19,10 @@ parent directory, which need not be a Git repository. Every machine can rebuild
 the same setup from the same source content without copying machine-specific
 agent folders between computers.
 
-Phase 1 supplies the tracked inputs and read-only command. Requirements describing
-materialization, ownership writes and recovery remain Phase 2 targets; generated
-parent files and live-host discovery are not delivered by this phase.
+Tracked inputs, inventory/planning, managed materialization and interruption
+recovery are implemented. The command generates parent files explicitly through
+`sync`; `check` and `sync --dry-run` remain read-only. Live-host discovery is a
+separate validation item in PLAN-001.
 
 ## Goals
 
@@ -40,8 +41,7 @@ parent files and live-host discovery are not delivered by this phase.
 - Replacing runtime's generic workspace-substrate APIs or per-repository scaffolds.
 - Distributing runtime product skills, App packages or Desktop release artifacts.
 - Changing production npm dependencies, launch behavior, or distributing workspace
-  tooling in the published package. A declared development parser dependency is
-  allowed when implementing the command.
+  tooling in the published package. Direct development dependencies provide YAML parsing and writer locking.
 - Implementing arbitrary workspace profiles, custom member layouts or shared
   release revision pinning in the first slice.
 
@@ -98,6 +98,7 @@ dependencies in the cats-one checkout:
 
 ```sh
 node ./cats-one/scripts/workspace.mjs sync --root . --agent codex --dry-run
+node ./cats-one/scripts/workspace.mjs sync --root . --agent codex
 node ./cats-one/scripts/workspace.mjs check --root . --agent codex
 ```
 
@@ -106,9 +107,9 @@ node ./cats-one/scripts/workspace.mjs check --root . --agent codex
 - Support `codex`, `claude` and `all`; default to `codex`. Codex writes
   `.agents/skills`, Claude writes `.claude/skills`, and `all` targets both.
   Other agents may consume a shared path, but are not separately certified here.
-- Phase 2 will enable `sync` without `--dry-run` to create/update outputs,
-  including a fresh workspace. Phase 1 rejects that invocation with exit `2` and
-  an explicit materialization-not-implemented message.
+- `sync` without `--dry-run` creates/updates outputs, including a fresh workspace.
+  It recovers any interrupted operation before planning new changes. It never
+  delegates mutation to the sibling sync helpers.
 - `sync --dry-run` and `check` are strictly read-only, including when outputs or
   ownership metadata are absent. Neither creates directories or temporary files.
 - Exit codes: `0` for a successful sync/preview or an in-sync check; `1` for a
@@ -146,8 +147,8 @@ Repository-local sessions continue to use each repository's local setup.
 The template has exactly one `{{MEMBERS}}` and one `{{SKILLS}}` placeholder;
 unknown placeholders fail. Tables include member responsibilities and each
 skill's relative canonical origin. Template CRLF is normalized to LF; skill
-bytes are not normalized. Phase 1 renders in memory and provides a preview-refresh
-command in the notice; Phase 2 must update that notice when apply becomes available.
+bytes are not normalized. The notice provides the sync command and explains how
+to preview and select agent targets. The same rendering feeds preview and apply.
 
 ### FR-4: Canonical skill discovery and materialization
 
@@ -174,7 +175,7 @@ Snapshot observed on 2026-09-11:
 
 This snapshot guides fixtures; production discovery remains data-driven.
 
-Phase 1 uses cats-one's direct `yaml` development dependency with strict YAML
+The command uses cats-one's direct `yaml` development dependency with strict YAML
 1.2 core parsing. Duplicate keys, unknown tags, aliases and malformed frontmatter
 fail; additional metadata fields are allowed. The portable v1 name is 1–64 ASCII
 lowercase letters/digits separated by single hyphens, excluding Windows device
@@ -193,8 +194,9 @@ digests determine freshness; timestamps and absolute machine paths do not.
 Treat metadata as untrusted input: validate every path and owner before use,
 reject malformed records, and never let a record authorize arbitrary deletion.
 
-Phase 1 reads this contract for previews; it does not create ownership records.
-The v1 object has exactly `schemaVersion: 1` and `entries`. Each entry has exactly
+Preview validates existing ownership; successful sync writes the reconciled
+record after replacing outputs. The v1 object has exactly `schemaVersion: 1`
+and `entries`. Each entry has exactly
 `path`, `agent`, `member`, `source`, and `digest`:
 
 - Root guidance: path `AGENTS.md`, agent `shared`, member `cats-one`, source
@@ -211,8 +213,9 @@ where entries are sorted depth-first by exact name, each
 `[type, relativePath, SHA256(bytes)]` (or `null` for directory content).
 Hashes inside the tuple are lowercase hex. Names, types, empty directories and
 bytes determine equality; modification times, permissions and absolute paths
-do not. Phase 2 must preserve required resource executable permissions when
-materializing copies, separately from content freshness.
+do not. Materialized copies preserve file/directory permission bits (including
+Unix executable resources), separately from content freshness. A content no-op
+does not rewrite files solely to reset their permissions.
 
 | Existing destination | Planned behavior |
 |----------------------|------------------|
@@ -242,10 +245,79 @@ The first implementation must test this failure path before claiming completion.
 Serialize apply operations with a workspace-local writer lock, and recheck that
 sources/destinations still match the previewed inventory before replacing them.
 Read-only commands report an active/interrupted apply without repairing it.
-Phase 1 reserves `.cats-workspace/writer.lock` and
-`.cats-workspace/recovery.json`; the presence of either fails with exit `2`.
-Phase 2 must specify and test their durable apply/recovery contents before enabling
-writes. Neither reserved file is created by Phase 1.
+The protocol below defines those reserved paths. Read-only commands return `2`
+when any lock, recovery, transaction, pending publication or commit marker exists;
+they never acquire a lock or repair/clean up the state.
+
+#### Writer and recovery protocol
+
+Only `sync` mutates `.cats-workspace/`. A clean no-op returns before creating a
+lock or changing directory/file timestamps. Invalid inventory, metadata and
+ordinary conflicts likewise fail before state creation.
+
+Writer exclusion uses the direct `proper-lockfile` dependency with an empty
+`writer.lock/` directory, a fixed 30-second stale interval and 10-second heartbeat
+for every invocation. A live/recent lock fails immediately; retry after the writer
+finishes or the stale interval following a crash. Never delete the lock manually
+or override lease timings. A compromised writer stops; another writer must own
+the lock before recovering. See the [lock research note](../research/2026-09-11-workspace-writer-lock.md).
+
+Before staging or replacing outputs, publish `recovery.json` by writing and
+syncing `recovery.pending`, then renaming it. A partial unpublished record cannot
+have changed outputs and is discarded by the next sync. The recovery object has
+exactly these fields:
+
+| Field | Contract |
+| --- | --- |
+| `schemaVersion` | `1` |
+| `agent` | `codex`, `claude` or `all` |
+| `beforeMetadata` | Exact previous ownership JSON text, or `null` |
+| `afterMetadata` | Exact next ownership JSON text |
+| `operations` | Ordered objects containing only `path`, `before`, `after`; digests or `null` mean present or absent |
+| `createdDirectories` | Selected discovery ancestors that were absent; rollback may remove them only when empty |
+
+Validate both ownership texts using the normal ownership schema, require all
+unselected entries to remain equal, and derive allowed operation paths/digests
+from them. Every physical output operation is within that selected set.
+The final operation is `managed.json`, whose digests match the two exact JSON
+texts. Its before/after digests can be equal when recreating a missing mirror.
+
+Stage complete desired snapshots at `transaction/new/<index>`. Before each
+replacement, recheck the destination and canonical source; re-inventory before
+apply and before ownership commit, including unchanged/adopted destinations.
+Rename an existing destination to `transaction/old/<index>`, then rename its
+staged replacement into place. Backups retain the original bytes/permissions.
+The operation is not a single atomic multi-file transaction; a pending journal
+prevents a partial result being reported as synchronized.
+
+After all replacements and ownership installation, atomically publish
+`committed.json` via `commit.pending`. Its exact fields are
+`schemaVersion: 1`, `recoveryDigest` and `metadataDigest`; both digests must match
+the journal and final ownership. This explicit marker is needed even when old
+and new ownership bytes are identical.
+
+On the next sync, validate the whole journal, staged/backup paths and destinations
+before any recovery mutation. Without the commit marker, restore backups in
+reverse order and remove only the transaction's newly created outputs. With the
+marker, require committed outputs to match and finish cleanup. Changed originals,
+backups or outputs stop recovery and preserve evidence for deliberate conflict
+resolution. Incomplete staging is disposable only while its original destination
+remains unchanged and has no backup.
+
+Move disposable entries into `transaction/trash/<side>-<index>` before recursive
+deletion; `side` is `new`, `old` or `installed`. Only validated transaction
+slots are permitted, with no links or arbitrary paths. Trash can be partially
+deleted on restart. This also makes interrupted rollback deletion recoverable.
+Remove empty transaction directories, then the journal, then the commit marker.
+A leftover commit marker without a journal is removed only when ownership still
+matches its recorded digest. Unknown/orphan transaction state is preserved and
+reported rather than interpreted as permission to delete arbitrary files.
+
+Files are synced before publication and directories are synced where Node's
+platform API supports it. Tests inject process termination, including SIGKILL;
+they do not claim filesystem/hardware power-loss certification. All persistent
+ownership content is relative and deterministic; locks/journals are transient
+protocol state.
 
 ### FR-6: Path and source protection
 
@@ -282,11 +354,11 @@ command's write scope. Tests use isolated temporary workspaces.
 ## Dependencies and Follow-ups
 
 - Requires local Node.js 22+, the four checkouts and explicitly prepared cats-one
-  developer dependencies. Declare an existing YAML parser as a direct development
-  dependency with a lockfile update during implementation; never import it from
-  a sibling checkout's node_modules. Setup may use the ordinary cats-one npm
+  developer dependencies. YAML and proper-lockfile are direct development
+  dependencies recorded in the lockfile; never import from a sibling checkout's
+  node_modules. Setup may use the ordinary cats-one npm
   install workflow, but sync itself must run offline, never install dependencies
-  or start a runtime. Missing parser dependencies produce setup guidance.
+  or start a runtime. Missing developer dependencies produce setup guidance.
 - Platform's shallow repository helper is a separate fix in its owning repo;
   this aggregator reads canonical sources and does not depend on that helper.
 - Launcher dependency/lockfile alignment is a separate work package. As inspected
@@ -299,9 +371,8 @@ command's write scope. Tests use isolated temporary workspaces.
 
 No unresolved product choice is needed for the approved first slice.
 Custom/partial checkout profiles, npm distribution and cross-repository build/dev
-commands are deferred scope, not hidden prerequisites. Parser selection and
-read-only schemas are settled above. Durable apply/recovery mechanics must be
-finalized and tested in Phase 2 before materialization is enabled.
+commands are deferred scope, not hidden prerequisites. Parser selection, ownership schemas and durable recovery mechanics are
+implemented above. Live agent-host discovery remains a separate validation item.
 
 ## References
 

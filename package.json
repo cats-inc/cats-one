@@ -10,6 +10,7 @@
     "@cats-inc/cats-runtime": "^0.1.2"
   },
   "devDependencies": {
+    "proper-lockfile": "^4.1.2",
     "yaml": "^2.9.0"
   },
   "keywords": [

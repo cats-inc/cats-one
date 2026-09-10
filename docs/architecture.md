@@ -31,18 +31,23 @@ cats-one tracked manifest + root instruction template
           `-- .cats-workspace/      (ownership/recovery metadata)
 ```
 
-The diagram describes the eventual materialized workspace. Phase 1 implements
-manifest validation, canonical inventory and template rendering in memory, then
-passes observed destinations to a pure action planner. `check` and
-`sync --dry-run` report that plan without writes. Managed apply/recovery remains
-Phase 2 work. [SPEC-001](specs/SPEC-001-developer-workspace-bootstrap.md) defines
-the schemas, full-member profile, discovery and conflict contract.
+The manifest, canonical inventory and rendered template feed a pure action
+planner. `check` and `sync --dry-run` report that plan without writes. `sync`
+preflights conflicts, acquires one workspace writer lock, records the operation,
+stages copies, replaces individual outputs, and commits ownership last.
+
+An explicit commit marker distinguishes fully applied output from interrupted
+work, even when ownership bytes happen to remain equal. The next sync rolls back
+an uncommitted operation or finishes committed cleanup before planning again.
+Backups and disposable trash keep both rollback and cleanup restartable.
+[SPEC-001](specs/SPEC-001-developer-workspace-bootstrap.md) defines these schemas
+and the full-member, discovery and conflict contracts.
 
 ## Repository Responsibilities
 
 | Repository | Responsibility |
 |------------|----------------|
-| cats-one | npm launch orchestration; Cats development member definition, root guidance and skill inventory/planning |
+| cats-one | npm launch orchestration; Cats development member definition, root guidance and managed maintenance-skill aggregation |
 | cats-runtime | Provider execution and telemetry; runtime-delivered skills and general product workspace-substrate tools; its own maintenance skills |
 | cats-platform | Product/Desktop host, App SDK, App selection/install/load and Desktop packaging; its own maintenance skills |
 | cats-apps | Official utility source and individually versioned `.catsapp` builds; its own maintenance skills when added |
@@ -72,8 +77,8 @@ release compatibility between independently checked-out revisions.
 
 ## Delivery
 
-See [PLAN-001](plans/PLAN-001-developer-workspace-bootstrap.md) for read-only
-inventory, managed apply and cross-platform validation phases, and
+See [PLAN-001](plans/PLAN-001-developer-workspace-bootstrap.md) for inventory,
+managed apply and cross-platform validation phases, and
 [PROGRESS.md](../PROGRESS.md) for implementation status.
 
 *Last updated: 2026-09-11*

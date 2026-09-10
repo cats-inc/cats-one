@@ -4,9 +4,9 @@ Generated from `cats-one/templates/workspace/AGENTS.md.template`, the workspace
 manifest and member skill inventory. Edit those tracked sources to share changes
 with other development machines.
 
-Preview refresh from this parent directory:
-`node ./cats-one/scripts/workspace.mjs sync --root . --agent codex --dry-run`.
-The current command is read-only; materialization is a later implementation phase.
+Refresh from this parent directory:
+`node ./cats-one/scripts/workspace.mjs sync --root . --agent codex`.
+Add `--dry-run` to preview; choose `--agent claude` or `--agent all` for other mirrors.
 
 ## Choose the owning repository
 
@@ -28,7 +28,7 @@ Desktop/App selection and installation; apps owns utility artifact production.
 
 Interpret a skill's repository-relative paths and commands in its owning member.
 Skill-local resource links remain relative to the skill directory. Edit canonical
-sources listed above, then rerun the workspace preview after pulling changes.
+sources listed above, then rerun workspace sync after pulling changes.
 Runtime's separate product `skills/` library is outside this developer inventory.
 
 Repository-local sessions retain their own setup. Changing a shell command's

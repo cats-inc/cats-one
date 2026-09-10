@@ -93,7 +93,7 @@ function skillMetadata(bytes, source, yaml) {
   }
 }
 
-export async function inventoryWorkspace({ root: rootArgument, checkoutRoot }) {
+export async function loadWorkspace({ root: rootArgument, checkoutRoot }) {
   const root = await canonicalRoot(rootArgument);
   const toolRoot = await canonicalRoot(checkoutRoot);
   const manifest = validateManifest(await readJson(toolRoot, 'config/developer-workspace.json'));
@@ -107,6 +107,11 @@ export async function inventoryWorkspace({ root: rootArgument, checkoutRoot }) {
     }
   }
   requireCondition(contained(root, toolRoot), 'cats-one must be a strict descendant of --root');
+  return { root, manifest, template };
+}
+
+export async function inventoryWorkspace(options) {
+  const { root, manifest, template } = await loadWorkspace(options);
   const yaml = await loadYaml();
   const skills = [];
   const names = new Map();

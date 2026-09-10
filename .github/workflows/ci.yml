@@ -28,7 +28,7 @@ jobs:
       - name: Install developer dependencies
         run: npm ci --include=dev
       - name: Test workspace without sibling checkouts or services
-        run: node --test test/workspace-inventory.test.js test/workspace-cli.test.js
+        run: node --test test/workspace-inventory.test.js test/workspace-cli.test.js test/workspace-apply.test.js
 
   test:
     runs-on: ubuntu-latest
