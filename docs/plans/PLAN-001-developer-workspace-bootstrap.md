@@ -129,6 +129,25 @@ They are not committed as copies in `cats-one` or another member repository.
 
 ## Technical Decisions
 
+### 2026-09-11 Developer directory alignment
+
+The owner approved using `skills/` in every member, following project-bootstrap.
+Runtime's shipped product library moves to `runtime-skills/`; the manifest,
+inventory profile, fixtures and generated guidance follow that separation.
+Existing recorded provenance for the one relocated runtime maintenance package
+is reconciled with existing digest/conflict checks and journal recovery.
+
+- [x] Align the four source roots and exclude the new runtime product root.
+- [x] Cover existing ownership relocation, single-agent selection and edited mirrors.
+- [x] Complete focused/full workspace validation and refresh the real parent workspace.
+
+Validation: `npm test` passed 97 tests with two filesystem-specific skips (99
+total) on Windows. The real OS helper migrated the recorded runtime source,
+updated parent guidance and both affected mirrors, then passed its automatic
+read-only check with all seven outputs unchanged. Independent review found no
+remaining code issues after fixes. No live-host discovery is claimed by this
+directory change.
+
 - Use one inventory and reconciliation plan for all members to avoid one repo's
   cleanup removing another repo's skills.
 - Read current canonical content, not generated mirrors; copy resources intact.

@@ -83,7 +83,7 @@ OS helpers infer that root from the cats-one checkout and select both agents.
   parent outputs outside member repositories. Read `docs/AGENT-GUIDE.md` and
   the linked spec/plan before changing the workspace feature.
 - Member instructions and canonical skills remain member-owned. Runtime's
-  maintenance source is `developer-skills/`; its separate `skills/` library is
+  maintenance source is `skills/`; its separate `runtime-skills/` library is
   product-delivered and must not be aggregated as developer instructions.
 - Runtime owns general product workspace-substrate capabilities. Platform owns
   Desktop packaging, App selection and install/load; Apps owns utility source

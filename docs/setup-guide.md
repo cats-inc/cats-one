@@ -8,7 +8,7 @@ The developer command requires all four sibling source checkouts:
 ```text
 <chosen parent>/
   cats-one/       skills/
-  cats-runtime/   developer-skills/
+  cats-runtime/   skills/
   cats-platform/  skills/
   cats-apps/      skills/
 ```
@@ -89,7 +89,14 @@ dependency lockfile changed, run `npm ci --include=dev` in cats-one first.
 Edit canonical skill sources or cats-one's manifest/template to share changes
 with other machines.
 Platform's nested maintenance skills are discovered recursively; runtime's
-separate product `skills/` library is excluded.
+separate product `runtime-skills/` library is excluded.
+
+All four members use `skills/` for developer skills. Workspaces synchronized
+before the 2026-09-11 directory alignment may record the runtime maintenance
+package's former `developer-skills/` source. Normal sync updates that one known
+ownership entry through existing digest checks and journal recovery. Edited
+mirrors still conflict; the retired source is never scanned. No manual ownership
+file edits or directory cleanup are needed.
 
 A custom root `AGENTS.md`, different unmanaged target skill, or locally edited
 managed entry is a conflict. Reconcile those edits with tracked sources, or save

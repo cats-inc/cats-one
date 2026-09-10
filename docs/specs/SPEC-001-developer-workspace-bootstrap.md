@@ -64,7 +64,7 @@ schema, stable member IDs, relative member paths and canonical skill roots:
 | Member ID and relative path | Expected package name | Maintenance-skill root |
 |-----------------------------|-----------------------|------------------------|
 | `cats-one` | `@cats-inc/cats-one` | `skills/` |
-| `cats-runtime` | `@cats-inc/cats-runtime` | `developer-skills/` |
+| `cats-runtime` | `@cats-inc/cats-runtime` | `skills/` |
 | `cats-platform` | `@cats-inc/cats-platform` | `skills/` |
 | `cats-apps` | `@cats-inc/cats-apps` | `skills/` |
 
@@ -170,7 +170,7 @@ preview and apply.
 Recursively discover `SKILL.md` under each explicitly declared source root.
 Stop descending once a skill root is found, so bundled resources are not treated
 as separate skills. Exclude pending `*.bootstrap` proposals. Never scan arbitrary
-workspace folders, ignored discovery copies or `cats-runtime/skills/`.
+workspace folders, ignored discovery copies or `cats-runtime/runtime-skills/`.
 
 Validate the required frontmatter and safe skill names using the Agent Skills
 format. Do not implement YAML parsing with ad hoc line splitting; choose and
@@ -184,11 +184,20 @@ discovery order, renaming a skill implicitly or silently choosing one version.
 
 Snapshot observed on 2026-09-11:
 
-- Runtime: `maintain-provider-model-catalogs` under `developer-skills/`.
+- Runtime: `maintain-provider-model-catalogs` under `skills/`.
 - Platform: `a2a-handoff` and `project-memory-sync` under `skills/orchestration/`.
 - One and Apps: declared `skills/` roots with no skills yet.
 
 This snapshot guides fixtures; production discovery remains data-driven.
+
+The 2026-09-11 owner-approved directory alignment sets all four canonical roots
+to `skills/`. The runtime product library is `runtime-skills/` and remains
+excluded. For existing generated ownership only, accept the exact former
+`cats-runtime` source `developer-skills/maintain-provider-model-catalogs` for
+that same skill name. Reconcile it to the new source with normal content-digest,
+selection, conflict and journal checks; do not discover retired roots or accept
+other historical/product sources. Unselected mirrors retain their ownership
+until selected in a later sync.
 
 The command uses cats-one's direct `yaml` development dependency with strict YAML
 1.2 core parsing. Duplicate keys, unknown tags, aliases and malformed frontmatter

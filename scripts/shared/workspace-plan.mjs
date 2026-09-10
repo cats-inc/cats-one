@@ -34,7 +34,13 @@ export function validateOwnership(record, manifest) {
       const name = entry.path.slice(TARGETS[entry.agent].length + 1);
       requireCondition(validSkillName(name) && entry.path === `${TARGETS[entry.agent]}/${name}`,
         `Invalid managed destination: ${entry.path}`);
-      requireCondition(member.skillRoots.some(source => entry.source.startsWith(`${source}/`))
+      // Existing parent workspaces recorded this package before the 2026-09-11
+      // source move. Accept its provenance so normal digest/conflict checks and
+      // journaled sync can update ownership; never discover the retired root.
+      const relocatedSource = entry.member === 'cats-runtime'
+        && name === 'maintain-provider-model-catalogs'
+        && entry.source === 'developer-skills/maintain-provider-model-catalogs';
+      requireCondition((member.skillRoots.some(source => entry.source.startsWith(`${source}/`)) || relocatedSource)
         && entry.source.split('/').at(-1) === name
         && !entry.source.split('/').some(part => part.endsWith('.bootstrap')),
       `Invalid canonical ownership source: ${entry.source}`);

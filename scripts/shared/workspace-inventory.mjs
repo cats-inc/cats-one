@@ -9,7 +9,7 @@ export const TEMPLATE = 'templates/workspace/AGENTS.md.template';
 export const TARGETS = { codex: '.agents/skills', claude: '.claude/skills' };
 const PROFILE = {
   'cats-one': 'skills',
-  'cats-runtime': 'developer-skills',
+  'cats-runtime': 'skills',
   'cats-platform': 'skills',
   'cats-apps': 'skills',
 };
