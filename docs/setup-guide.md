@@ -3,8 +3,7 @@
 ## Requirements
 
 Use Node.js 22+ and npm 12+. Product launcher usage is in the [README](../README.md).
-The developer workspace command runs from a cats-one source checkout and requires
-all four sibling checkouts, regardless of which agent mirror is selected:
+The developer command requires all four sibling source checkouts:
 
 ```text
 <chosen parent>/
@@ -14,71 +13,95 @@ all four sibling checkouts, regardless of which agent mirror is selected:
   cats-apps/      skills/
 ```
 
-The parent can have any name and need not be a Git repository. Each member must
-have its expected package name, `AGENTS.md`, Git metadata and declared skill root.
-Empty skill roots are valid. Git worktrees with a `.git` file are supported.
-Source/output links and junctions are rejected in this initial copy-oriented mode.
+The parent can have any name and need not be a Git repository. Each member needs
+its expected package name, `AGENTS.md`, Git metadata and declared skill root.
+Empty roots and Git worktrees are supported. Source/output links and junctions
+are rejected; ordinary ancestor aliases are normalized physically.
 
-Install developer dependencies explicitly once in the cats-one checkout:
+Install dependencies explicitly once in cats-one:
 
 ```sh
 npm ci --include=dev
 ```
 
-This provides the directly declared `yaml` parser. Subsequent workspace commands
-run offline, without installing dependencies or starting services. They resolve
-configuration, templates and dependencies from their own cats-one checkout.
+This prepares the directly declared YAML parser and writer-lock library.
+Workspace commands then run offline without installing dependencies or starting
+product services. Configuration, templates and dependencies resolve from the
+executing cats-one checkout, which must be the member of the selected workspace.
 
-## Preview and Check
+## Generate, Preview and Check
 
-From the shared parent, on Windows, macOS or Linux:
+From the shared parent on Windows, macOS or Linux:
 
 ```sh
 node ./cats-one/scripts/workspace.mjs --help
 node ./cats-one/scripts/workspace.mjs sync --root . --agent codex --dry-run
+node ./cats-one/scripts/workspace.mjs sync --root . --agent codex
 node ./cats-one/scripts/workspace.mjs check --root . --agent codex
 ```
 
-From cats-one itself, use `--root ..`. From elsewhere, give the script path and
-an explicit parent path; quote paths containing spaces. The executing cats-one
-checkout must be the member of the selected root.
+From cats-one, use `--root ..`. From elsewhere, provide both the script path and
+an explicit parent path; quote paths containing spaces.
 
-`--agent` defaults to `codex` (`.agents/skills`). Choose `claude`
-(`.claude/skills`) or `all` for both. Root `AGENTS.md` is shared and always
-included. Output lists each planned path, action and canonical source owner.
+The default agent is `codex` (`.agents/skills`). Choose `claude`
+(`.claude/skills`) or `all` for both. Root `AGENTS.md` is shared. Sync copies
+complete skills/resources and writes `.cats-workspace/managed.json` to record
+ownership. The tool maintains ownership and recovery files; do not create or
+maintain them manually.
 
 | Exit | Meaning |
 | --- | --- |
-| 0 | Successful preview, or a check with matching content and ownership |
+| 0 | Successful sync/preview, or a check with matching content and ownership |
 | 1 | Check found drift, including missing outputs or adoption |
 | 2 | Invalid input, conflict, active/interrupted apply or filesystem error |
 
-Both available commands are strictly read-only, even when destinations and
-metadata do not exist. A fresh workspace therefore normally previews `create`
-actions and returns `1` from `check`. Phase 1 does not install discovery copies:
-`sync` without `--dry-run` currently fails with a clear error. Managed writes and
-recovery will arrive in [PLAN-001 Phase 2](plans/PLAN-001-developer-workspace-bootstrap.md).
+`check` and `sync --dry-run` never create files, acquire a lock or repair state.
+A fresh workspace normally previews `create` actions and checks with exit `1`.
+After sync, a repeat with unchanged inputs/outputs performs no writes.
 
-## Updating Sources and Resolving Reports
+## Pulling Changes and Resolving Conflicts
 
-Pull the relevant member's changes and rerun the preview. Edit canonical skill
-sources or cats-one's manifest/template to share changes across development
-machines. Keep skill-local resources in the skill directory; platform's nested
-skills are discovered recursively. Runtime's product `skills/` is excluded.
+Pull the relevant member's changes and rerun preview/sync. Edit canonical skill
+sources or cats-one's manifest/template to share changes with other machines.
+Platform's nested maintenance skills are discovered recursively; runtime's
+separate product `skills/` library is excluded.
 
-A different existing root `AGENTS.md` or unmanaged target skill is a conflict.
-Reconcile personal changes deliberately with the tracked sources, or preserve
-the personal copy outside the generated destination before a future apply.
-Locally edited managed entries also conflict, including entries whose source was
-removed. A byte-identical unmanaged destination reports `adopt`: a future apply
-would take ownership of it. Preview itself never adopts or overwrites files.
+A custom root `AGENTS.md`, different unmanaged target skill, or locally edited
+managed entry is a conflict. Reconcile those edits with tracked sources, or save
+the personal copy outside the generated destination before retrying. There is no
+force or blanket-clean option. Unrelated skills and unselected agents are retained.
+Byte-identical unmanaged content reports `adopt`; sync then takes ownership,
+including responsibility for future scoped cleanup.
 
-Missing members or skill roots are errors, not evidence that stale copies should
-be removed. Correct the checkout layout before retrying. Unknown/malformed
-ownership records fail; do not hand-edit metadata to bypass a conflict.
-An active writer or pending recovery record is reported without repair.
+Missing checkouts or canonical roots are errors. Correct the layout before
+retrying; absence is never treated as permission to remove their managed skills.
 
-The existing per-repository PowerShell/Bash helpers remain single-project
-commands. Do not run them against a shared destination to compose this workspace.
+## Interrupted Sync
+
+Rerun the same `sync` command. It restores an uncommitted operation or completes
+cleanup after a committed operation, then plans the current source state.
+Ordinary caught failures attempt recovery immediately. Forced termination can
+leave an active-looking writer lock for up to 30 seconds; retry after that interval.
+Do not delete the lock or edit ownership/recovery records to bypass it.
+
+A second concurrent writer fails while the first writer owns the lock.
+Preview/check report pending recovery without performing it. Recovery refuses
+locally changed outputs/backups, malformed records and unsafe paths, preserving
+the files and journal for deliberate conflict resolution.
+
+The [specification](specs/SPEC-001-developer-workspace-bootstrap.md) describes
+the journal, commit marker and restartable trash cleanup. These are generated
+implementation state; routine setup needs only the sync command.
+
+## Agent Discovery
+
+Generated root guidance routes work to each member's rules and canonical skills.
+Use a parent-root agent session for the aggregated setup; repository-local sessions
+retain their own setup. Live host discovery is separate from the tested filesystem
+mirrors, and changing a shell command's working directory does not reload an active
+conversation's skills.
+
+The existing repository PowerShell/Bash helpers remain single-project commands.
+Do not compose them against a shared destination.
 
 *Last updated: 2026-09-11*

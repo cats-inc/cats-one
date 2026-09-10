@@ -49,7 +49,9 @@ async function fixture(t, { cli = false, yaml = true, skills = true } = {}) {
     await write(checkoutRoot, 'scripts/workspace.mjs', await fs.readFile(path.join(repository, 'scripts/workspace.mjs')));
     await fs.cp(path.join(repository, 'scripts/shared'), path.join(checkoutRoot, 'scripts/shared'), { recursive: true });
     if (yaml) {
-      await fs.cp(path.dirname(require.resolve('yaml/package.json')), path.join(checkoutRoot, 'node_modules/yaml'), { recursive: true });
+      for (const dependency of ['yaml', 'proper-lockfile', 'graceful-fs', 'retry', 'signal-exit']) {
+        await fs.cp(path.dirname(require.resolve(`${dependency}/package.json`)), path.join(checkoutRoot, `node_modules/${dependency}`), { recursive: true });
+      }
     }
   }
   return { base, root, checkoutRoot, manifest };
@@ -73,7 +75,7 @@ async function snapshot(root) {
   return result;
 }
 
-// Test arrangement only: the production command has no materialization code.
+// Arrange legacy ownership independently of the production apply code.
 async function arrangeManaged(workspace, report, agents = ['shared', 'codex', 'claude']) {
   const entries = [];
   for (const desired of report.desired.filter(entry => agents.includes(entry.agent))) {

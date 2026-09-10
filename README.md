@@ -43,26 +43,30 @@ npx @cats-inc/cats-one
 - `--platform-only` skips runtime orchestration entirely.
 - Ctrl+C / SIGTERM stops both processes.
 
-## Developer Workspace Preview
+## Developer Workspace
 
 `cats-one` owns the development workspace definition for sibling `cats-one`,
 `cats-runtime`, `cats-platform`, and `cats-apps` checkouts. Their parent directory
 can remain outside Git. The checkout command inventories canonical maintenance
-skills and previews root guidance and discovery copies.
+skills and synchronizes root guidance and discovery copies.
 
 Prepare developer dependencies once with `npm ci --include=dev` in `cats-one`,
 then run from the shared parent:
 
 ```sh
 node ./cats-one/scripts/workspace.mjs sync --root . --agent codex --dry-run
+node ./cats-one/scripts/workspace.mjs sync --root . --agent codex
 node ./cats-one/scripts/workspace.mjs check --root . --agent codex
 ```
 
-Use `--agent claude` or `--agent all` to select other mirrors. Both commands are
-read-only: a fresh preview exits `0`, a check with drift exits `1`, and invalid
-input or conflicts exit `2`. Materialization is the next implementation phase;
-`sync` without `--dry-run` currently fails explicitly. See the
-[setup guide](docs/setup-guide.md) for requirements and conflict handling.
+Use `--agent claude` or `--agent all` to select other mirrors. Sync copies complete
+skills, records their ownership, preserves local edits and unrelated files, and
+recovers interrupted operations on the next sync. Repeating an unchanged sync
+does not rewrite files or metadata.
+
+`check` and `sync --dry-run` stay read-only. Sync/preview exit `0` on success;
+a check with drift exits `1`; invalid input or conflicts exit `2`. See the
+[setup guide](docs/setup-guide.md) for requirements, conflicts and recovery.
 
 This developer command is available from a checkout, outside the published npm
 payload. App installation, version selection and Desktop packaging remain owned

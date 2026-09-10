@@ -9,14 +9,17 @@ project-specific procedures that are too detailed for always-loaded instructions
   developer-workspace boundary.
 - Workspace planning follows [ADR-001](decisions/ADR-001-own-developer-workspace-bootstrap.md),
   [SPEC-001](specs/SPEC-001-developer-workspace-bootstrap.md), and
-  [PLAN-001](plans/PLAN-001-developer-workspace-bootstrap.md). Phase 1 implements
-  read-only inventory, check and sync preview; managed apply/recovery is pending.
+  [PLAN-001](plans/PLAN-001-developer-workspace-bootstrap.md). Inventory, managed
+  sync and interruption recovery are implemented; live-host discovery validation
+  remains separate from filesystem/CLI tests.
 - Track delivered versus planned work in [PROGRESS.md](../PROGRESS.md). Planning
   completion is not implementation completion.
 - The product entrypoint is `bin/cli.js`; developer inventory uses
   `scripts/workspace.mjs`. Tests use `node:test` in `test/` through `npm test`.
 - Read [setup](setup-guide.md) and [testing](testing.md) for available commands.
   `check` and `sync --dry-run` must never generate parent files or repair state.
+  `sync` recovers pending work before planning new changes; ownership/recovery
+  records are generated state, not files to maintain manually.
 - Sibling links in the planning package assume the four checkouts share a parent.
   They document ownership and do not authorize modifying a sibling repository.
 

@@ -46,6 +46,7 @@ export async function maybeStat(filename) {
 
 // Check every existing ancestor without following links, including when the
 // final destination is absent. Detect case aliases before they become writes.
+// root is the physical path returned by canonicalRoot, not a caller's alias.
 export async function inspectPath(root, relative, { optional = false, kind } = {}) {
   relativePath(relative);
   let current = root;
@@ -87,34 +88,35 @@ export async function listEntries(directory) {
 
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 
-export function fileSnapshot(content) {
+export function fileSnapshot(content, mode = 0o644) {
   const bytes = Buffer.from(content);
-  return { type: 'file', content: bytes, digest: `sha256:${hash(JSON.stringify(['file', hash(bytes)]))}` };
+  return { type: 'file', content: bytes, mode, digest: `sha256:${hash(JSON.stringify(['file', hash(bytes)]))}` };
 }
 
 export async function readSnapshot(root, relative) {
   const filename = await inspectPath(root, relative, { optional: true });
   if (!filename) return null;
   const stat = await fs.lstat(filename);
-  if (stat.isFile()) return fileSnapshot(await fs.readFile(filename));
+  if (stat.isFile()) return fileSnapshot(await fs.readFile(filename), stat.mode & 0o777);
   requireCondition(stat.isDirectory(), `Unsupported filesystem entry: ${relative}`);
   const entries = [];
   async function walk(directory, prefix) {
     for (const entry of await listEntries(directory)) {
       const name = prefix ? `${prefix}/${entry.name}` : entry.name;
       const child = path.join(directory, entry.name);
+      const mode = (await fs.lstat(child)).mode & 0o777;
       if (entry.isDirectory()) {
-        entries.push({ path: name, type: 'directory' });
+        entries.push({ path: name, type: 'directory', mode });
         await walk(child, name);
       } else {
-        entries.push({ path: name, type: 'file', content: await fs.readFile(child) });
+        entries.push({ path: name, type: 'file', content: await fs.readFile(child), mode });
       }
     }
   }
   await walk(filename, '');
   const digest = `sha256:${hash(JSON.stringify(['directory', entries.map(entry =>
     [entry.type, entry.path, entry.type === 'file' ? hash(entry.content) : null])]))}`;
-  return { type: 'directory', entries, digest };
+  return { type: 'directory', entries, mode: stat.mode & 0o777, digest };
 }
 
 export async function readJson(root, relative) {

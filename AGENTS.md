@@ -14,10 +14,10 @@ policy/supervision is future work. `--platform-only` skips the runtime.
 Developer workspace bootstrap is defined in
 [ADR-001](docs/decisions/ADR-001-own-developer-workspace-bootstrap.md), with
 [SPEC-001](docs/specs/SPEC-001-developer-workspace-bootstrap.md) and
-[PLAN-001](docs/plans/PLAN-001-developer-workspace-bootstrap.md). Phase 1 provides
-`scripts/workspace.mjs check` and `sync --dry-run` to inventory all four Cats
-checkouts and preview parent guidance/skills. Both require an explicit `--root`
-and write nothing. Materialization and recovery remain Phase 2 work.
+[PLAN-001](docs/plans/PLAN-001-developer-workspace-bootstrap.md). The checkout
+command `scripts/workspace.mjs sync` materializes parent guidance/skills and
+ownership with interruption recovery. `check` and `sync --dry-run` remain
+strictly read-only. All commands require an explicit `--root` and four members.
 
 - Canonical npm name: `@cats-inc/cats-one` (the unscoped `cats-one` npm name is
   a reserved alias stub).
@@ -40,9 +40,10 @@ and write nothing. Materialization and recovery remain Phase 2 work.
 
 ## Commands
 
-- Developer setup: `npm ci --include=dev` (includes the direct YAML parser).
+- Developer setup: `npm ci --include=dev` (includes direct YAML and writer-lock dependencies).
 - Test: `npm test` (node:test); see `docs/testing.md` for isolated workspace tests.
 - Workspace preview from this checkout: `node scripts/workspace.mjs sync --root .. --dry-run`.
+- Workspace apply from this checkout: `node scripts/workspace.mjs sync --root ..`.
 
 ## Pull Requests
 
@@ -71,7 +72,7 @@ and write nothing. Materialization and recovery remain Phase 2 work.
   once after a fresh checkout. Do not assume optional skills exist.
 - These existing helpers synchronize this repository's `skills/` source. A
   `-ProjectRoot` override selects another whole project's source and destination;
-  use `scripts/workspace.mjs` to preview the multi-repository workspace instead.
+  use `scripts/workspace.mjs` for the multi-repository workspace instead.
 
 ## Developer Workspace Boundaries
 
@@ -85,6 +86,9 @@ and write nothing. Materialization and recovery remain Phase 2 work.
   Desktop packaging, App selection and install/load; Apps owns utility source
   and versioned `.catsapp` artifacts. Do not move these responsibilities into
   the developer workspace command.
+- Workspace writes must keep full preflight, writer locking, durable journal
+  recovery, scoped cleanup and conflict protection. Do not add a force/blanket-clean
+  mode or remove a writer lock manually; see SPEC-001 for the recovery protocol.
 - Keep the existing launcher's argument-forwarding contract. Dependency/lockfile
   alignment and build/dev orchestration are separate work packages in PLAN-001.
 

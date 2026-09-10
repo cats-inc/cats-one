@@ -2,77 +2,78 @@
 
 ## Commands
 
-Prepare checkout dependencies with `npm ci --include=dev`, then run from cats-one:
+Prepare checkout dependencies with `npm ci --include=dev`, then run:
 
 ```sh
 npm test
 ```
 
-The suite uses Node's built-in `node:test` runner. To run only workspace behavior:
+For the complete workspace suites:
 
 ```sh
-node --test test/workspace-inventory.test.js test/workspace-cli.test.js
+node --test test/workspace-inventory.test.js test/workspace-cli.test.js test/workspace-apply.test.js
 ```
 
-CLI tests spawn Node child processes. Run in an environment that permits process
-creation; a sandbox `spawn EPERM` is not a test assertion failure.
+Tests use Node's built-in runner. CLI, crash and lock tests need permission to
+create child processes. A sandbox `spawn EPERM` is not a test assertion failure.
 
-## Workspace Coverage
+## Fixture and Fault Coverage
 
-Fixtures create four fake checkouts beneath OS-native temporary parents with
-spaces and Unicode. They do not use the user's real member sources, Git state,
-agent folders or product services. Each fixture is removed after the test.
+Fixtures use fake member manifests, Git metadata and canonical skills beneath
+OS-native temporary parents with spaces and Unicode. They never write the user's
+real member checkouts, agent folders or product services. Each fixture is removed
+after its test.
 
-| Acceptance | Evidence in the Phase 1 tests |
+| Acceptance | Evidence |
 | --- | --- |
-| AC-2 / AC-3 | Three maintenance skills, nested platform sources, empty roots, excluded proposals/product library, byte-preserving resources and routing text |
-| AC-4 | Different parent names and timestamps produce equal desired bytes/digests |
-| AC-6 | Missing/invalid members, worktrees, YAML/name errors, duplicate skills, unsafe ownership, links/junctions and case aliases |
-| AC-7 | Custom root conflicts, explicit adoption, managed local edits and stale-entry protection in the planner |
-| AC-8 | Full temporary-tree byte/mtime snapshots around preview/check/error paths, CLI exit codes and retained unselected-agent ownership |
+| AC-1 / AC-3 | Root guidance, full resource/empty-directory copies, ownership and executable permissions |
+| AC-2 | Three nested maintenance skills, empty roots, excluded proposals/product library |
+| AC-4 | Equal desired contents/digests under different parent paths/timestamps |
+| AC-5 | No-op byte/mtime snapshots, changed sources, new names, removal, adoption and missing mirrors |
+| AC-6 / AC-7 | Invalid identity/YAML/metadata, unsafe paths, links, custom files, local edits and unselected-agent preservation |
+| AC-8 | Entire temporary-tree snapshots around read-only paths, CLI exit codes and interrupted-state reporting |
+| AC-9 | Forced termination, repeated recovery, partial staging/trash, ownership commit, concurrent edits and separate-process writer exclusion |
 
-Phase 1 tests arrange managed files as fixtures to exercise planning; this is not
-evidence of implemented synchronization. Apply, rollback and interrupted-recovery
-tests remain Phase 2 work. Live parent-session skill discovery remains Phase 3.
+The test driver lives in `scripts/testing/workspace-sync-child.mjs`; production
+CLI flags never expose fault injection. Tests kill their own child process with
+SIGKILL after selected journal, stage, backup, replacement, ownership, commit and
+cleanup checkpoints. After confirming the child is dead, fixtures backdate its
+lock to exercise stale-lock acquisition without a 30-second test delay.
 
-Windows normally cannot represent two files differing only in name casing; that
-one resource-collision fixture is skipped there (and on case-insensitive macOS).
-The separate case-alias destination test runs on every platform. Directory links
-use Windows junctions and Unix symlinks.
+A subsequent sync must restore original outputs before retrying, or finish the
+committed cleanup, with no lost unrelated files. Recovery is also interrupted and
+resumed. A concurrent-edit test checks that an adopted output is not recorded as
+owned after it changes before commit.
 
-The CLI is also exercised through a linked ancestor directory, covering macOS
-temporary paths whose invocation name differs from the module's physical path.
+Windows and case-insensitive macOS skip a two-case-only-resource-filenames fixture.
+A separate destination-alias case runs everywhere. Windows skips Unix executable
+permission assertions; directory links use Windows junctions or Unix symlinks.
+CLI invocation through a linked ancestor covers macOS temporary-path aliases.
 
-## Launcher and Package Contract
+## Launcher, Payload and CI
 
-`test/cli.test.js` covers the existing launcher's resolution and health behavior.
-Workspace tooling must keep production dependency ranges and `files` unchanged.
-
-Inspect the npm payload without creating a tarball:
+`test/cli.test.js` retains the existing launcher's resolution/health contract.
+Production dependency ranges and npm's files allowlist remain unchanged.
 
 ```sh
 npm pack --dry-run --ignore-scripts --offline --json
 ```
 
-The payload is limited to `bin/`, README, LICENSE and npm's automatic
-`package.json`; no workspace script, config, template or generated file belongs
-in the published package.
+The payload must contain only `bin/cli.js`, README, LICENSE and npm's automatic
+`package.json`. Workspace tooling and generated files remain checkout-only.
 
-The existing Ubuntu `test` CI job installs dependencies, runs `npm test`, packs
-and installs a tarball in an isolated consumer, and verifies startup/shutdown.
-The separate `workspace` matrix runs the isolated workspace suites on
-Windows/macOS/Linux with Node 22 and 24; it does not start product services.
+The Ubuntu `test` CI job runs the full suite and isolated tarball
+resolution/startup/shutdown checks. The `workspace` matrix runs all three
+workspace suites on Windows/macOS/Linux with Node 22 and 24, without live services.
 
 ## Validation Record
 
-On 2026-09-11, the Windows full suite completed 62 tests: 61 passed and one
-case-sensitive-resource fixture skipped. That initial run included 47 workspace
-tests and 15 existing launcher tests. The added entrypoint-alias regression and
-all five CLI tests also passed on Windows after the path-resolution fix.
-Offline npm pack inspection contained only the four
-allowed files. A read-only preview of the real four-member workspace found the
-expected three canonical maintenance skills. CI results belong in the
-implementation PR. Author-run tests are automated validation, not independent
-code review. Live Codex/Claude discovery has not been validated by Phase 1.
+The Windows full suite passed 85 tests with two filesystem-specific skips
+(87 total, including 24 apply/recovery tests). It covers forced termination through
+ownership and cleanup, partial staging, repeated recovery, concurrent edits,
+unsafe recovery input and two-process writer exclusion. Offline npm pack inspection
+contains only the four allowed files. The implementation PR records OS-matrix results.
+Author-run tests are automated validation, not independent code review. Live
+parent-root Codex/Claude discovery remains a separate, unclaimed check.
 
 *Last updated: 2026-09-11*

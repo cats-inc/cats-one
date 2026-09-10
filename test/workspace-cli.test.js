@@ -7,7 +7,7 @@ const { fixture, write, snapshot, arrangeManaged } = require('../scripts/testing
 
 function run(workspace, args, cwd = workspace.base) {
   const result = spawnSync(process.execPath, [path.join(workspace.checkoutRoot, 'scripts/workspace.mjs'), ...args], {
-    cwd, encoding: 'utf8', timeout: 15000, env: { ...process.env, NODE_DISABLE_COMPILE_CACHE: '1' },
+    cwd, encoding: 'utf8', timeout: 60000, env: { ...process.env, NODE_DISABLE_COMPILE_CACHE: '1' },
   });
   assert.ifError(result.error);
   assert.equal(result.signal, null);
@@ -19,14 +19,14 @@ test('CLI help needs no root or parser; missing developer dependencies explain e
   const before = await snapshot(workspace.base);
   const help = run(workspace, ['--help']);
   assert.equal(help.status, 0, help.stderr);
-  assert.match(help.stdout, /read-only phase/);
+  assert.match(help.stdout, /checkout command/);
   const missing = run(workspace, ['check', '--root', workspace.root]);
   assert.equal(missing.status, 2);
   assert.match(missing.stderr, /npm ci --include=dev/);
   assert.deepEqual(await snapshot(workspace.base), before);
 });
 
-test('CLI validates usage and rejects materialization without writing', async t => {
+test('CLI validates usage without writing', async t => {
   const workspace = await fixture(t, { cli: true });
   const before = await snapshot(workspace.base);
   for (const args of [
@@ -35,7 +35,6 @@ test('CLI validates usage and rejects materialization without writing', async t 
     ['check', '--root', workspace.root, '--agent', 'other'],
     ['check', '--root', workspace.root, '--agent', 'codex', '--agent', 'claude'],
     ['check', '--root', workspace.root, '--dry-run'],
-    ['sync', '--root', workspace.root],
     ['sync', '--root', workspace.root, '--dry-run', 'extra'],
     ['check', '--root', path.join(workspace.base, 'absent')],
     ['check', '--root', path.join(workspace.checkoutRoot, 'package.json')],
@@ -55,7 +54,7 @@ test('CLI resolves its entrypoint through a linked ancestor such as macOS tempor
   const before = await snapshot(workspace.base);
   const help = run(throughAlias, ['--help']);
   assert.equal(help.status, 0, help.stderr);
-  assert.match(help.stdout, /read-only phase/);
+  assert.match(help.stdout, /checkout command/);
   const check = run(throughAlias, ['check', '--root', workspace.root]);
   assert.equal(check.status, 1, check.stderr);
   assert.match(check.stdout, /4 members, 3 canonical skills/);

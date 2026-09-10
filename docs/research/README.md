@@ -2,6 +2,12 @@
 
 > Track external sources and findings that inform decisions.
 
+## Current Entries
+
+| Date | Topic |
+| --- | --- |
+| 2026-09-11 | [Workspace writer lock and recovery boundary](2026-09-11-workspace-writer-lock.md) |
+
 ## Entry Template
 
 ```
@@ -15,4 +21,4 @@ Action Items:
 
 ---
 
-*Last updated: 2026-01-03
+*Last updated: 2026-09-11*

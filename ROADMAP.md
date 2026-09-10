@@ -21,9 +21,10 @@ Planning is recorded in [ADR-001](docs/decisions/ADR-001-own-developer-workspace
 - [x] Prepare the ownership proposal, behavior contract and implementation plan.
 - [x] Define all four members and root routing instructions in tracked inputs.
 - [x] Add read-only check/preview with conflict and provenance reporting.
-- [ ] Enable repeatable local synchronization after apply/recovery validation.
-- [ ] Preserve custom files, reconcile managed entries and verify failure recovery.
-- [ ] Validate Windows/macOS/Linux and document setup on another machine.
+- [x] Enable repeatable local synchronization with apply/recovery validation.
+- [x] Preserve custom files, reconcile managed entries and verify failure recovery.
+- [x] Cover Windows/macOS/Linux in CI and document setup on another machine.
+- [ ] Validate live parent-root discovery in an agent-host session.
 
 ## Separate Follow-ups
 

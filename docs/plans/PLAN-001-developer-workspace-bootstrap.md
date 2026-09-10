@@ -4,7 +4,7 @@
 
 | Field | Value |
 |-------|-------|
-| Status | In progress; Phase 1 implemented, managed apply/recovery next |
+| Status | Phases 1–2 implemented; live-host discovery validation pending |
 | Owner | cats-one maintainers |
 | Implementation assignment | Codex, requested by the repository owner on 2026-09-11 |
 | Review | Owner approved implementation; repository CI is the merge gate |
@@ -14,8 +14,8 @@
 [SPEC-001: Developer Workspace Bootstrap](../specs/SPEC-001-developer-workspace-bootstrap.md)
 defines the command and acceptance contract. [ADR-001](../decisions/ADR-001-own-developer-workspace-bootstrap.md)
 records the accepted ownership boundary. The owner requested implementation
-after the planning PR merged. Phase 1 supplies read-only inventory/planning;
-this status does not imply completion of managed apply or live-host discovery.
+after the planning PR merged. Inventory/planning and managed apply/recovery are
+implemented; live-host discovery remains an explicit, separate validation item.
 
 ## Overview
 
@@ -59,22 +59,22 @@ Cover AC-2, AC-4, AC-6 and the read-only part of AC-8 using isolated fixtures.
 
 ### Phase 2: Managed materialization and recovery
 
-- [ ] Materialize the in-memory root instructions and complete skill directory copies.
-- [ ] Add the workspace-specific ownership record, separate from repository
+- [x] Materialize the in-memory root instructions and complete skill directory copies.
+- [x] Add the workspace-specific ownership record, separate from repository
   helper manifests; retain per-agent records when syncing one target.
-- [ ] Implement all destination states in SPEC-001, including visible adoption,
+- [x] Implement all destination states in SPEC-001, including visible adoption,
   locally edited generated files, absent sources and scoped stale-entry cleanup.
-- [ ] Preflight all selected targets before any writes. Never execute the sibling
+- [x] Preflight all selected targets before any writes. Never execute the sibling
   sync helpers with a shared destination or mutate member checkouts.
-- [ ] Serialize writers and detect changes since inventory before replacement;
+- [x] Serialize writers and detect changes since inventory before replacement;
   another sync or concurrent source edit must not silently invalidate the plan.
-- [ ] Implement bounded staging, a durable recovery record and per-output
+- [x] Implement bounded staging, a durable recovery record and per-output
   replacement/rollback. Validate recovery paths with the same containment rules.
   Inject failures between replacement and metadata commit, including cleanup.
-- [ ] On a subsequent sync, report and recover an interrupted operation before
+- [x] On a subsequent sync, report and recover an interrupted operation before
   planning new changes. Check/preview must report pending recovery without
   performing it. Never delete an entire discovery directory.
-- [ ] Prove no-op synchronization leaves content and metadata unchanged.
+- [x] Prove no-op synchronization leaves content and metadata unchanged.
 
 **Deliverable**: Repeatable generation/update with conflict protection and
 recoverable failures. Cover AC-1, AC-3, AC-5, AC-7, AC-8 and AC-9.
@@ -83,29 +83,29 @@ recoverable failures. Cover AC-1, AC-3, AC-5, AC-7, AC-8 and AC-9.
 
 - [x] Introduce read-only fixture coverage in `test/` and a Windows/macOS/Linux
   Node 22/24 CI matrix during Phase 1, without sibling checkouts or live services.
-- [ ] Extend that matrix to managed apply and recovery once Phase 2 is available.
-- [ ] Use fake package manifests and canonical skills under OS-native temporary
+- [x] Extend that matrix to managed apply and recovery.
+- [x] Use fake package manifests and canonical skills under OS-native temporary
   roots. Exercise worktrees, different root names, Unicode/spaces, missing
   members, duplicate names, resource copies and linked paths where supported.
-- [ ] Verify the existing launcher contract and npm package allowlist still
+- [x] Verify the existing launcher contract and npm package allowlist still
   exclude checkout-only developer tooling and generated files.
-- [ ] Write executable setup/update/check instructions only after the command
+- [x] Write executable setup/update/check instructions only after the command
   exists. Explain how to resolve custom-root-file conflicts and rerun sync after
   pulling changes to any member's canonical skills.
 - [ ] Validate Codex discovery in a temporary parent-root session with generated
   test skills. For Claude, verify the selected filesystem mirror; claim live
   discovery only if that host has actually been tested.
-- [ ] Record commands, OS coverage and any unavailable live-host checks; obtain
-  implementation review according to the repository workflow.
+- [x] Record commands, configured OS coverage and unavailable live-host checks.
+- [x] Use the repository PR/CI merge workflow; author tests are not independent review.
 
 **Deliverable**: AC-10 and AC-11 evidence, current documentation and a completed
 SPEC-001 checklist. Fixtures never write to the user's real workspace or state.
 
 ## Files to Create or Modify During Implementation
 
-Phase 1 supplies the manifest, template, CLI, filesystem/inventory/planning
-modules and read-only tests. Managed apply is pending. The Node command is the
-portable interface; add shell wrappers only if they improve an actual workflow.
+The implementation supplies manifest/template, CLI, inventory/planning, safe
+filesystem writes, journal/recovery and behavioral/fault tests. The Node command
+is the portable interface; add shell wrappers only when useful to an actual workflow.
 
 | Path relative to cats-one | Action | Responsibility |
 |--------------------------|--------|----------------|
@@ -113,7 +113,7 @@ portable interface; add shell wrappers only if they improve an actual workflow.
 | `templates/workspace/AGENTS.md.template` | Create | Small parent-level routing document |
 | `scripts/workspace.mjs` | Create | CLI and explicit sync/check dispatch |
 | `scripts/shared/workspace-*.mjs` | Create as needed | Inventory, planning and managed apply |
-| `package.json`, `package-lock.json` | Update in Phase 1 | Direct developer parser dependency; retain production dependency ranges and npm files allowlist |
+| `package.json`, `package-lock.json` | Update in Phases 1–2 | Direct YAML/writer-lock development dependencies; retain production dependency ranges and npm files allowlist |
 | `test/workspace-*.test.js` | Create | Behavioral fixture coverage using node:test |
 | `.github/workflows/ci.yml` | Update | Isolated cross-platform workspace checks |
 | `docs/setup-guide.md`, `docs/testing.md`, `scripts/README.md` | Update | Actual developer commands and verified behavior |
@@ -134,6 +134,9 @@ They are not committed as copies in `cats-one` or another member repository.
   commits, enforce exact CLI versions or rewrite npm/App lockfiles.
 - Scope the implementation to Cats checkout composition. General workspace
   substrate work remains behind the runtime-owned API described by ADR-015.
+- Use fixed writer lease settings and the recovery/commit/trash protocol documented
+  in SPEC-001. Incomplete staging, rollback and cleanup must all survive process
+  termination. Never treat a partial ownership write as a completed operation.
 - Keep this command out of `bin/cli.js` because that entrypoint already forwards
   platform arguments. Developer tooling does not run implicitly during npm install
   or normal product startup.
@@ -180,6 +183,7 @@ published or change dependencies as an incidental part of skill synchronization.
 |------|--------|
 | 2026-09-11 | Planning PR #4 merged; owner requested implementation. |
 | 2026-09-11 | Implemented Phase 1: schema v1, routing template, direct yaml dependency, recursive inventory, ownership preflight and pure read-only action planning. |
-| 2026-09-11 | Windows full suite: 61 pass, one filesystem-dependent skip (47 workspace tests plus 15 launcher tests). Offline npm payload has only the four allowed files; real-parent preview finds three skills. Node 22/24 OS matrix added. Apply/recovery and live discovery remain pending. |
+| 2026-09-11 | Phase 1 Windows full suite: 61 pass, one filesystem-dependent skip. Offline npm payload has only the four allowed files; real-parent preview finds three skills. Node 22/24 OS matrix added. |
+| 2026-09-11 | Implemented managed copies/ownership, fixed writer locking, journal/commit markers, restartable rollback and trash cleanup. Windows full suite: 85 pass, two filesystem-specific skips (87 total, including 24 apply/recovery tests). Offline package inspection passes. See the implementation PR for OS-matrix results. Live-host discovery remains pending. |
 
 *Created: 2026-09-11*
