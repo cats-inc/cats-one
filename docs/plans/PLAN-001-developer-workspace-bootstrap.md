@@ -4,17 +4,18 @@
 
 | Field | Value |
 |-------|-------|
-| Status | Draft; documentation prepared, implementation not started |
+| Status | In progress; Phase 1 implemented, managed apply/recovery next |
 | Owner | cats-one maintainers |
-| Implementation assignment | Unassigned |
-| Review | Repository owner for proposed scope; implementation review to be assigned |
+| Implementation assignment | Codex, requested by the repository owner on 2026-09-11 |
+| Review | Owner approved implementation; repository CI is the merge gate |
 
 ## Related Spec
 
 [SPEC-001: Developer Workspace Bootstrap](../specs/SPEC-001-developer-workspace-bootstrap.md)
 defines the command and acceptance contract. [ADR-001](../decisions/ADR-001-own-developer-workspace-bootstrap.md)
-records the proposed ownership boundary. This draft plan accompanies the requested
-planning work; it does not label the draft spec as approved or authorize releases.
+records the accepted ownership boundary. The owner requested implementation
+after the planning PR merged. Phase 1 supplies read-only inventory/planning;
+this status does not imply completion of managed apply or live-host discovery.
 
 ## Overview
 
@@ -37,20 +38,20 @@ files are created in this phase.
 
 ### Phase 1: Manifest and read-only inventory
 
-- [ ] Add the four-member manifest and root routing template at the proposed
+- [x] Add the four-member manifest and root routing template at the proposed
   paths below. State schema/validation rules in the spec when implementation
   resolves details.
-- [ ] Add a Node.js checkout command with `--help`, explicit `--root`, selected
+- [x] Add a Node.js checkout command with `--help`, explicit `--root`, selected
   agent targets and unknown-argument rejection.
-- [ ] Validate member identity, `.git` directory/file checkouts, source roots and
+- [x] Validate member identity, `.git` directory/file checkouts, source roots and
   physical containment before any output planning.
-- [ ] Implement recursive skill discovery with leaf boundaries, proposal
+- [x] Implement recursive skill discovery with leaf boundaries, proposal
   exclusion, frontmatter validation, deterministic digests and collision errors.
-- [ ] Select an existing YAML parser and declare it as a direct development
+- [x] Select an existing YAML parser and declare it as a direct development
   dependency in cats-one with a matching lockfile update. Document explicit
   one-time setup; sync stays offline, never runs npm install and never imports
   a sibling implementation or dependency tree.
-- [ ] Implement a pure desired-state/action planner with read-only `check` and
+- [x] Implement a pure desired-state/action planner with read-only `check` and
   `sync --dry-run`, including empty and missing destination cases.
 
 **Deliverable**: Inspectable actions and exit codes with no filesystem writes.
@@ -58,7 +59,7 @@ Cover AC-2, AC-4, AC-6 and the read-only part of AC-8 using isolated fixtures.
 
 ### Phase 2: Managed materialization and recovery
 
-- [ ] Implement root instruction rendering and complete skill directory copying.
+- [ ] Materialize the in-memory root instructions and complete skill directory copies.
 - [ ] Add the workspace-specific ownership record, separate from repository
   helper manifests; retain per-agent records when syncing one target.
 - [ ] Implement all destination states in SPEC-001, including visible adoption,
@@ -80,8 +81,9 @@ recoverable failures. Cover AC-1, AC-3, AC-5, AC-7, AC-8 and AC-9.
 
 ### Phase 3: Cross-platform validation and developer handoff
 
-- [ ] Add fixture coverage to the existing `test/` suite and a Windows/macOS/Linux
-  CI job that does not need sibling checkouts, provider accounts or live services.
+- [x] Introduce read-only fixture coverage in `test/` and a Windows/macOS/Linux
+  Node 22/24 CI matrix during Phase 1, without sibling checkouts or live services.
+- [ ] Extend that matrix to managed apply and recovery once Phase 2 is available.
 - [ ] Use fake package manifests and canonical skills under OS-native temporary
   roots. Exercise worktrees, different root names, Unicode/spaces, missing
   members, duplicate names, resource copies and linked paths where supported.
@@ -101,9 +103,9 @@ SPEC-001 checklist. Fixtures never write to the user's real workspace or state.
 
 ## Files to Create or Modify During Implementation
 
-These are proposed implementation targets, not files supplied by this planning
-change. The Node command is the portable interface; shell wrappers can be added
-later only if they improve the actual workflow.
+Phase 1 supplies the manifest, template, CLI, filesystem/inventory/planning
+modules and read-only tests. Managed apply is pending. The Node command is the
+portable interface; add shell wrappers only if they improve an actual workflow.
 
 | Path relative to cats-one | Action | Responsibility |
 |--------------------------|--------|----------------|
@@ -176,6 +178,8 @@ published or change dependencies as an incidental part of skill synchronization.
 
 | Date | Update |
 |------|--------|
-| 2026-09-11 | Inspected the post-bootstrap cats-one checkout and four-repository boundaries; prepared this planning package. Implementation phases remain unstarted. |
+| 2026-09-11 | Planning PR #4 merged; owner requested implementation. |
+| 2026-09-11 | Implemented Phase 1: schema v1, routing template, direct yaml dependency, recursive inventory, ownership preflight and pure read-only action planning. |
+| 2026-09-11 | Windows full suite: 61 pass, one filesystem-dependent skip (47 workspace tests plus 15 launcher tests). Offline npm payload has only the four allowed files; real-parent preview finds three skills. Node 22/24 OS matrix added. Apply/recovery and live discovery remain pending. |
 
 *Created: 2026-09-11*

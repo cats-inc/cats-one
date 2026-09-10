@@ -39,7 +39,7 @@ Use [000-template.md](./000-template.md) as the starting point for new ADRs.
 | ADR | Title | Status | Date |
 |-----|-------|--------|------|
 | [000-template](./000-template.md) | Template | - | - |
-| [ADR-001](./ADR-001-own-developer-workspace-bootstrap.md) | Own Cats developer workspace bootstrap in cats-one | Proposed | 2026-09-11 |
+| [ADR-001](./ADR-001-own-developer-workspace-bootstrap.md) | Own Cats developer workspace bootstrap in cats-one | Accepted | 2026-09-11 |
 <!-- Add new ADRs above this line -->
 
 ## For AI Agents

@@ -11,12 +11,13 @@ serves `CATS_RUNTIME_BASE_URL`), waits for its `/health`, then launches
 started dies, it tears the platform down and exits non-zero; restart
 policy/supervision is future work. `--platform-only` skips the runtime.
 
-Developer workspace bootstrap is proposed in
+Developer workspace bootstrap is defined in
 [ADR-001](docs/decisions/ADR-001-own-developer-workspace-bootstrap.md), with
 [SPEC-001](docs/specs/SPEC-001-developer-workspace-bootstrap.md) and
-[PLAN-001](docs/plans/PLAN-001-developer-workspace-bootstrap.md). It would assemble
-parent-level instructions and maintenance skills for the four Cats checkouts.
-The command is not implemented; do not present planned commands as available.
+[PLAN-001](docs/plans/PLAN-001-developer-workspace-bootstrap.md). Phase 1 provides
+`scripts/workspace.mjs check` and `sync --dry-run` to inventory all four Cats
+checkouts and preview parent guidance/skills. Both require an explicit `--root`
+and write nothing. Materialization and recovery remain Phase 2 work.
 
 - Canonical npm name: `@cats-inc/cats-one` (the unscoped `cats-one` npm name is
   a reserved alias stub).
@@ -39,7 +40,9 @@ The command is not implemented; do not present planned commands as available.
 
 ## Commands
 
-- Test: `npm test` (node:test, no dependencies needed)
+- Developer setup: `npm ci --include=dev` (includes the direct YAML parser).
+- Test: `npm test` (node:test); see `docs/testing.md` for isolated workspace tests.
+- Workspace preview from this checkout: `node scripts/workspace.mjs sync --root .. --dry-run`.
 
 ## Pull Requests
 
@@ -68,13 +71,13 @@ The command is not implemented; do not present planned commands as available.
   once after a fresh checkout. Do not assume optional skills exist.
 - These existing helpers synchronize this repository's `skills/` source. A
   `-ProjectRoot` override selects another whole project's source and destination;
-  it is not the proposed multi-repository workspace aggregation command.
+  use `scripts/workspace.mjs` to preview the multi-repository workspace instead.
 
-## Developer Workspace Planning Boundaries
+## Developer Workspace Boundaries
 
 - Keep workspace definitions/templates in version control here and generated
   parent outputs outside member repositories. Read `docs/AGENT-GUIDE.md` and
-  the linked proposal before implementing the workspace feature.
+  the linked spec/plan before changing the workspace feature.
 - Member instructions and canonical skills remain member-owned. Runtime's
   maintenance source is `developer-skills/`; its separate `skills/` library is
   product-delivered and must not be aggregated as developer instructions.

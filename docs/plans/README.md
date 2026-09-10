@@ -47,11 +47,11 @@ Use [000-template.md](./000-template.md) as the starting point for new plans.
 | Plan | Title | Status | Related Spec |
 |------|-------|--------|--------------|
 | [000-template](./000-template.md) | Template | - | - |
-| [PLAN-001](./PLAN-001-developer-workspace-bootstrap.md) | Developer workspace bootstrap | Draft; implementation not started | [SPEC-001](../specs/SPEC-001-developer-workspace-bootstrap.md) |
+| [PLAN-001](./PLAN-001-developer-workspace-bootstrap.md) | Developer workspace bootstrap | Phase 1 implemented; Phase 2 next | [SPEC-001](../specs/SPEC-001-developer-workspace-bootstrap.md) |
 <!-- Add new plans above this line -->
 
-PLAN-001 was drafted with SPEC-001 at the owner's request for planning. Its
-presence does not mean the draft specification is approved or implemented.
+The owner requested implementation after the planning PR merged. PLAN-001 now
+tracks the delivered read-only phase and pending managed apply/recovery work.
 
 ## For AI Agents
 

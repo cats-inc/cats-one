@@ -8,13 +8,13 @@ health, and launches platform with forwarded arguments. It coordinates child
 shutdown and fails when a runtime it started exits unexpectedly.
 
 Package resolution uses installed npm dependencies, not arbitrary sibling source
-imports. The current launcher does not create a source workspace or include a
-developer workspace command. The repository-local skill helpers operate on one
+imports. Developer workspace tooling has its own checkout entrypoint at
+`scripts/workspace.mjs`. The repository-local skill helpers operate on one
 project's `skills/` and discovery directories.
 
-## Proposed Developer Workspace
+## Developer Workspace
 
-[ADR-001](decisions/ADR-001-own-developer-workspace-bootstrap.md) proposes a second,
+[ADR-001](decisions/ADR-001-own-developer-workspace-bootstrap.md) defines a second,
 explicit developer entrypoint in the `cats-one` checkout. Tracked configuration
 and templates describe the source workspace; generated files live in its parent.
 
@@ -31,15 +31,18 @@ cats-one tracked manifest + root instruction template
           `-- .cats-workspace/      (ownership/recovery metadata)
 ```
 
-The diagram is proposed behavior. These workspace outputs and the sync command
-are not supplied by this planning change. [SPEC-001](specs/SPEC-001-developer-workspace-bootstrap.md)
-defines the initial full-member profile, source discovery and conflict contract.
+The diagram describes the eventual materialized workspace. Phase 1 implements
+manifest validation, canonical inventory and template rendering in memory, then
+passes observed destinations to a pure action planner. `check` and
+`sync --dry-run` report that plan without writes. Managed apply/recovery remains
+Phase 2 work. [SPEC-001](specs/SPEC-001-developer-workspace-bootstrap.md) defines
+the schemas, full-member profile, discovery and conflict contract.
 
 ## Repository Responsibilities
 
 | Repository | Responsibility |
 |------------|----------------|
-| cats-one | Current npm launch orchestration; proposed Cats development member definition, root guidance and skill aggregation |
+| cats-one | npm launch orchestration; Cats development member definition, root guidance and skill inventory/planning |
 | cats-runtime | Provider execution and telemetry; runtime-delivered skills and general product workspace-substrate tools; its own maintenance skills |
 | cats-platform | Product/Desktop host, App SDK, App selection/install/load and Desktop packaging; its own maintenance skills |
 | cats-apps | Official utility source and individually versioned `.catsapp` builds; its own maintenance skills when added |
@@ -47,7 +50,7 @@ defines the initial full-member profile, source discovery and conflict contract.
 The Cats developer profile does not supersede
 [runtime ADR-015](../../cats-runtime/docs/decisions/015-own-workspace-substrate-tools-in-cats-runtime.md).
 Generic project initialization, collaboration scaffolding and product-user
-workspace APIs remain runtime-owned. This proposal assembles the existing Cats
+workspace APIs remain runtime-owned. This developer feature composes the existing Cats
 source checkouts and their parent entrypoints only.
 
 Recognizing `cats-apps` in the development manifest does not make its private npm
@@ -59,7 +62,7 @@ artifacts; its App bundle lock remains authoritative for Desktop distribution.
 Three different inputs have different owners:
 
 - `cats-one`'s npm manifest/lock choose its installed launcher dependencies.
-- The proposed developer manifest describes member paths and maintenance sources.
+- The developer manifest describes member paths and maintenance sources.
 - Platform's Desktop App lock chooses exact App artifact versions and hashes.
 
 Synchronizing developer instructions updates none of the package/release locks.

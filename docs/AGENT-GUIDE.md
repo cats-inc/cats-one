@@ -5,18 +5,18 @@ project-specific procedures that are too detailed for always-loaded instructions
 
 ## Project Context
 
-- Read [architecture](architecture.md) for the current npm launcher and proposed
+- Read [architecture](architecture.md) for the current npm launcher and
   developer-workspace boundary.
 - Workspace planning follows [ADR-001](decisions/ADR-001-own-developer-workspace-bootstrap.md),
   [SPEC-001](specs/SPEC-001-developer-workspace-bootstrap.md), and
-  [PLAN-001](plans/PLAN-001-developer-workspace-bootstrap.md). These are proposals;
-  implementation has not started.
+  [PLAN-001](plans/PLAN-001-developer-workspace-bootstrap.md). Phase 1 implements
+  read-only inventory, check and sync preview; managed apply/recovery is pending.
 - Track delivered versus planned work in [PROGRESS.md](../PROGRESS.md). Planning
   completion is not implementation completion.
-- The current entrypoint is `bin/cli.js`; tests use `node:test` in `test/` through
-  `npm test`. Generic setup/testing templates are not evidence of extra scripts.
-- Repository-local skill helpers exist, but the parent-level workspace command
-  does not. Do not generate parent files during documentation-only planning.
+- The product entrypoint is `bin/cli.js`; developer inventory uses
+  `scripts/workspace.mjs`. Tests use `node:test` in `test/` through `npm test`.
+- Read [setup](setup-guide.md) and [testing](testing.md) for available commands.
+  `check` and `sync --dry-run` must never generate parent files or repair state.
 - Sibling links in the planning package assume the four checkouts share a parent.
   They document ownership and do not authorize modifying a sibling repository.
 

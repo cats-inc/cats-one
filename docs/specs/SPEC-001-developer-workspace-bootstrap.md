@@ -4,9 +4,9 @@
 
 | Field | Value |
 |-------|-------|
-| Status | Draft; planning complete, implementation not started |
+| Status | In progress; Phase 1 read-only inventory/planning implemented |
 | Owner | cats-one maintainers |
-| Review | Proposed scope for the repository owner |
+| Review | Owner requested implementation; automated validation recorded in PLAN-001 |
 | Decision | [ADR-001](../decisions/ADR-001-own-developer-workspace-bootstrap.md) |
 | Plan | [PLAN-001](../plans/PLAN-001-developer-workspace-bootstrap.md) |
 
@@ -19,8 +19,9 @@ parent directory, which need not be a Git repository. Every machine can rebuild
 the same setup from the same source content without copying machine-specific
 agent folders between computers.
 
-All paths and commands described as proposed below are implementation targets;
-this documentation change does not create the command or generated workspace.
+Phase 1 supplies the tracked inputs and read-only command. Requirements describing
+materialization, ownership writes and recovery remain Phase 2 targets; generated
+parent files and live-host discovery are not delivered by this phase.
 
 ## Goals
 
@@ -57,7 +58,7 @@ this documentation change does not create the command or generated workspace.
 
 ### FR-1: Tracked workspace definition
 
-The proposed `config/developer-workspace.json` in `cats-one` declares a versioned
+The tracked `config/developer-workspace.json` in `cats-one` declares a versioned
 schema, stable member IDs, relative member paths and canonical skill roots:
 
 | Member ID and relative path | Expected package name | Maintenance-skill root |
@@ -82,15 +83,21 @@ The manifest and root instruction template resolve relative to the executing
 resolve relative to the explicit workspace root, and must remain within it.
 Verify the executing checkout is the declared `cats-one` member.
 
+Schema v1 has exactly `schemaVersion: 1` and `members`. Each member has exactly
+`id`, `path`, `packageName`, `skillRoots` (an array), and `role` (a nonempty,
+single-line Markdown table cell). It requires each row above once, with its fixed
+path/package and single approved source root. Unknown fields, versions, duplicate
+IDs and custom/overlapping layouts fail. `role` supplies the routing template.
+Checkout validation reads `.git` or its `gitdir:` pointer and a valid `HEAD`;
+it neither runs Git nor compares branches/versions.
+
 ### FR-2: Explicit command and scope
 
-Proposed interface, run from the workspace parent after preparing the developer
+Available interface, run from the workspace parent after preparing the developer
 dependencies in the cats-one checkout:
 
 ```sh
-# Proposed commands; scripts/workspace.mjs does not exist yet.
 node ./cats-one/scripts/workspace.mjs sync --root . --agent codex --dry-run
-node ./cats-one/scripts/workspace.mjs sync --root . --agent codex
 node ./cats-one/scripts/workspace.mjs check --root . --agent codex
 ```
 
@@ -99,20 +106,22 @@ node ./cats-one/scripts/workspace.mjs check --root . --agent codex
 - Support `codex`, `claude` and `all`; default to `codex`. Codex writes
   `.agents/skills`, Claude writes `.claude/skills`, and `all` targets both.
   Other agents may consume a shared path, but are not separately certified here.
-- `sync` creates or updates the selected outputs; the same operation handles a
-  fresh workspace, so a separate `init` command is unnecessary.
+- Phase 2 will enable `sync` without `--dry-run` to create/update outputs,
+  including a fresh workspace. Phase 1 rejects that invocation with exit `2` and
+  an explicit materialization-not-implemented message.
 - `sync --dry-run` and `check` are strictly read-only, including when outputs or
   ownership metadata are absent. Neither creates directories or temporary files.
 - Exit codes: `0` for a successful sync/preview or an in-sync check; `1` for a
   valid check that found drift; `2` for invalid input, conflicts or I/O failure.
 - Report create/update/remove/unchanged/conflict actions with source ownership.
-  `--help` is available without `--root`. Unknown arguments fail explicitly.
+  `--help` is available without `--root` or the parser dependency. Unknown or
+  repeated arguments fail explicitly; `--dry-run` is only accepted with `sync`.
 - The executable is a developer command from a checkout. The existing `cats-one`
   npm bin keeps forwarding platform arguments and is not the dispatch surface.
 
 ### FR-3: Root routing instructions
 
-Render `<root>/AGENTS.md` from the proposed tracked
+Render `<root>/AGENTS.md` from the tracked
 `templates/workspace/AGENTS.md.template`. Include a generated-file notice, the
 source template, the resync command, and the four members' responsibilities.
 
@@ -133,6 +142,12 @@ Generate a compact routing document rather than concatenating all instructions.
 It applies to the conversation opened at the parent; do not claim that merely
 changing a shell command's working directory reloads an active agent's skills.
 Repository-local sessions continue to use each repository's local setup.
+
+The template has exactly one `{{MEMBERS}}` and one `{{SKILLS}}` placeholder;
+unknown placeholders fail. Tables include member responsibilities and each
+skill's relative canonical origin. Template CRLF is normalized to LF; skill
+bytes are not normalized. Phase 1 renders in memory and provides a preview-refresh
+command in the notice; Phase 2 must update that notice when apply becomes available.
 
 ### FR-4: Canonical skill discovery and materialization
 
@@ -157,11 +172,19 @@ Snapshot observed on 2026-09-11:
 - Platform: `a2a-handoff` and `project-memory-sync` under `skills/orchestration/`.
 - One and Apps: declared `skills/` roots with no skills yet.
 
-This snapshot guides fixtures; production discovery must remain data-driven.
+This snapshot guides fixtures; production discovery remains data-driven.
+
+Phase 1 uses cats-one's direct `yaml` development dependency with strict YAML
+1.2 core parsing. Duplicate keys, unknown tags, aliases and malformed frontmatter
+fail; additional metadata fields are allowed. The portable v1 name is 1–64 ASCII
+lowercase letters/digits separated by single hyphens, excluding Windows device
+names. Description must be a nonempty string of at most 1024 characters; folded
+and literal block strings are supported. A UTF-8 BOM and CRLF delimiters are valid.
+Skill snapshots include file bytes, nested resources and empty directories.
 
 ### FR-5: Ownership and update rules
 
-Maintain one proposed `<root>/.cats-workspace/managed.json` record for this
+Maintain one `<root>/.cats-workspace/managed.json` record for this
 workspace tool, separate from all existing repository sync manifests. Store a
 schema version, generated relative paths, agent target, owning member, relative
 canonical source and last-applied content digests. Source/template content
@@ -169,6 +192,27 @@ digests determine freshness; timestamps and absolute machine paths do not.
 
 Treat metadata as untrusted input: validate every path and owner before use,
 reject malformed records, and never let a record authorize arbitrary deletion.
+
+Phase 1 reads this contract for previews; it does not create ownership records.
+The v1 object has exactly `schemaVersion: 1` and `entries`. Each entry has exactly
+`path`, `agent`, `member`, `source`, and `digest`:
+
+- Root guidance: path `AGENTS.md`, agent `shared`, member `cats-one`, source
+  `templates/workspace/AGENTS.md.template`.
+- Skills: path `.agents/skills/<name>` or `.claude/skills/<name>`, matching agent
+  `codex` or `claude`, a known member, and a member-relative source below its
+  canonical root whose leaf matches the name. Proposal paths are invalid.
+- Digests use `sha256:` followed by 64 lowercase hex digits. Unknown fields,
+  versions, duplicate paths and invalid provenance are errors.
+
+The digest is SHA-256 over a UTF-8 JSON tuple. A file tuple is
+`["file", SHA256(bytes)]`; a directory tuple is `["directory", entries]`,
+where entries are sorted depth-first by exact name, each
+`[type, relativePath, SHA256(bytes)]` (or `null` for directory content).
+Hashes inside the tuple are lowercase hex. Names, types, empty directories and
+bytes determine equality; modification times, permissions and absolute paths
+do not. Phase 2 must preserve required resource executable permissions when
+materializing copies, separately from content freshness.
 
 | Existing destination | Planned behavior |
 |----------------------|------------------|
@@ -198,6 +242,10 @@ The first implementation must test this failure path before claiming completion.
 Serialize apply operations with a workspace-local writer lock, and recheck that
 sources/destinations still match the previewed inventory before replacing them.
 Read-only commands report an active/interrupted apply without repairing it.
+Phase 1 reserves `.cats-workspace/writer.lock` and
+`.cats-workspace/recovery.json`; the presence of either fails with exit `2`.
+Phase 2 must specify and test their durable apply/recovery contents before enabling
+writes. Neither reserved file is created by Phase 1.
 
 ### FR-6: Path and source protection
 
@@ -249,11 +297,11 @@ command's write scope. Tests use isolated temporary workspaces.
 
 ## Open Questions
 
-No unresolved product choice is needed to implement this proposed first slice.
+No unresolved product choice is needed for the approved first slice.
 Custom/partial checkout profiles, npm distribution and cross-repository build/dev
 commands are deferred scope, not hidden prerequisites. Parser selection and
-apply-recovery mechanics must be settled and documented in PLAN-001's first
-implementation phase.
+read-only schemas are settled above. Durable apply/recovery mechanics must be
+finalized and tested in Phase 2 before materialization is enabled.
 
 ## References
 

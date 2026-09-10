@@ -10,6 +10,26 @@ permissions:
   contents: read
 
 jobs:
+  workspace:
+    name: workspace (${{ matrix.os }}, Node ${{ matrix.node }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node: ['22', '24']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install developer dependencies
+        run: npm ci --include=dev
+      - name: Test workspace without sibling checkouts or services
+        run: node --test test/workspace-inventory.test.js test/workspace-cli.test.js
+
   test:
     runs-on: ubuntu-latest
     steps:
