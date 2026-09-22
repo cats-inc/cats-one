@@ -9,6 +9,7 @@
 | Developer workspace planning | Accepted for implementation | ADR-001 accepted; SPEC-001 and PLAN-001 track phased delivery |
 | Developer workspace command | Phases 1–2 implemented | Inventory, check/preview, managed copies/ownership and interruption recovery |
 | Launcher dependency alignment | Implemented for 0.1.22 | Platform 0.3.4 and Runtime 0.1.25 resolved from npm; isolated packed-consumer startup and bootstrap passed |
+| Unscoped npm alias release tooling | Implemented | Generated matching version/exact dependency, paired publish workflow and release checklist |
 | Cross-repository build/dev and release coordination | Deferred | Outside the first workspace synchronization slice |
 
 ## WP-1: Developer Workspace Bootstrap

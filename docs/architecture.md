@@ -81,6 +81,12 @@ CI also checks the packed launcher's package resolution and isolated startup.
 A successful workspace sync does not establish release compatibility between
 independently checked-out revisions.
 
+The unscoped `cats-one` npm package is a separate public entrypoint. Its generated
+manifest takes the root version and pins `@cats-inc/cats-one` to that exact
+version. The npm publish workflow releases the canonical package and alias
+together; both registry versions must be verified. See [deployment](deployment.md)
+for the release checklist and recovery of an omitted alias.
+
 ## Delivery
 
 See [PLAN-001](plans/PLAN-001-developer-workspace-bootstrap.md) for inventory,

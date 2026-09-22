@@ -75,6 +75,12 @@ npm pack --dry-run --ignore-scripts --offline --json
 The payload must contain only `bin/cli.js`, README, LICENSE and npm's automatic
 `package.json`. Workspace tooling and generated files remain checkout-only.
 
+`test/npm-alias.test.js` checks that the unscoped alias automatically follows the
+canonical version (including prereleases), pins its exact dependency, and forwards
+arguments, environment, stdout/stderr and exit status to a fixture launcher.
+Prepare its separate four-file payload with `node scripts/prepare-npm-alias.mjs`;
+the [release guide](deployment.md) requires registry and `npx cats-one` verification.
+
 The Ubuntu `test` CI job runs the full suite and isolated tarball
 resolution/startup/shutdown checks. The `workspace` matrix runs all four
 workspace suites on Windows/macOS/Linux with Node 22 and 24, without live services.

@@ -13,6 +13,11 @@ all CLI arguments to the platform.
 > is a thin alias that forwards to this canonical package, so `npx cats-one`
 > works too.
 
+Both npm names are released at the same version. The alias pins that exact
+canonical version; `npx cats-one` displays the alias's own package version in
+its installation prompt. Maintainers must publish and verify both names using
+the [npm release guide](docs/deployment.md).
+
 ## Requirements
 
 - Node.js 22+

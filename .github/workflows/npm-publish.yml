@@ -11,6 +11,11 @@ on:
         options:
           - next
           - latest
+      alias_only:
+        description: 'Recover a missing unscoped alias after the canonical version is already published'
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -40,5 +45,19 @@ jobs:
       - name: Run test gate
         run: npm test
 
-      - name: Publish package
+      - name: Prepare matching unscoped alias
+        run: node scripts/prepare-npm-alias.mjs
+
+      - name: Publish canonical package
+        if: ${{ !inputs.alias_only }}
+        run: npm publish --tag "${{ inputs.dist_tag }}"
+
+      - name: Verify canonical version before alias-only recovery
+        if: ${{ inputs.alias_only }}
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          test "$(npm view "@cats-inc/cats-one@$VERSION" version)" = "$VERSION"
+
+      - name: Publish unscoped alias
+        working-directory: .npm/alias
         run: npm publish --tag "${{ inputs.dist_tag }}"

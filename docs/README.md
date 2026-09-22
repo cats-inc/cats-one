@@ -42,7 +42,7 @@ Update the affected guide when its feature is implemented.
 | [API](api.md) | Template | API documentation scaffold |
 | [Setup](setup-guide.md) | Current | Developer dependencies, sync/check, conflicts and recovery |
 | [Testing](testing.md) | Current | Fixture/fault coverage, CLI exit codes, package contract and CI |
-| [Deployment](deployment.md) | Template | Deployment scaffold |
+| [Deployment](deployment.md) | Current | Coordinated scoped/unscoped npm release, verification and alias recovery |
 | [Security](security-guidelines.md) | Template | Security documentation scaffold |
 | [MCP](mcp-config.md) | Template | Optional MCP integration guidance |
 | [Services](services.md) | Template | Service registry scaffold |
