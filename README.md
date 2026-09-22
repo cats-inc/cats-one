@@ -6,7 +6,7 @@ Bootstrap installer entrypoint for the Cats ecosystem.
 [`@cats-inc/cats-runtime`](https://github.com/cats-inc/cats-runtime) (unless one is
 already serving), waits for its `/health` endpoint, then launches
 [`@cats-inc/cats-platform`](https://github.com/cats-inc/cats-platform), forwarding
-all CLI arguments to the platform.
+Platform CLI options to the platform.
 
 > **Status**: published. `@cats-inc/cats-one` and its dependencies are live on
 > npm. The unscoped [`cats-one`](https://www.npmjs.com/package/cats-one) package
@@ -48,7 +48,19 @@ npx @cats-inc/cats-one
   launcher shuts the platform down and exits non-zero (automatic restart /
   supervision is future work).
 - `--platform-only` skips runtime orchestration entirely.
-- Ctrl+C / SIGTERM stops both processes.
+- Once Platform is ready, an interactive terminal opens its page in the default
+  browser and shows the URL. Press `o` to open it again, or `q` / Ctrl+C to stop.
+- `--no-open` skips the initial browser launch while keeping the `o` shortcut.
+- Shutdown waits for Platform cleanup, then stops only the Runtime this launcher
+  started. An already running Runtime is left alone. SIGTERM follows the same
+  cleanup path; unresponsive owned children have a 15-second fallback per child.
+- CI, non-TTY, app-managed, and JSON/silent sessions do not launch browsers or
+  take over terminal input. `--help` exits without starting either service.
+
+Standalone `npx @cats-inc/cats-platform` and `npx @cats-inc/cats-runtime` have
+the same browser and keyboard behavior. Runtime opens Setup when bootstrapping,
+otherwise its dashboard. Browser launch failure leaves the URL available for
+manual opening and the service running.
 
 ## Developer Workspace
 

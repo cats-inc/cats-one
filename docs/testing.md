@@ -62,6 +62,11 @@ of failures from either command.
 ## Launcher, Payload and CI
 
 `test/cli.test.js` retains the existing launcher's resolution/health contract.
+`test/launcher-lifecycle.test.js` uses real fixture child processes and temporary
+homes to verify ordered IPC/EOF cleanup, repeated signals, startup cancellation,
+child failure, forced-stop timeout, and preservation of an already running Runtime.
+Standalone browser/keyboard integration lives in the Runtime and Platform CLI
+entrypoint suites; their test-only terminal preloads intercept OS browser openers.
 An isolated HTTP fixture checks authenticated health probes and rejected keys;
 readiness polling must authenticate each retry.
 The 0.1.22 dependency alignment requires Platform `^0.3.4` and Runtime

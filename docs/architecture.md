@@ -9,6 +9,15 @@ shutdown and fails when a runtime it started exits unexpectedly.
 Health probes authenticate with `CATS_RUNTIME_API_KEY` when configured, including
 both reuse checks and startup polling; child services receive the same key.
 
+Platform owns the interactive terminal and opens its browser URL after its own
+listener is ready. Runtime children are app-managed and never open a second page.
+The launcher requests Platform cleanup through private Node IPC, waits for its
+exit, then ends its Runtime child's private stdin pipe. Both services reuse their
+existing shutdown routines; a reused Runtime is outside the launcher's ownership.
+Normal exit, startup cancellation and child failure share this bounded shutdown.
+See [SPEC-002](specs/SPEC-002-interactive-cli-startup.md) for the three-entrypoint
+contract and terminal/automation opt-outs.
+
 Package resolution uses installed npm dependencies, not arbitrary sibling source
 imports. Developer workspace tooling has its own checkout entrypoint at
 `scripts/workspace.mjs`. The repository-local skill helpers operate on one

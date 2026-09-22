@@ -2,7 +2,11 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { createServer } = require('node:http');
 
-const { pickPlatformBin, pickRuntimeBin, resolveRuntimeEndpoint, waitForHealth, isHealthy } = require('../bin/cli.js');
+const { pickPlatformBin, pickRuntimeBin, resolveRuntimeEndpoint, waitForHealth, isHealthy, runLauncher } = require('../bin/cli.js');
+
+test('help exits without resolving or starting either service', async () => {
+  assert.equal(await runLauncher({ args: ['--help'], resolveBin: () => assert.fail('must not start') }), 0);
+});
 
 test('accepts a string bin declaration', () => {
   assert.equal(pickPlatformBin({ bin: 'build/server/index.js' }), 'build/server/index.js');

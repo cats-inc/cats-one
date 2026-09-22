@@ -21,6 +21,12 @@ The alias contains no duplicate Runtime/Platform orchestration implementation.
 
 ## Normal release
 
+The interactive CLI change in SPEC-002 also updates Runtime and Platform.
+Publish their implementations first, then raise cats-one's minimum dependency
+versions and regenerate its lockfile before publishing the launcher. The new
+Platform terminal and private shutdown channel must be present in the published
+dependency; sibling source checkouts are not a substitute for this release step.
+
 1. If Runtime/Platform dependency ranges change, publish those versions first,
    then regenerate and verify the root lockfile against npm.
 2. Bump root `package.json` and `package-lock.json` together. Run relevant tests;

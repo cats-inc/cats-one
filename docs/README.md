@@ -2,6 +2,10 @@
 
 ## Current Work
 
+[Interactive npm entrypoints](specs/SPEC-002-interactive-cli-startup.md) specifies
+automatic browser opening, o/q controls, terminal ownership and graceful shutdown
+across cats-one, Platform and Runtime.
+
 Developer workspace inventory, managed sync and interruption recovery are
 implemented. `check` and `sync --dry-run` continue to report without writes.
 Start with [setup](setup-guide.md); the documents below distinguish delivered
@@ -9,6 +13,9 @@ filesystem/CLI behavior from remaining live-host discovery validation.
 
 | Document | Status | Purpose |
 |----------|--------|---------|
+| [ADR-002](decisions/ADR-002-interactive-cli-lifecycle.md) | Accepted | Terminal ownership and cross-platform graceful shutdown |
+| [SPEC-002](specs/SPEC-002-interactive-cli-startup.md) | Implemented; unpublished | Browser opening and o/q controls for all three npm entrypoints |
+| [PLAN-002](plans/PLAN-002-interactive-cli-startup.md) | Locally verified; unpublished | Focused checks and coordinated publication follow-up |
 | [ADR-001](decisions/ADR-001-own-developer-workspace-bootstrap.md) | Accepted | Why cats-one owns Cats development composition and root setup |
 | [SPEC-001](specs/SPEC-001-developer-workspace-bootstrap.md) | Phases 1–2 implemented | Member/source scope, sync/check behavior and acceptance criteria |
 | [PLAN-001](plans/PLAN-001-developer-workspace-bootstrap.md) | In progress | Implementation phases, verification and separate follow-ups |

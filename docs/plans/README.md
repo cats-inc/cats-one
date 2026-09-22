@@ -48,6 +48,7 @@ Use [000-template.md](./000-template.md) as the starting point for new plans.
 |------|-------|--------|--------------|
 | [000-template](./000-template.md) | Template | - | - |
 | [PLAN-001](./PLAN-001-developer-workspace-bootstrap.md) | Developer workspace bootstrap | Phases 1–2 implemented; live discovery pending | [SPEC-001](../specs/SPEC-001-developer-workspace-bootstrap.md) |
+| [PLAN-002](./PLAN-002-interactive-cli-startup.md) | Interactive npm entrypoints | Implemented and locally verified; unpublished | [SPEC-002](../specs/SPEC-002-interactive-cli-startup.md) |
 <!-- Add new plans above this line -->
 
 The owner requested implementation after the planning PR merged. PLAN-001 now

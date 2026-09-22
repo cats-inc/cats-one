@@ -5,6 +5,7 @@
 | Component | Status | Evidence / next step |
 |-----------|--------|----------------------|
 | npm runtime/platform launcher | Implemented | Existing `bin/cli.js`, `test/cli.test.js` and package CI |
+| Interactive npm startup | Implemented; unpublished | [PLAN-002](docs/plans/PLAN-002-interactive-cli-startup.md): automatic browser, o/q controls and ordered owned-service cleanup |
 | Repository-local agent base layer | Implemented | Agent guidance, templates and single-project skill helpers from the bootstrap adoption |
 | Developer workspace planning | Accepted for implementation | ADR-001 accepted; SPEC-001 and PLAN-001 track phased delivery |
 | Developer workspace command | Phases 1–2 implemented | Inventory, check/preview, managed copies/ownership and interruption recovery |

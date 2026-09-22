@@ -85,9 +85,10 @@ function resolveRuntimeEndpoint(env) {
 
 async function isHealthy(url, fetchImpl = fetch, apiKey) {
   try {
-    const response = await fetchImpl(url, apiKey
-      ? { headers: { Authorization: `Bearer ${apiKey}` } }
-      : undefined);
+    const response = await fetchImpl(url, {
+      signal: AbortSignal.timeout(2_000),
+      ...(apiKey ? { headers: { Authorization: `Bearer ${apiKey}` } } : {}),
+    });
     return response.ok;
   } catch {
     return false;
@@ -114,127 +115,163 @@ async function waitForHealth(url, {
   return false;
 }
 
-async function main() {
-  const args = process.argv.slice(2);
+function spawnService(name, bin, args, options, spawnImpl = spawn) {
+  const child = spawnImpl(process.execPath, [bin, ...args], options);
+  const service = { name, child, finished: false, result: null };
+  let spawnError;
+  child.on('error', error => { spawnError = error; });
+  // The private input pipe is only used for EOF-based shutdown. A child may
+  // already have exited by the time its parent closes it.
+  child.stdin?.on('error', () => {});
+  service.done = new Promise(resolveDone => {
+    child.once('close', (code, signal) => {
+      service.finished = true;
+      service.result = { code, signal, error: spawnError };
+      resolveDone(service.result);
+    });
+  });
+  return service;
+}
+
+async function stopService(service, { timeoutMs, log }) {
+  if (!service || service.finished) return false;
+  const child = service.child;
+  if (service.name === 'cats-runtime') {
+    child.stdin.end();
+  } else if (child.connected) {
+    child.send({ type: 'cats.shutdown' }, () => {});
+  }
+
+  let timer;
+  const stopped = await Promise.race([
+    service.done.then(() => true),
+    new Promise(resolveTimeout => { timer = setTimeout(() => resolveTimeout(false), timeoutMs); }),
+  ]);
+  clearTimeout(timer);
+  if (stopped) return false;
+
+  log(`cats-one: ${service.name} did not stop within ${timeoutMs / 1000}s; forcing its exit.`);
+  if (!service.finished) child.kill('SIGKILL');
+  await service.done;
+  return true;
+}
+
+async function runLauncher({
+  args = process.argv.slice(2), env = process.env, events = process,
+  input = process.stdin, spawnImpl = spawn, resolveBin = resolvePackageBin,
+  log = console.error, shutdownTimeoutMs = 15_000,
+} = {}) {
+  if (args.includes('--help') || args.includes('-h')) {
+    process.stdout.write([
+      'Usage: cats-one [options]',
+      '',
+      '  --platform-only  Skip Runtime startup',
+      '  --no-open        Skip opening the browser (press o to open later)',
+      '  -h, --help       Show this help',
+      '',
+      'Other options are forwarded to cats-platform.',
+      'Once ready: o opens the browser; q or Ctrl+C stops the services.',
+      '',
+    ].join('\n'));
+    return 0;
+  }
   const platformOnly = args.includes('--platform-only');
   const platformArgs = args.filter((arg) => arg !== '--platform-only');
-
-  let endpoint;
-  try {
-    endpoint = resolveRuntimeEndpoint(process.env);
-  } catch (error) {
-    const detail = error instanceof Error ? error.message : String(error);
-    console.error(`cats-one: invalid runtime endpoint configuration.\n${detail}`);
-    process.exit(1);
-  }
-
-  const childEnv = {
-    ...process.env,
-    CATS_RUNTIME_BASE_URL: endpoint.baseUrl,
-    ...(endpoint.spawnEnv ?? {}),
-  };
-
-  let platformBinPath;
-  let runtimeBinPath = null;
-
-  try {
-    platformBinPath = resolvePackageBin('@cats-inc/cats-platform', pickPlatformBin);
-    if (!platformOnly) {
-      runtimeBinPath = resolvePackageBin('@cats-inc/cats-runtime', pickRuntimeBin);
-    }
-  } catch (error) {
-    const detail = error instanceof Error ? error.message : String(error);
-    console.error(
-      `cats-one could not resolve its Cats packages. Reinstall cats-one or run npx cats-one again.\n${detail}`,
-    );
-    process.exit(1);
-  }
-
-  let runtimeChild = null;
-  let runtimeExitedEarly = false;
+  let runtime = null;
+  let platform = null;
   let shuttingDown = false;
-
-  const stopRuntime = () => {
-    if (runtimeChild && runtimeChild.exitCode === null && !runtimeChild.killed) {
-      runtimeChild.kill();
-    }
-  };
-
-  if (!platformOnly) {
-    if (await isHealthy(endpoint.healthUrl, fetch, childEnv.CATS_RUNTIME_API_KEY)) {
-      console.error(`cats-one: reusing the cats-runtime already serving ${endpoint.baseUrl}`);
-    } else if (!endpoint.isLocal) {
-      console.error(
-        `cats-one: no runtime is answering at ${endpoint.healthUrl} and cats-one only `
-        + 'auto-starts a local runtime. Start the remote runtime first, or use a '
-        + 'local CATS_RUNTIME_BASE_URL.',
-      );
-      process.exit(1);
-    } else {
-      console.error(`cats-one: starting cats-runtime (${endpoint.baseUrl})`);
-      runtimeChild = spawn(process.execPath, [runtimeBinPath], {
-        stdio: 'inherit',
-        env: childEnv,
-        windowsHide: true,
-      });
-      runtimeChild.on('exit', (code) => {
-        if (!shuttingDown) {
-          runtimeExitedEarly = true;
-          console.error(`cats-one: cats-runtime exited unexpectedly (code ${code ?? 'unknown'})`);
-        }
-      });
-
-      const ready = await waitForHealth(endpoint.healthUrl, {
-        apiKey: childEnv.CATS_RUNTIME_API_KEY,
-        shouldStop: () => runtimeExitedEarly,
-      });
-      if (!ready) {
-        console.error(
-          `cats-one: cats-runtime did not become healthy at ${endpoint.healthUrl} within ${RUNTIME_READY_TIMEOUT_MS / 1000}s.`,
-        );
-        shuttingDown = true;
-        stopRuntime();
-        process.exit(1);
+  let shutdownPromise;
+  let exitCode = 0;
+  const wasRaw = input.isRaw;
+  const shutdown = (code = 0) => {
+    if (code !== 0) exitCode = code;
+    if (shutdownPromise) return shutdownPromise;
+    shuttingDown = true;
+    shutdownPromise = (async () => {
+      log('cats-one: stopping services...');
+      for (const service of [platform, runtime]) {
+        if (await stopService(service, { timeoutMs: shutdownTimeoutMs, log })) exitCode = 1;
+        if (service?.result?.error || service?.result?.code > 0) exitCode = service.result.code || 1;
       }
-      console.error('cats-one: cats-runtime is healthy');
-    }
-  }
-
-  console.error('cats-one: starting cats-platform');
-  const platformChild = spawn(process.execPath, [platformBinPath, ...platformArgs], {
-    stdio: 'inherit',
-    env: childEnv,
-    windowsHide: true,
-  });
-
-  const stopAll = () => {
-    shuttingDown = true;
-    if (platformChild.exitCode === null && !platformChild.killed) {
-      platformChild.kill();
-    }
-    stopRuntime();
+    })();
+    return shutdownPromise;
   };
-  process.on('SIGINT', stopAll);
-  process.on('SIGTERM', stopAll);
+  const onSignal = () => { void shutdown(); };
+  events.on('SIGINT', onSignal);
+  events.on('SIGTERM', onSignal);
 
-  runtimeChild?.on('exit', () => {
-    if (!shuttingDown) {
-      // The runtime died under the platform; fail loudly instead of leaving a
-      // half-working stack behind. Supervision/restart policy is future work.
-      stopAll();
-      process.exitCode = 1;
+  try {
+    const endpoint = resolveRuntimeEndpoint(env);
+    const childEnv = { ...env, CATS_RUNTIME_BASE_URL: endpoint.baseUrl, ...(endpoint.spawnEnv ?? {}) };
+    const platformBin = resolveBin('@cats-inc/cats-platform', pickPlatformBin);
+    if (!platformOnly) {
+      const healthy = await isHealthy(endpoint.healthUrl, fetch, childEnv.CATS_RUNTIME_API_KEY);
+      if (shuttingDown) { await shutdown(); return exitCode; }
+      if (healthy) {
+        log(`cats-one: reusing the cats-runtime already serving ${endpoint.baseUrl}`);
+      } else {
+        if (!endpoint.isLocal) throw new Error(`No runtime is answering at ${endpoint.healthUrl}; start the remote runtime first.`);
+        const runtimeBin = resolveBin('@cats-inc/cats-runtime', pickRuntimeBin);
+        log(`cats-one: starting cats-runtime (${endpoint.baseUrl})`);
+        runtime = spawnService('cats-runtime', runtimeBin, [], {
+          stdio: ['pipe', 'inherit', 'inherit'],
+          env: {
+            ...childEnv,
+            CATS_RUNTIME_STARTUP_MODE: 'app-managed',
+            CATS_RUNTIME_MANAGED_BY: 'cats-one',
+            CATS_RUNTIME_READY_OUTPUT: 'plain',
+          },
+          windowsHide: true,
+        }, spawnImpl);
+        void runtime.done.then(result => {
+          if (!shuttingDown) {
+            log(`cats-one: cats-runtime exited unexpectedly (${result.error?.message ?? result.code ?? result.signal}).`);
+            void shutdown(1);
+          }
+        });
+        const ready = await waitForHealth(endpoint.healthUrl, {
+          apiKey: childEnv.CATS_RUNTIME_API_KEY,
+          shouldStop: () => shuttingDown,
+        });
+        if (shuttingDown) { await shutdown(); return exitCode; }
+        if (!ready) throw new Error(`cats-runtime did not become healthy within ${RUNTIME_READY_TIMEOUT_MS / 1000}s.`);
+        log('cats-one: cats-runtime is healthy');
+      }
     }
-  });
-
-  platformChild.on('exit', (code) => {
-    shuttingDown = true;
-    stopRuntime();
-    process.exit(process.exitCode ?? code ?? 1);
-  });
+    if (shuttingDown) { await shutdown(); return exitCode; }
+    log('cats-one: starting cats-platform');
+    // Platform owns interactive stdin and browser readiness. The separate IPC
+    // channel lets the launcher request cleanup without stealing keyboard input.
+    platform = spawnService('cats-platform', platformBin, platformArgs, {
+      stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
+      env: childEnv,
+      windowsHide: true,
+    }, spawnImpl);
+    const result = await platform.done;
+    if (!shuttingDown) {
+      if (result.error) log(`cats-one: ${result.error.message}`);
+      await shutdown(result.code ?? 1);
+    } else {
+      await shutdown();
+    }
+    return exitCode;
+  } catch (error) {
+    log(`cats-one: ${error instanceof Error ? error.message : String(error)}`);
+    await shutdown(1);
+    return exitCode;
+  } finally {
+    events.off('SIGINT', onSignal);
+    events.off('SIGTERM', onSignal);
+    // A forced child exit must not leave the shared terminal in raw mode.
+    if (input.isTTY) input.setRawMode(wasRaw);
+  }
 }
 
 if (require.main === module) {
-  main();
+  runLauncher().then(code => { process.exitCode = code; }).catch(error => {
+    console.error(error);
+    process.exitCode = 1;
+  });
 }
 
 module.exports = {
@@ -243,4 +280,5 @@ module.exports = {
   resolveRuntimeEndpoint,
   waitForHealth,
   isHealthy,
+  runLauncher,
 };

@@ -11,6 +11,12 @@ serves `CATS_RUNTIME_BASE_URL`), waits for its `/health`, then launches
 started dies, it tears the platform down and exits non-zero; restart
 policy/supervision is future work. `--platform-only` skips the runtime.
 
+Interactive startup follows [SPEC-002](docs/specs/SPEC-002-interactive-cli-startup.md).
+Platform owns browser opening and o/q/Ctrl+C input after readiness. cats-one gives
+its owned Runtime an app-managed stdin pipe and requests Platform shutdown over
+private Node IPC; wait for Platform cleanup before ending Runtime stdin. Preserve
+reused Runtime instances. Do not replace Windows graceful shutdown with kill().
+
 Developer workspace bootstrap is defined in
 [ADR-001](docs/decisions/ADR-001-own-developer-workspace-bootstrap.md), with
 [SPEC-001](docs/specs/SPEC-001-developer-workspace-bootstrap.md) and
@@ -36,7 +42,7 @@ OS helpers infer that root from the cats-one checkout and select both agents.
   key = loud failure. Do NOT add compatibility fallbacks — pre-release policy
   is no compatibility shims. Runtime resolution depends on
   `@cats-inc/cats-runtime`'s `"./package.json"` export (>=0.1.2).
-- `bin/cli.js` exports `pickPlatformBin` for tests and only runs `main()` when
+- `bin/cli.js` exports bin/endpoint helpers and `runLauncher` for tests and only runs the launcher when
   executed directly.
 
 ## Commands

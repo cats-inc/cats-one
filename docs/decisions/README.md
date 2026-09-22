@@ -40,6 +40,7 @@ Use [000-template.md](./000-template.md) as the starting point for new ADRs.
 |-----|-------|--------|------|
 | [000-template](./000-template.md) | Template | - | - |
 | [ADR-001](./ADR-001-own-developer-workspace-bootstrap.md) | Own Cats developer workspace bootstrap in cats-one | Accepted | 2026-09-11 |
+| [ADR-002](./ADR-002-interactive-cli-lifecycle.md) | Let the serving application own terminal interaction | Accepted | 2026-09-23 |
 <!-- Add new ADRs above this line -->
 
 ## For AI Agents
