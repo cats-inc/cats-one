@@ -1,5 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const { createServer } = require('node:http');
 
 const { pickPlatformBin, pickRuntimeBin, resolveRuntimeEndpoint, waitForHealth, isHealthy } = require('../bin/cli.js');
 
@@ -95,6 +96,39 @@ test('waitForHealth gives up on timeout and on shouldStop', async () => {
 test('isHealthy swallows connection errors', async () => {
   assert.equal(await isHealthy('http://127.0.0.1:9/health', async () => { throw new Error('x'); }), false);
   assert.equal(await isHealthy('http://127.0.0.1:9/health', async () => ({ ok: true })), true);
+});
+
+test('isHealthy supports a runtime protected by its configured API key', async (t) => {
+  const server = createServer((req, res) => {
+    res.writeHead(req.headers.authorization === 'Bearer runtime-test-key' ? 200 : 401);
+    res.end();
+  });
+  await new Promise((resolve, reject) => {
+    server.once('error', reject);
+    server.listen(0, '127.0.0.1', resolve);
+  });
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const url = `http://127.0.0.1:${server.address().port}/health`;
+
+  assert.equal(await isHealthy(url, fetch, 'runtime-test-key'), true);
+  assert.equal(await isHealthy(url), false);
+  assert.equal(await isHealthy(url, fetch, 'wrong-key'), false);
+});
+
+test('waitForHealth authenticates every readiness poll', async () => {
+  let calls = 0;
+  const healthy = await waitForHealth('http://127.0.0.1:9/health', {
+    apiKey: 'runtime-test-key',
+    timeoutMs: 5_000,
+    intervalMs: 1,
+    fetchImpl: async (_url, options) => {
+      calls += 1;
+      assert.equal(options?.headers?.Authorization, 'Bearer runtime-test-key');
+      return { ok: calls >= 3 };
+    },
+  });
+  assert.equal(healthy, true);
+  assert.equal(calls, 3);
 });
 
 test('resolveRuntimeEndpoint defaults to local 127.0.0.1:3110', () => {

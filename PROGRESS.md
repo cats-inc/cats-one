@@ -8,7 +8,7 @@
 | Repository-local agent base layer | Implemented | Agent guidance, templates and single-project skill helpers from the bootstrap adoption |
 | Developer workspace planning | Accepted for implementation | ADR-001 accepted; SPEC-001 and PLAN-001 track phased delivery |
 | Developer workspace command | Phases 1–2 implemented | Inventory, check/preview, managed copies/ownership and interruption recovery |
-| Launcher dependency alignment | Follow-up identified | Declared/locked package versions need a separate compatibility assessment |
+| Launcher dependency alignment | Implemented for 0.1.22 | Platform 0.3.4 and Runtime 0.1.25 resolved from npm; isolated packed-consumer startup and bootstrap passed |
 | Cross-repository build/dev and release coordination | Deferred | Outside the first workspace synchronization slice |
 
 ## WP-1: Developer Workspace Bootstrap
@@ -31,12 +31,26 @@ for acceptance criteria. Documentation delivery does not mark those criteria met
 
 ## WP-2: Launcher Dependency Alignment
 
-**Status**: follow-up; production dependency ranges and resolved versions are unchanged.
+**Status**: implemented for cats-one 0.1.22; npm publication follows PR CI.
 
-The 2026-09-11 local snapshot shows platform declared as `^0.1.0`, locked at
-`0.1.1`, and checked out at `0.2.3`; runtime is declared as `^0.1.2`, locked at
-`0.1.2`, and checked out at `0.1.21`. Assess published artifacts and compatibility
-separately before updating both package files and running isolated consumer tests.
+The 2026-09-23 alignment raises the Platform dependency from `^0.1.0` to
+`^0.3.4` and Runtime from `^0.1.2` to `^0.1.25`. Publish both dependencies first,
+then regenerate the lockfile from npm and verify the packed launcher before
+publishing cats-one to `latest`. Workspace synchronization does not change these
+production dependencies.
+
+The npm publish workflow now installs locked developer dependencies before its
+test gate, because workspace tests import YAML and proper-lockfile. Local
+launcher contract validation passed all 17 tests, including authenticated Runtime
+health probes. The launcher now sends `CATS_RUNTIME_API_KEY` during reuse checks
+and startup polling, avoiding a 60-second timeout when the Runtime is healthy but
+requires authentication. A packed-consumer check on Windows with Node 24/npm 12
+installed the published dependencies into a fresh directory and home. Both
+services became healthy; bundled management/catalog defaults loaded, an explicit
+empty provider selection persisted, and Platform generated its session secret.
+No provider commands ran or bulk config copies were created. The isolated
+process tree stopped and released both ports. CI additionally gates the full
+suite, Windows/macOS/Linux workspace matrix, and tarball resolution/startup/shutdown.
 
 ## Workspace Delivery
 
@@ -58,4 +72,4 @@ cleanup and concurrent writers. CI runs the same workspace suites on Node 22/24
 on Windows/macOS/Linux. Live parent-session discovery remains pending.
 See [testing](docs/testing.md) and the implementation PR for verification evidence.
 
-*Last updated: 2026-09-11*
+*Last updated: 2026-09-23*

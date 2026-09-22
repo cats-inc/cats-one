@@ -83,9 +83,11 @@ function resolveRuntimeEndpoint(env) {
   };
 }
 
-async function isHealthy(url, fetchImpl = fetch) {
+async function isHealthy(url, fetchImpl = fetch, apiKey) {
   try {
-    const response = await fetchImpl(url);
+    const response = await fetchImpl(url, apiKey
+      ? { headers: { Authorization: `Bearer ${apiKey}` } }
+      : undefined);
     return response.ok;
   } catch {
     return false;
@@ -96,6 +98,7 @@ async function waitForHealth(url, {
   timeoutMs = RUNTIME_READY_TIMEOUT_MS,
   intervalMs = 500,
   fetchImpl = fetch,
+  apiKey,
   shouldStop = () => false,
 } = {}) {
   const deadline = Date.now() + timeoutMs;
@@ -103,7 +106,7 @@ async function waitForHealth(url, {
     if (shouldStop()) {
       return false;
     }
-    if (await isHealthy(url, fetchImpl)) {
+    if (await isHealthy(url, fetchImpl, apiKey)) {
       return true;
     }
     await new Promise((resolveDelay) => setTimeout(resolveDelay, intervalMs));
@@ -158,7 +161,7 @@ async function main() {
   };
 
   if (!platformOnly) {
-    if (await isHealthy(endpoint.healthUrl)) {
+    if (await isHealthy(endpoint.healthUrl, fetch, childEnv.CATS_RUNTIME_API_KEY)) {
       console.error(`cats-one: reusing the cats-runtime already serving ${endpoint.baseUrl}`);
     } else if (!endpoint.isLocal) {
       console.error(
@@ -182,6 +185,7 @@ async function main() {
       });
 
       const ready = await waitForHealth(endpoint.healthUrl, {
+        apiKey: childEnv.CATS_RUNTIME_API_KEY,
         shouldStop: () => runtimeExitedEarly,
       });
       if (!ready) {

@@ -6,6 +6,8 @@
 platform packages, reuses a healthy runtime or starts a local one, waits for
 health, and launches platform with forwarded arguments. It coordinates child
 shutdown and fails when a runtime it started exits unexpectedly.
+Health probes authenticate with `CATS_RUNTIME_API_KEY` when configured, including
+both reuse checks and startup polling; child services receive the same key.
 
 Package resolution uses installed npm dependencies, not arbitrary sibling source
 imports. Developer workspace tooling has its own checkout entrypoint at
@@ -71,9 +73,13 @@ Three different inputs have different owners:
 - Platform's Desktop App lock chooses exact App artifact versions and hashes.
 
 Synchronizing developer instructions updates none of the package/release locks.
-The launcher currently has a dependency-alignment follow-up, documented with a
-dated local snapshot in SPEC-001. A successful workspace sync does not establish
-release compatibility between independently checked-out revisions.
+The 0.1.22 npm alignment requires Platform `^0.3.4` and Runtime `^0.1.25`.
+Publish both dependencies before regenerating the launcher's lockfile from the
+registry and publishing cats-one. The npm publish workflow installs the locked
+dependencies, including developer test dependencies, before its test gate.
+CI also checks the packed launcher's package resolution and isolated startup.
+A successful workspace sync does not establish release compatibility between
+independently checked-out revisions.
 
 ## Delivery
 
@@ -81,4 +87,4 @@ See [PLAN-001](plans/PLAN-001-developer-workspace-bootstrap.md) for inventory,
 managed apply and cross-platform validation phases, and
 [PROGRESS.md](../PROGRESS.md) for implementation status.
 
-*Last updated: 2026-09-11*
+*Last updated: 2026-09-23*

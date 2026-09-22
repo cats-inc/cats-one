@@ -196,9 +196,11 @@ routing in addition to testing the file operations.
 | Cross-repository build/dev orchestration | cats-one | After workspace sync is proven; compose existing member commands with explicit working directories |
 | Desktop/App release coordination | cats-one + platform/apps owners | Compose built App artifacts and platform packaging later; keep authoritative App selection/install behavior in platform |
 
-The dependency-alignment package must investigate the current platform `^0.1.0`
-range and old locked versions. It must not assume a local source version is
-published or change dependencies as an incidental part of skill synchronization.
+The dependency-alignment package must verify registry availability and run
+isolated consumer checks before changing the manifest and lockfile together.
+The 2026-09-23 follow-through targets Platform `^0.3.4` and Runtime `^0.1.25` for
+cats-one 0.1.22; current delivery evidence is in `PROGRESS.md` WP-2. Dependency
+alignment remains separate from skill synchronization.
 
 ## Progress Log
 

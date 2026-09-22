@@ -28,7 +28,7 @@ Planning is recorded in [ADR-001](docs/decisions/ADR-001-own-developer-workspace
 
 ## Separate Follow-ups
 
-- [ ] Assess and align launcher's installed runtime/platform dependencies.
+- [x] Align launcher dependencies for 0.1.22 with Platform 0.3.4 and Runtime 0.1.25; see [WP-2](PROGRESS.md#wp-2-launcher-dependency-alignment) for consumer validation.
 - [ ] Coordinate cross-repository build/dev commands after workspace sync is proven.
 - [ ] Evaluate partial/custom checkout profiles when an actual workflow needs them.
 - [ ] Evaluate npm distribution of developer tooling after the checkout command
@@ -39,4 +39,4 @@ Planning is recorded in [ADR-001](docs/decisions/ADR-001-own-developer-workspace
 These items have no promised release date and are not prerequisites hidden inside
 the initial instruction/skill synchronization feature.
 
-*Last updated: 2026-09-11*
+*Last updated: 2026-09-23*
