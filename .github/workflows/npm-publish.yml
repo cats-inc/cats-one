@@ -32,10 +32,11 @@ jobs:
       - name: Update npm for trusted publishing
         run: npm install -g npm@^11.5.1
 
-      # No install step yet: runtime dependencies are unpublished and the
-      # unit tests only use node built-ins. Once @cats-inc/cats-platform and
-      # @cats-inc/cats-runtime are on npm, add a lockfile, npm ci, and a
-      # packed-tarball launcher smoke test here.
+      # Workspace tests import developer dependencies. Install the locked
+      # registry packages before running the gate on a fresh Actions runner.
+      - name: Install dependencies
+        run: npm ci --include=dev
+
       - name: Run test gate
         run: npm test
 

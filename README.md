@@ -31,6 +31,8 @@ npx @cats-inc/cats-one
   `http://127.0.0.1:3110`. The same endpoint drives the health probe, the
   runtime `cats-one` starts, and the platform's runtime client, so they always
   agree (wildcard binds like `0.0.0.0` are probed via loopback).
+- When `CATS_RUNTIME_API_KEY` is set, health probes use it as a bearer token.
+  The same environment is passed to runtime and platform.
 - If a runtime already answers there, it is reused instead of starting a
   second one.
 - Otherwise, for local endpoints `cats-one` starts `cats-runtime`, waits up to

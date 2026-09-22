@@ -62,7 +62,11 @@ of failures from either command.
 ## Launcher, Payload and CI
 
 `test/cli.test.js` retains the existing launcher's resolution/health contract.
-Production dependency ranges and npm's files allowlist remain unchanged.
+An isolated HTTP fixture checks authenticated health probes and rejected keys;
+readiness polling must authenticate each retry.
+The 0.1.22 dependency alignment requires Platform `^0.3.4` and Runtime
+`^0.1.25`; manifest and lockfile must agree on registry-backed dependencies.
+The npm files allowlist remains unchanged.
 
 ```sh
 npm pack --dry-run --ignore-scripts --offline --json
@@ -85,4 +89,4 @@ contains only the four allowed files. The implementation PR records OS-matrix re
 Author-run tests are automated validation, not independent code review. Live
 parent-root Codex/Claude discovery remains a separate, unclaimed check.
 
-*Last updated: 2026-09-11*
+*Last updated: 2026-09-23*
