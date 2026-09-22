@@ -4,7 +4,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Implemented and locally verified; unpublished |
+| Status | Implemented and locally verified; npm release in progress |
 | Assigned to | Codex |
 | Reviewer | Independent review_cli_interaction agent |
 | Spec | [SPEC-002](../specs/SPEC-002-interactive-cli-startup.md) |
@@ -48,11 +48,26 @@ openers. No user configuration or live provider sessions are used.
 
 ## Publication Follow-up
 
-No versions have been changed or published for this feature. Before release,
-publish the changed Runtime and Platform, raise cats-one's minimum dependencies,
-regenerate the registry lockfile, and publish both scoped and unscoped cats-one.
-Run the release checks and clean packed-consumer verification in the
-[deployment guide](../deployment.md).
+The user authorized direct-to-main commits and npm publication on 2026-09-23.
+The release targets are Runtime 0.1.26, Platform 0.3.5 and both cats-one names at
+0.1.23. Latest remote main changes are integrated before pushing. Publish Runtime
+and Platform first, then resolve the launcher's `^0.1.26` / `^0.3.5` dependency
+minima from npm, regenerate its lockfile, and publish both launcher names.
+Publication workflows run the full gates; no duplicate full local suite is
+required. Registry versions and a clean consumer must be verified before marking
+the release complete; see the [deployment guide](../deployment.md).
+
+Release evidence:
+
+- Runtime 0.1.26: [publish run](https://github.com/cats-inc/cats-runtime/actions/runs/35791354113)
+  passed its full release gate at `3c503fd23b9695b456caabd9028965e94edebd7b`.
+- Platform 0.3.5: [publish run](https://github.com/cats-inc/cats-platform/actions/runs/35791873040)
+  passed its full test/build gate at `df8be7b1aec03a9833de816f8a4ff98cd36c7b97`.
+- The integration includes remote Junie/Auggie/Goose shortlist updates. Following
+  integration, the rebuilt Runtime entrypoint's 3 tests and Platform CLI/provider
+  consumer selection's 35 tests passed locally.
+- Registry propagation can lag a successful publication. The launcher lockfile
+  and clean npm consumer verification must use downloadable registry packages.
 
 ## Progress Log
 

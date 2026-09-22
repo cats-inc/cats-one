@@ -2,7 +2,8 @@
 
 ## Status
 
-Approved for implementation by the user on 2026-09-23. Implemented; unpublished.
+Approved for implementation by the user on 2026-09-23. Implemented; npm publication
+is in progress for cats-one 0.1.23, Platform 0.3.5 and Runtime 0.1.26.
 See [ADR-002](../decisions/ADR-002-interactive-cli-lifecycle.md) for ownership
 and [PLAN-002](../plans/PLAN-002-interactive-cli-startup.md) for validation evidence.
 

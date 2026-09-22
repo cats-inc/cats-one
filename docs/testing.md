@@ -69,8 +69,8 @@ Standalone browser/keyboard integration lives in the Runtime and Platform CLI
 entrypoint suites; their test-only terminal preloads intercept OS browser openers.
 An isolated HTTP fixture checks authenticated health probes and rejected keys;
 readiness polling must authenticate each retry.
-The 0.1.22 dependency alignment requires Platform `^0.3.4` and Runtime
-`^0.1.25`; manifest and lockfile must agree on registry-backed dependencies.
+The 0.1.23 interactive CLI release requires Platform `^0.3.5` and Runtime
+`^0.1.26`; manifest and lockfile must agree on registry-backed dependencies.
 The npm files allowlist remains unchanged.
 
 ```sh
