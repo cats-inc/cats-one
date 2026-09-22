@@ -50,7 +50,7 @@ Use [000-template.md](./000-template.md) as the starting point for new specs.
 |------|-------|--------|--------------|
 | [000-template](./000-template.md) | Template | - | - |
 | [SPEC-001](./SPEC-001-developer-workspace-bootstrap.md) | Developer workspace bootstrap | Phases 1–2 implemented; live discovery pending | [PLAN-001](../plans/PLAN-001-developer-workspace-bootstrap.md) |
-| [SPEC-002](./SPEC-002-interactive-cli-startup.md) | Interactive npm entrypoints | Implemented; release in progress | [PLAN-002](../plans/PLAN-002-interactive-cli-startup.md) |
+| [SPEC-002](./SPEC-002-interactive-cli-startup.md) | Interactive npm entrypoints | Published | [PLAN-002](../plans/PLAN-002-interactive-cli-startup.md) |
 <!-- Add new specs above this line -->
 
 ## For AI Agents

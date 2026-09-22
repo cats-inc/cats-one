@@ -14,8 +14,8 @@ filesystem/CLI behavior from remaining live-host discovery validation.
 | Document | Status | Purpose |
 |----------|--------|---------|
 | [ADR-002](decisions/ADR-002-interactive-cli-lifecycle.md) | Accepted | Terminal ownership and cross-platform graceful shutdown |
-| [SPEC-002](specs/SPEC-002-interactive-cli-startup.md) | Implemented; release in progress | Browser opening and o/q controls for all three npm entrypoints |
-| [PLAN-002](plans/PLAN-002-interactive-cli-startup.md) | npm release in progress | Focused checks and coordinated publication evidence |
+| [SPEC-002](specs/SPEC-002-interactive-cli-startup.md) | Published | Browser opening and o/q controls for all three npm entrypoints |
+| [PLAN-002](plans/PLAN-002-interactive-cli-startup.md) | Published | Focused checks and coordinated publication evidence |
 | [ADR-001](decisions/ADR-001-own-developer-workspace-bootstrap.md) | Accepted | Why cats-one owns Cats development composition and root setup |
 | [SPEC-001](specs/SPEC-001-developer-workspace-bootstrap.md) | Phases 1–2 implemented | Member/source scope, sync/check behavior and acceptance criteria |
 | [PLAN-001](plans/PLAN-001-developer-workspace-bootstrap.md) | In progress | Implementation phases, verification and separate follow-ups |

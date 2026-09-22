@@ -4,7 +4,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Implemented and locally verified; npm release in progress |
+| Status | Implemented and published to npm |
 | Assigned to | Codex |
 | Reviewer | Independent review_cli_interaction agent |
 | Spec | [SPEC-002](../specs/SPEC-002-interactive-cli-startup.md) |
@@ -46,16 +46,14 @@ openers. No user configuration or live provider sessions are used.
   by the mocked-opener tests. macOS/Linux native smoke remains for their OS jobs
   or manual validation; opener argument tests cover all three platforms.
 
-## Publication Follow-up
+## Publication
 
 The user authorized direct-to-main commits and npm publication on 2026-09-23.
-The release targets are Runtime 0.1.26, Platform 0.3.5 and both cats-one names at
-0.1.23. Latest remote main changes are integrated before pushing. Publish Runtime
-and Platform first, then resolve the launcher's `^0.1.26` / `^0.3.5` dependency
-minima from npm, regenerate its lockfile, and publish both launcher names.
-Publication workflows run the full gates; no duplicate full local suite is
-required. Registry versions and a clean consumer must be verified before marking
-the release complete; see the [deployment guide](../deployment.md).
+Runtime 0.1.26, Platform 0.3.5 and both cats-one names at 0.1.23 are published.
+Remote main changes were integrated before pushing. Runtime and Platform were
+published first, then the launcher's `^0.1.26` / `^0.3.5` dependency minima and
+lockfile were resolved from npm before publishing both launcher names.
+See the [deployment guide](../deployment.md) for the coordinated release process.
 
 Release evidence:
 
@@ -63,11 +61,26 @@ Release evidence:
   passed its full release gate at `3c503fd23b9695b456caabd9028965e94edebd7b`.
 - Platform 0.3.5: [publish run](https://github.com/cats-inc/cats-platform/actions/runs/35791873040)
   passed its full test/build gate at `df8be7b1aec03a9833de816f8a4ff98cd36c7b97`.
+- Both cats-one names at 0.1.23:
+  [paired publish run](https://github.com/cats-inc/cats-one/actions/runs/35793743774)
+  passed its full test gate and both publish steps at
+  `3adbd5148c64d6827ae9f5ade9d05fd427606a60`. The unscoped package pins canonical
+  0.1.23 exactly; canonical dependencies and its registry lockfile agree on
+  Runtime `^0.1.26` and Platform `^0.3.5`.
+- The release commits also passed their main-branch CI:
+  [Runtime](https://github.com/cats-inc/cats-runtime/actions/runs/35791279520),
+  [Platform](https://github.com/cats-inc/cats-platform/actions/runs/35791749338),
+  [cats-one](https://github.com/cats-inc/cats-one/actions/runs/35793702327).
 - The integration includes remote Junie/Auggie/Goose shortlist updates. Following
   integration, the rebuilt Runtime entrypoint's 3 tests and Platform CLI/provider
   consumer selection's 35 tests passed locally.
-- Registry propagation can lag a successful publication. The launcher lockfile
-  and clean npm consumer verification must use downloadable registry packages.
+- Registry versions and all four downloaded package versions were confirmed.
+  Fresh-cache `npx cats-one@latest --help` passed. Published Runtime and Platform
+  startup, automatic opener invocation, `o`, `q` and port cleanup passed with
+  isolated homes and intercepted browser openers.
+- The user stopped an additional full-stack alias verification repeat and
+  requested immediate commit/push without further tests. That repeat is not
+  claimed as passed; no further validation was run after the stop request.
 
 ## Progress Log
 
