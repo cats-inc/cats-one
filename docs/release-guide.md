@@ -26,6 +26,40 @@ scope, rather than silently releasing every repository.
 Ordinary branch pushes run the configured CI. A successful CI run or uploaded
 CI artifact is not a published npm package, Desktop release, or App release.
 
+## Compatibility and data upgrades
+
+The owner adopted this rule on 2026-09-23 for every Cats package and App:
+
+- Preserve compatibility within a `0.x` minor line. Breaking public API, CLI,
+  configuration-file, persisted-data or supported user-workflow changes require
+  the next minor (`0.1.z` -> `0.2.0`). Compatible fixes can use patch releases;
+  compatible features may use a minor release. At `1.0.0` and above, follow
+  SemVer: breaking changes increment major, compatible features minor, fixes patch.
+- Schema numbers and software versions are independent. Changing an internal
+  schema with a transparent, lossless migration is not by itself a breaking API
+  change. Rejecting previously supported user configuration is a breaking change.
+- Preview and pre-1.0 status do not waive existing-user data protection. A schema
+  change must ship a tested upgrade path: detect the exact old format, validate a
+  complete conversion, back up, atomically apply, and verify the new state. Unknown
+  data or failures preserve the original and expose actionable diagnostics.
+- Keep one current execution contract. A bounded one-time data migration is
+  permitted; it is not permission to keep legacy execution APIs or fallback tables.
+- Verify both clean install and an isolated previous-version profile, including
+  repeat startup, failed conversion and recovery. Health checks, release notes,
+  or converter unit tests alone do not establish a working installed upgrade.
+- Classify each selected release independently; do not bump unrelated repositories.
+  Check dependency ranges, App host/SDK declarations and Desktop App pins when a
+  compatibility boundary changes. A version bump never substitutes for migration.
+
+The catalog schema-2 transition requires the next authorized release to use
+Runtime `0.2.0` and Platform/Desktop `0.4.0`, instead of continuing the old patch
+lines. This records the intended release boundary; it does not publish packages,
+change versions immediately, or authorize release of the launcher or Apps.
+
+SemVer explicitly leaves `0.x` unstable; the same-minor guarantee above is Cats'
+stricter policy. See [SemVer](https://semver.org/#spec-item-4) and
+[npm caret ranges](https://github.com/npm/node-semver#caret-ranges-123-025-004).
+
 ## Three different version identifiers
 
 - A package version, such as `0.3.7`, identifies the package being built.
@@ -147,7 +181,7 @@ explicit project compatibility choice, not a guarantee made by SemVer itself.
 See [SemVer's initial-development rule](https://semver.org/#spec-item-4) and
 [caret range semantics](https://github.com/npm/node-semver#caret-ranges-123-025-004).
 
-Recommended discipline: preserve the declared App-facing contract within a 0.x
+Required project discipline: preserve the declared App-facing contract within a 0.x
 minor line; a breaking host change moves to the next minor line. Stable SDK 1.x
 uses a major bump for breaking API changes. If a compatible line cannot yet be
 committed to, use an exact verified host/SDK version rather than implying support

@@ -47,6 +47,12 @@ OS helpers infer that root from the cats-one checkout and select both agents.
 
 ## Release Scope and Versioning
 
+- Preserve compatibility within each `0.x` minor line; breaking API, CLI,
+  configuration or persisted-data changes require a minor bump. At `1.x` and
+  above, breaking public contracts require a major bump. Schema upgrades must
+  include a tested, backed-up migration path; version bumps and release notes
+  alone do not handle existing users. See the release guide's compatibility rules.
+
 - Follow the [cross-repository release guide](docs/release-guide.md) for scope
   and the [launcher npm SOP](docs/deployment.md) for this repository's commands.
 - Ordinary implementation, documentation, commit/push and merge requests do not

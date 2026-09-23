@@ -30,6 +30,17 @@ directory. Each checkout has independent Git state; this parent need not be a
 repository. Runtime owns generic product workspace capabilities; platform owns
 Desktop/App selection and installation; apps owns utility artifact production.
 
+## Version and upgrade policy
+
+For every member, preserve compatibility within a `0.x` minor line; breaking
+public APIs, CLI/config contracts or persisted-data requirements move to the next
+minor. Stable `1.x+` breaking contracts require a major bump. Data-format changes
+must include a tested upgrade path with validation, backup, atomic replacement
+and failure recovery; release notes and version bumps alone are insufficient.
+One-time data migrations are permitted without retaining obsolete execution APIs.
+Follow `cats-one/docs/release-guide.md` and each member's release SOP. Record the
+needed boundary now; bump or publish only within the user's release authorization.
+
 ## Maintenance skills
 
 {{SKILLS}}

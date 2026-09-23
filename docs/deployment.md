@@ -23,6 +23,13 @@ tag, for example with `npm version <version> --no-git-tag-version`. Reuse a prep
 unpublished version where appropriate. Git tags are not required for this npm
 workflow: pushing the source runs CI; the separate manual dispatch publishes it.
 
+Apply the [compatibility and data-upgrade policy](release-guide.md#compatibility-and-data-upgrades)
+when selecting versions: breaking launcher CLI, configuration or supported
+dependency contracts move `0.x` to its next minor, or stable versions to the next
+major. Verify adopted Runtime/Platform dependencies with an existing profile as
+well as a clean profile. Delegate their data migrations to the owning service;
+the launcher must not implement a second migration or edit their settings itself.
+
 ## Two packages, one release version
 
 | npm package | Purpose | Source |
