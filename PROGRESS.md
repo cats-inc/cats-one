@@ -9,7 +9,7 @@
 | Repository-local agent base layer | Implemented | Agent guidance, templates and single-project skill helpers from the bootstrap adoption |
 | Developer workspace planning | Accepted for implementation | ADR-001 accepted; SPEC-001 and PLAN-001 track phased delivery |
 | Developer workspace command | Phases 1–2 implemented | Inventory, check/preview, managed copies/ownership and interruption recovery |
-| Launcher dependency alignment | Published in 0.1.23 | Minimum Platform 0.3.5 and Runtime 0.1.26 include terminal controls; coordinated publication recorded in PLAN-002 |
+| Launcher dependency alignment | Implemented for 0.1.24 | Minimum Platform 0.3.6 and Runtime 0.1.27 include Windows browser and Unix npm web-asset fixes; coordinated publication recorded in PLAN-002 |
 | Unscoped npm alias release tooling | Implemented | Generated matching version/exact dependency, paired publish workflow and release checklist |
 | Cross-repository build/dev and release coordination | Deferred | Outside the first workspace synchronization slice |
 

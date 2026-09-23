@@ -84,6 +84,15 @@ Release evidence:
 
 ## Progress Log
 
+- 2026-09-23 follow-up: cats-one 0.1.24 raises dependency minima to Runtime
+  0.1.27 and Platform 0.3.6. Both fix the Windows detached PowerShell launcher,
+  which could exit successfully without executing its command. Platform also
+  resolves renderer files from its package root so Unix npm bin symlinks serve
+  the homepage rather than a JSON 404. Platform 0.3.6 includes the user's newer
+  macOS update-dialog focus change. Publish both cats-one names at 0.1.24; the
+  alias must pin canonical 0.1.24 exactly. No additional local test suites or
+  application builds are run for this publication; use the existing hosted gates.
+
 - 2026-09-23: Implemented three-entrypoint interaction and owned-child cleanup;
   documented cross-repository ownership and added targeted process regressions.
   All 89 targeted tests passed; no full release suite was run for this feature.
