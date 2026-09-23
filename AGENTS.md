@@ -45,6 +45,24 @@ OS helpers infer that root from the cats-one checkout and select both agents.
 - `bin/cli.js` exports bin/endpoint helpers and `runLauncher` for tests and only runs the launcher when
   executed directly.
 
+## Release Scope and Versioning
+
+- Follow the [cross-repository release guide](docs/release-guide.md) for scope
+  and the [launcher npm SOP](docs/deployment.md) for this repository's commands.
+- Ordinary implementation, documentation, commit/push and merge requests do not
+  authorize version bumps or publication. Accumulate commits until a release is
+  requested. Apply existing user authorization without asking for it again.
+- A Runtime or Platform release does not automatically require a cats-one release.
+  Change launcher dependency ranges/minima only for a launcher change, a changed
+  compatibility requirement, or an explicitly requested new minimum baseline.
+- When cats-one is selected for release, publish both npm names at the same
+  version and dist-tag. Keep the alias's exact canonical dependency generated.
+- Version preparation updates root package.json and package-lock.json together.
+  A push runs CI; npm publication requires a separate npm-publish.yml dispatch.
+  Do not create release Git tags as an incidental npm version-bump side effect.
+- Publication of this launcher does not authorize npm releases of unchanged
+  dependencies, Desktop installers, App releases, or changes to Desktop App pins.
+
 ## Commands
 
 - Developer setup: `npm ci --include=dev` (includes direct YAML and writer-lock dependencies).
@@ -52,8 +70,9 @@ OS helpers infer that root from the cats-one checkout and select both agents.
 - npm release: follow [deployment](docs/deployment.md). Publish both
   `@cats-inc/cats-one` and `cats-one` at the same version and dist-tag. The alias
   is generated from the root manifest and pins that exact canonical version.
-  Verify both registry versions and the unscoped `npx` entrypoint before calling
-  a release complete. Updating only the scoped package is incomplete.
+  Verify both registry versions and the exact alias dependency before calling a
+  release complete; check the unscoped `npx` entrypoint when launcher or packaging
+  behavior changed. Updating only the scoped package is incomplete.
 - Workspace sync and check from this checkout: `scripts/windows/Sync-WorkspaceSkills.ps1`,
   `./scripts/linux/sync-workspace-skills.sh`, or the macOS equivalent. No arguments
   are needed; both agents are selected. Use `-WhatIf` / `--dry-run` for preview,

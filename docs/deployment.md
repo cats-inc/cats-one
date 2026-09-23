@@ -1,5 +1,28 @@
 # npm Release Guide
 
+## Release boundaries
+
+This is the cats-one npm SOP. The [cross-repository release guide](release-guide.md)
+covers Runtime, Platform, Desktop and individually versioned Apps.
+
+Ordinary commits, merges and branch pushes do not bump or publish cats-one.
+Release the launcher when its own behavior changes, its supported dependency
+range changes, or the owner selects a new required minimum dependency baseline.
+Do not bump cats-one merely to mirror every Runtime/Platform release. Use the
+user's selected scope and existing authorization for release steps.
+
+A newer compatible dependency can be selected during fresh npm resolution
+without a launcher release. Existing installs and npx caches may keep older
+dependencies; `npx cats-one@latest` does not promise to refresh every cached
+transitive dependency. The repo lockfile is not a published consumer lockfile.
+See the [range and cache examples](release-guide.md#when-cats-one-needs-a-release).
+
+The version sources are root `package.json`, `package-lock.json.version` and
+`package-lock.json.packages[""].version`. Synchronize them without creating a Git
+tag, for example with `npm version <version> --no-git-tag-version`. Reuse a prepared
+unpublished version where appropriate. Git tags are not required for this npm
+workflow: pushing the source runs CI; the separate manual dispatch publishes it.
+
 ## Two packages, one release version
 
 | npm package | Purpose | Source |
@@ -21,17 +44,21 @@ The alias contains no duplicate Runtime/Platform orchestration implementation.
 
 ## Normal release
 
-The interactive CLI change in SPEC-002 also updates Runtime and Platform.
-Publish their implementations first, then raise cats-one's minimum dependency
-versions and regenerate its lockfile before publishing the launcher. The new
-Platform terminal and private shutdown channel must be present in the published
-dependency; sibling source checkouts are not a substitute for this release step.
+When a selected launcher release requires new dependency minima, those versions
+must already be published and downloadable. Publish only missing required
+versions, then update the ranges and resolve the lockfile from npm. Sibling
+source checkouts are not substitutes for published dependencies. The coordinated
+interactive-CLI release in SPEC-002 needed this order; it is not a requirement
+to republish Runtime and Platform for every later cats-one release.
 
-1. If Runtime/Platform dependency ranges change, publish those versions first,
-   then regenerate and verify the root lockfile against npm.
-2. Bump root `package.json` and `package-lock.json` together. Run relevant tests;
-   `node --test test/npm-alias.test.js` checks automatic alias alignment and
-   forwarding. CI's full test gate must pass before publication.
+1. Integrate remote changes and select the source, version and npm dist-tag.
+   If dependency ranges change, confirm the required npm versions exist before
+   resolving and verifying the root lockfile.
+2. Bump root `package.json` and `package-lock.json` together. Follow the repository's
+   scoped validation policy and reuse relevant passing evidence. For alias changes,
+   `node --test test/npm-alias.test.js` checks alignment and forwarding. The
+   publication workflow retains its full gate; do not duplicate it locally solely
+   for a version bump.
 3. Generate and inspect the alias payload:
 
    ```sh
@@ -47,21 +74,26 @@ dependency; sibling source checkouts are not a substitute for this release step.
    ```
 
    The workflow tests, prepares the alias, publishes the canonical package, then
-   publishes the alias. Use `next` for an explicitly requested prerelease channel.
+   publishes the alias. `--ref main` selects main's source at dispatch time; choose
+   the intended release branch when necessary. Set the channel explicitly: the
+   workflow defaults to `next`, not `latest`.
 5. Confirm the workflow succeeded and verify **both** registry entries:
 
    ```sh
    npm view @cats-inc/cats-one@latest version
    npm view cats-one@latest version
    npm view cats-one@latest dependencies --json
-   npx --yes cats-one@latest --platform-only --help
    ```
 
    Both versions must match the root version; the alias dependency must pin it
-   exactly. Use the chosen dist-tag in these checks. A fresh npm cache/consumer
-   avoids mistaking an old `npx` installation for the release. Registry metadata
-   and tarball propagation can lag publication; wait and verify actual download
-   availability rather than reporting success from a workflow dispatch alone.
+   exactly. Use the chosen dist-tag in these checks. Registry metadata and tarball
+   propagation can lag publication; verify download availability for both packages
+   rather than reporting success from a workflow dispatch alone.
+
+   When launcher or package behavior changed, verify the affected entrypoint in a
+   fresh npm cache/consumer, for example
+   `npx --yes cats-one@latest --platform-only --help`. Do not repeat full-stack
+   startup exercises solely for a version or documentation edit.
 
 ## Recover a missing alias
 

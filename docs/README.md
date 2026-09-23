@@ -29,6 +29,7 @@ filesystem/CLI behavior from remaining live-host discovery validation.
 | [ROADMAP](../ROADMAP.md) | Current | Next workspace slice and deferred coordination work |
 | [Architecture](architecture.md) | Current | Launcher, inventory, managed apply and restartable recovery |
 | [Agent guide](AGENT-GUIDE.md) | Current | Task routing and documentation/implementation discipline |
+| [Cross-repository releases](release-guide.md) | Current | Independent release scope, version sources, workflow/tag triggers and App compatibility |
 
 ## Planning Collections
 
@@ -49,7 +50,7 @@ Update the affected guide when its feature is implemented.
 | [API](api.md) | Template | API documentation scaffold |
 | [Setup](setup-guide.md) | Current | Developer dependencies, sync/check, conflicts and recovery |
 | [Testing](testing.md) | Current | Fixture/fault coverage, CLI exit codes, package contract and CI |
-| [Deployment](deployment.md) | Current | Coordinated scoped/unscoped npm release, verification and alias recovery |
+| [Deployment](deployment.md) | Current | Launcher release criteria, paired scoped/unscoped npm publication, verification and alias recovery |
 | [Security](security-guidelines.md) | Template | Security documentation scaffold |
 | [MCP](mcp-config.md) | Template | Optional MCP integration guidance |
 | [Services](services.md) | Template | Service registry scaffold |
@@ -66,4 +67,4 @@ indexes and dates. Keep proposed commands visibly labeled until they exist.
 Sibling links in architecture/planning documents assume the four Cats checkouts
 share a parent; ordinary project docs must work in a standalone cats-one checkout.
 
-*Last updated: 2026-09-11*
+*Last updated: 2026-09-23*

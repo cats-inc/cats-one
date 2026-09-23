@@ -18,6 +18,10 @@ canonical version; `npx cats-one` displays the alias's own package version in
 its installation prompt. Maintainers must publish and verify both names using
 the [npm release guide](docs/deployment.md).
 
+The [cross-repository release guide](docs/release-guide.md) covers independent
+Runtime/Platform npm releases, when cats-one needs a new version, Desktop
+official/preview publication, and individually versioned Apps and compatibility.
+
 ## Requirements
 
 - Node.js 22+
