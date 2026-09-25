@@ -97,8 +97,12 @@ Release evidence:
   `providers.yaml` and schema-1 catalog examples, started Runtime 0.3.1 and
   Platform 0.5.1. The Runtime retired the unmodified catalog copy with a
   backup and served the current ten Claude models; a repeat start was a no-op.
-  A clean profile started both services with an available catalog. Publish
-  both cats-one names at 0.2.0; the alias must pin canonical 0.2.0 exactly.
+  A clean profile started both services with an available catalog. Both
+  names were published at 0.2.0 on `latest` from `460e623` (npm-publish run
+  36187020990). The registry shows `@cats-inc/cats-one` and `cats-one` at
+  0.2.0, with the alias pinning canonical 0.2.0 exactly. A fresh-cache
+  `npx --yes cats-one@latest --platform-only --help` installed cats-one 0.2.0,
+  Platform 0.5.1 and Runtime 0.3.1.
 
 - 2026-09-23 follow-up: cats-one 0.1.24 raises dependency minima to Runtime
   0.1.27 and Platform 0.3.6. Both fix the Windows detached PowerShell launcher,
