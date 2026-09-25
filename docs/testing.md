@@ -90,6 +90,12 @@ The Ubuntu `test` CI job runs the full suite and isolated tarball
 resolution/startup/shutdown checks. The `workspace` matrix runs all four
 workspace suites on Windows/macOS/Linux with Node 22 and 24, without live services.
 
+When every changed file is under `docs/`, a `changes` job skips the `workspace`
+matrix and the required `test` job; branch protection accepts the skipped job as
+passing. Any other path, a manual run or a failed detection runs them. Tests,
+scripts and launcher files must not read repository documentation, and
+`test/docs-boundary.test.js` enforces that.
+
 ## Validation Record
 
 The Windows full suite passed 95 tests with two filesystem-specific skips
