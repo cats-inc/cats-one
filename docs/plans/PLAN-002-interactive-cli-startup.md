@@ -84,6 +84,22 @@ Release evidence:
 
 ## Progress Log
 
+- 2026-09-26 follow-up: cats-one 0.2.0 raises dependency minima to Runtime
+  0.3.1 and Platform 0.5.1, both published to npm `latest` alongside the
+  Desktop 0.5.1 standard-profile preview. The supported dependency contract
+  crosses the Runtime 0.2/0.3 and Platform 0.4/0.5 breaking minors, so the
+  launcher moves to its next minor. Its own contract is unchanged: the bins,
+  `CATS_RUNTIME_*` endpoint variables, app-managed startup, `/health` and IPC
+  shutdown all remain supported. Launcher tests passed 28/28, and the alias
+  payload holds its four files with an exact pin. A locally packed 0.2.0 ran
+  in isolated profiles on non-default ports. A profile created by cats-one
+  0.1.24 (Runtime 0.1.27, Platform 0.3.6), holding the old
+  `providers.yaml` and schema-1 catalog examples, started Runtime 0.3.1 and
+  Platform 0.5.1. The Runtime retired the unmodified catalog copy with a
+  backup and served the current ten Claude models; a repeat start was a no-op.
+  A clean profile started both services with an available catalog. Publish
+  both cats-one names at 0.2.0; the alias must pin canonical 0.2.0 exactly.
+
 - 2026-09-23 follow-up: cats-one 0.1.24 raises dependency minima to Runtime
   0.1.27 and Platform 0.3.6. Both fix the Windows detached PowerShell launcher,
   which could exit successfully without executing its command. Platform also
