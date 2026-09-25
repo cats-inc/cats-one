@@ -140,9 +140,14 @@ is not a prerequisite. Record the chosen revisions and App hashes.
 - Preview: dispatch desktop-release.yml from the intended source with the unused
   matching tag and an immutable `runtime_ref`. The workflow creates the preview
   tag/release itself. Do not push the tag first: that selects the official path.
-- Preview status and signing are separate. The current default signs when
-  credentials are available; explicitly requested unsigned previews use
-  `unsigned=true`. Current preview tags still use `vX.Y.Z`, without a prerelease suffix.
+- Preview status and signing are separate. A preview uses the *standard* signing
+  profile (each platform signs with the credentials it has) unless `unsigned=true`
+  selects the *unsigned override*, which today breaks macOS self-update. Do not
+  report a bare "signed preview" or "unsigned preview"; name the profile and each
+  platform's trust, and confirm the override's consequences with the operator
+  before dispatch, as defined in
+  [Desktop signing profiles](https://github.com/cats-inc/cats-platform/blob/main/docs/deployment.md#desktop-signing-profiles).
+  Current preview tags still use `vX.Y.Z`, without a prerelease suffix.
 
 Follow the [Desktop SOP](https://github.com/cats-inc/cats-platform/blob/main/docs/deployment.md#desktop-publication).
 
