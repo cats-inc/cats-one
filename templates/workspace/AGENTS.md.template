@@ -42,6 +42,17 @@ One-time data migrations are permitted without retaining obsolete execution APIs
 Follow `cats-one/docs/release-guide.md` and each member's release SOP. Record the
 needed boundary now; bump or publish only within the user's release authorization.
 
+## Branches and worktrees
+
+Several agents can work in these checkouts at once. Keep each member's main
+checkout on its default branch and do the work in a worktree inside that member,
+under its Git-ignored `.claude/worktrees/`, not in a sibling directory of this
+parent, which folder-wide tools such as bulk `git pull` scripts also scan. When
+you clean up after a merge, remove the worktree you created for it, then run the
+member's merged-branch sweep from its main checkout; the sweep skips any branch a
+worktree still holds. Remove only worktrees you created, and keep one past its
+merge only when the user asks.
+
 ## Maintenance skills
 
 {{SKILLS}}

@@ -101,6 +101,14 @@ OS helpers infer that root from the cats-one checkout and select both agents.
 - `gh pr merge --auto` returns success once auto-merge is *armed*, not once the
   PR is *merged*. Check `gh pr view <n> --json state,mergeStateStatus` rather
   than assuming it landed.
+- When you clean up after a merge, remove the worktree you created for that PR
+  first, then sweep with `scripts/windows/Remove-MergedBranches.ps1` or its Bash
+  twin (see `docs/AGENT-GUIDE.md`); the sweep skips any branch a worktree still
+  holds. Remove only worktrees you created, since another may hold a different
+  agent's live work, and keep one past its merge only when the user asks. While
+  agents share this clone, keep the main checkout on `main` and work in worktrees
+  under the Git-ignored `.claude/worktrees/`, not sibling directories that
+  folder-wide tools such as bulk `git pull` scripts also scan.
 
 ## Agent Skills
 

@@ -74,8 +74,10 @@ only when cleanup is requested:
 The macOS copy provides the same interface. Helpers stop on dirty worktrees, skip
 other worktrees and never remove the default branch or never-pushed branches.
 Read their help before execution. `-ReturnToDefault` / `--return-to-default`
-also updates and switches to the default branch. Do not change global Git settings
-as an implicit step; use repository-scoped or explicit user choices.
+also switches to and fast-forwards the default branch, but only leaves a branch
+whose upstream is gone: on an unmerged branch or a detached HEAD it stays and
+warns, and a failed fast-forward is reported as a warning. Do not change global
+Git settings as an implicit step; use repository-scoped or explicit user choices.
 
 ## Handoff
 
