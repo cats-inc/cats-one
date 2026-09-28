@@ -30,7 +30,7 @@ node scripts/workspace.mjs sync --root .. --agent codex
 node scripts/workspace.mjs check --root .. --agent all
 ```
 
-`--root` requires all four declared checkouts. Codex is the Node CLI's default;
+`--root` requires all five declared checkouts. Codex is the Node CLI's default;
 the OS wrappers select both agents.
 Sync materializes copies/ownership and recovers interrupted work; check and
 dry-run write nothing. See [setup](../docs/setup-guide.md) for usage and
@@ -52,7 +52,7 @@ dry-run write nothing. See [setup](../docs/setup-guide.md) for usage and
 
 `windows/Sync-AgentSkills.ps1` and the `sync-agent-skills.sh` Bash equivalents
 target one repository's `skills/`. Use the new `Sync-WorkspaceSkills.ps1` /
-`sync-workspace-skills.sh` helpers above for the four-repository parent workspace.
+`sync-workspace-skills.sh` helpers above for the five-repository parent workspace.
 Read each helper's help before running it.
 
 Follow [script standards](../docs/SCRIPT-STANDARDS.md) for naming and help.

@@ -28,6 +28,13 @@
       "packageName": "@cats-inc/cats-apps",
       "skillRoots": ["skills"],
       "role": "Official utility sources and versioned .catsapp artifacts"
+    },
+    {
+      "id": "cats-plugins",
+      "path": "cats-plugins",
+      "packageName": "@cats-inc/cats-plugins",
+      "skillRoots": ["skills"],
+      "role": "Pinned upstream plugin producer recipes and packaged plugin artifacts"
     }
   ]
 }

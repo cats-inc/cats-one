@@ -64,7 +64,7 @@ Update the affected guide when its feature is implemented.
 
 Use the existing ADR/spec/plan templates, link related documents and update their
 indexes and dates. Keep proposed commands visibly labeled until they exist.
-Sibling links in architecture/planning documents assume the four Cats checkouts
+Sibling links in architecture/planning documents assume the five Cats checkouts
 share a parent; ordinary project docs must work in a standalone cats-one checkout.
 
 *Last updated: 2026-09-23*

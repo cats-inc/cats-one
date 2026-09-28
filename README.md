@@ -69,7 +69,7 @@ manual opening and the service running.
 ## Developer Workspace
 
 `cats-one` owns the development workspace definition for sibling `cats-one`,
-`cats-runtime`, `cats-platform`, and `cats-apps` checkouts. Their parent directory
+`cats-runtime`, `cats-platform`, `cats-apps`, and `cats-plugins` checkouts. Their parent directory
 can remain outside Git. The checkout command inventories canonical maintenance
 skills and synchronizes root guidance and discovery copies.
 
@@ -85,7 +85,7 @@ then use the helper for your OS from that checkout, with no parameters:
 Each helper locates the parent workspace from its script path, synchronizes both
 `.agents/skills` and `.claude/skills`, then checks the result. Use `-WhatIf` on
 Windows or `--dry-run` on Bash to preview; `-Check` / `--check` only checks.
-Node.js and the four sibling checkouts are still required.
+Node.js and the five sibling checkouts are still required.
 
 Sync copies complete skills, records their ownership, preserves local edits and
 unrelated files, and recovers interrupted operations on the next sync. Repeating

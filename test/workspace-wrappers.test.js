@@ -53,8 +53,8 @@ for (const wrapper of wrappers) {
     const beforeMembers = await Promise.all(workspace.manifest.members.map(member => snapshot(relative(workspace.root, member.path))));
     const applied = run(workspace, wrapper, [], { env });
     assert.equal(applied.status, 0, `${applied.stdout}\n${applied.stderr}`);
-    assert.match(applied.stdout, /Sync: 4 members, 3 canonical skills, target all/);
-    assert.match(applied.stdout, /Read-only check: 4 members, 3 canonical skills, target all/);
+    assert.match(applied.stdout, /Sync: 5 members, 3 canonical skills, target all/);
+    assert.match(applied.stdout, /Read-only check: 5 members, 3 canonical skills, target all/);
     const managed = JSON.parse(await fs.readFile(relative(workspace.root, '.cats-workspace/managed.json'), 'utf8'));
     assert.equal(managed.entries.filter(entry => entry.agent === 'codex').length, 3);
     assert.equal(managed.entries.filter(entry => entry.agent === 'claude').length, 3);
@@ -74,11 +74,11 @@ for (const wrapper of wrappers) {
     const before = await snapshot(workspace.base);
     const planned = run(workspace, wrapper, [preview]);
     assert.equal(planned.status, 0, planned.stderr);
-    assert.match(planned.stdout, /Read-only preview: 4 members, 3 canonical skills, target all/);
+    assert.match(planned.stdout, /Read-only preview: 5 members, 3 canonical skills, target all/);
     assert.doesNotMatch(planned.stdout, /Read-only check:/);
     const drift = run(workspace, wrapper, [check]);
     assert.equal(drift.status, 1, drift.stderr);
-    assert.match(drift.stdout, /Read-only check: 4 members, 3 canonical skills, target all/);
+    assert.match(drift.stdout, /Read-only check: 5 members, 3 canonical skills, target all/);
     assert.notEqual(run(workspace, wrapper, ['--bogus']).status, 0);
     assert.notEqual(run(workspace, wrapper, [check, preview]).status, 0);
     assert.deepEqual(await snapshot(workspace.base), before);

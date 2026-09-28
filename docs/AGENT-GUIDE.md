@@ -20,7 +20,7 @@ project-specific procedures that are too detailed for always-loaded instructions
   `check` and `sync --dry-run` must never generate parent files or repair state.
   `sync` recovers pending work before planning new changes; ownership/recovery
   records are generated state, not files to maintain manually.
-- Sibling links in the planning package assume the four checkouts share a parent.
+- Sibling links in the planning package assume the five checkouts share a parent.
   They document ownership and do not authorize modifying a sibling repository.
 
 ## Workflows

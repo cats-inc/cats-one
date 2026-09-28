@@ -57,7 +57,7 @@ test('CLI resolves its entrypoint through a linked ancestor such as macOS tempor
   assert.match(help.stdout, /checkout command/);
   const check = run(throughAlias, ['check', '--root', workspace.root]);
   assert.equal(check.status, 1, check.stderr);
-  assert.match(check.stdout, /4 members, 3 canonical skills/);
+  assert.match(check.stdout, /5 members, 3 canonical skills/);
   assert.deepEqual(await snapshot(workspace.base), before);
 });
 
@@ -67,7 +67,7 @@ test('AC-8 CLI: fresh previews succeed, checks report drift, all targets stay re
   for (const agent of ['codex', 'claude', 'all']) {
     const preview = run(workspace, ['sync', '--root', workspace.root, '--agent', agent, '--dry-run']);
     assert.equal(preview.status, 0, preview.stderr);
-    assert.match(preview.stdout, /4 members, 3 canonical skills/);
+    assert.match(preview.stdout, /5 members, 3 canonical skills/);
     assert.match(preview.stdout, /create\s+AGENTS.md/);
     if (agent === 'claude') assert.doesNotMatch(preview.stdout, /\.agents\/skills/);
     if (agent === 'codex') assert.doesNotMatch(preview.stdout, /\.claude\/skills/);
