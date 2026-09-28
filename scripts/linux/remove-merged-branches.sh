@@ -17,6 +17,11 @@
 # never swept. Branches checked out in another worktree are reported and skipped,
 # and the default branch is never removed.
 #
+# The working tree must be clean. A clean tree is not enough to leave a branch,
+# though: someone may have committed and be waiting on CI. --return-to-default
+# only moves off a branch whose upstream is gone, and otherwise stays with a
+# warning. A fast-forward that fails is reported as a warning, not as success.
+#
 # Run `git config --global fetch.prune true` once per machine so the gone markers
 # appear without passing --prune on every fetch.
 #
@@ -113,6 +118,37 @@ if [ "$SKIP_FETCH" = false ]; then
   fi
 fi
 
+fast_forward_default() {
+  local before after output
+  if ! git_repo rev-parse --verify --quiet HEAD >/dev/null 2>&1; then
+    # An unborn branch has no commit to fast-forward from yet.
+    echo "  stay   $default_branch (no commits yet)"
+    return 0
+  fi
+  before="$(git_repo rev-parse --short HEAD)"
+  if ! git_repo rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' >/dev/null 2>&1; then
+    # A freshly initialized project has nothing to fast-forward from yet.
+    echo "  stay   $default_branch (no upstream to fast-forward from, at $before)"
+    return 0
+  fi
+
+  if ! output="$(git_repo pull --ff-only 2>&1)"; then
+    # Offline, a local branch that diverged, or another process holding the
+    # index lock. None of them damage anything, but reporting success would
+    # leave a stale default branch looking current.
+    echo "warning: git pull --ff-only failed, so '$default_branch' stays at $before." >&2
+    printf '%s\n' "$output" >&2
+    return 0
+  fi
+
+  after="$(git_repo rev-parse --short HEAD)"
+  if [ "$after" = "$before" ]; then
+    echo "  pull   $default_branch (already up to date at $after)"
+  else
+    echo "  pull   $default_branch (fast-forwarded $before..$after)"
+  fi
+}
+
 local_branch_exists() {
   if [ -z "${1:-}" ]; then
     return 1
@@ -179,9 +215,14 @@ is_worktree_held() {
 
 blocked=()
 deletable=()
+# Only a gone upstream shows the current branch landed; a detached HEAD has none.
+current_merged=false
 while IFS="$(printf '\t')" read -r name track; do
   if [ "$track" != "gone" ]; then
     continue
+  fi
+  if [ -n "$current_branch" ] && [ "$name" = "$current_branch" ]; then
+    current_merged=true
   fi
   # The default branch tracks a live upstream and should never reach this list,
   # but never delete the branch everything else falls back to.
@@ -241,6 +282,15 @@ fi
 if [ "$RETURN_TO_DEFAULT" = true ]; then
   if [ -z "$default_branch" ]; then
     echo "warning: no default branch could be determined, so --return-to-default did nothing." >&2
+  elif [ "$current_branch" != "$default_branch" ] && [ "$current_merged" = false ]; then
+    # A clean tree only shows the work was committed. In a shared clone this
+    # branch may be someone else's, still waiting on its pull request.
+    if [ -n "$current_branch" ]; then
+      position="'$current_branch', which has not merged (its upstream still exists, or it was never pushed)"
+    else
+      position="a detached HEAD"
+    fi
+    echo "warning: staying on $position, so --return-to-default did not switch to or fast-forward '$default_branch'. Switch yourself once nobody is working here." >&2
   elif [ "$DRY_RUN" = true ]; then
     echo "  would switch to $default_branch and fast-forward"
   else
@@ -249,11 +299,8 @@ if [ "$RETURN_TO_DEFAULT" = true ]; then
         echo "Failed to switch to $default_branch." >&2
         exit 1
       fi
-      git_repo pull --ff-only >/dev/null 2>&1 || true
-      echo "  switch $default_branch (fast-forwarded)"
-    else
-      git_repo pull --ff-only >/dev/null 2>&1 || true
-      echo "  pull   $default_branch (fast-forwarded)"
+      echo "  switch $default_branch (left merged '$current_branch')"
     fi
+    fast_forward_default
   fi
 fi

@@ -21,7 +21,9 @@
     branch is never removed.
 
     The working tree must be clean. A dirty tree usually means unfinished work,
-    so the script stops rather than guessing what to do with it.
+    so the script stops rather than guessing what to do with it. A clean tree is
+    not enough to leave a branch, though: someone may have committed and be
+    waiting on CI. The script only moves off a branch whose upstream is gone.
 
     Run `git config --global fetch.prune true` once per machine so the gone
     markers appear without passing --prune on every fetch.
@@ -34,7 +36,12 @@
 .PARAMETER ReturnToDefault
     Switch to the default branch and fast-forward it after sweeping. The switch
     happens regardless when the current branch is one of the deleted ones,
-    because a checked-out branch cannot be removed.
+    because a checked-out branch cannot be removed. A current branch that has
+    not merged - its upstream still exists, it was never pushed, or HEAD is
+    detached - is left checked out with a warning, and the default branch is not
+    fast-forwarded. A fast-forward that fails is reported as a warning and leaves
+    the default branch where it was; a default branch with no upstream yet is
+    left as it is.
 
 .PARAMETER SkipFetch
     Skip `git fetch --prune`. Only useful when a fetch just ran, since without a
@@ -73,6 +80,41 @@ function Invoke-Git {
         throw "git $($Arguments -join ' ') failed with exit code $LASTEXITCODE`n$output"
     }
     return $output
+}
+
+function Update-DefaultBranch {
+    param([string]$Name)
+
+    Invoke-Git @("rev-parse", "--verify", "--quiet", "HEAD") -AllowFailure | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        # An unborn branch has no commit to fast-forward from yet.
+        Write-Host "  stay   $Name (no commits yet)"
+        return
+    }
+
+    $before = (Invoke-Git @("rev-parse", "--short", "HEAD") | Select-Object -First 1).ToString().Trim()
+    Invoke-Git @("rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}") -AllowFailure | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        # A freshly initialized project has nothing to fast-forward from yet.
+        Write-Host "  stay   $Name (no upstream to fast-forward from, at $before)"
+        return
+    }
+
+    $output = Invoke-Git @("pull", "--ff-only") -AllowFailure
+    if ($LASTEXITCODE -ne 0) {
+        # Offline, a local branch that diverged, or another process holding the
+        # index lock. None of them damage anything, but reporting success would
+        # leave a stale default branch looking current.
+        Write-Warning "git pull --ff-only failed, so '$Name' stays at $before.`n$($output -join "`n")"
+        return
+    }
+
+    $after = (Invoke-Git @("rev-parse", "--short", "HEAD") | Select-Object -First 1).ToString().Trim()
+    if ($after -eq $before) {
+        Write-Host "  pull   $Name (already up to date at $after)"
+    } else {
+        Write-Host "  pull   $Name (fast-forwarded $before..$after)"
+    }
 }
 
 function Test-LocalBranch {
@@ -171,6 +213,9 @@ foreach ($line in @(Invoke-Git @("for-each-ref", "--format=%(refname:short)%09%(
     }
 }
 
+# Only a gone upstream shows the current branch landed; a detached HEAD has none.
+$currentMerged = [bool]($currentBranch -and ($gone -contains $currentBranch))
+
 # The default branch tracks a live upstream and should never reach this list,
 # but never delete the branch everything else falls back to.
 $gone = @($gone | Where-Object { $_ -ne $defaultBranch })
@@ -217,16 +262,24 @@ if ($deletable.Count -eq 0) {
 if ($ReturnToDefault) {
     if (-not $defaultBranch) {
         Write-Warning "No default branch could be determined, so -ReturnToDefault did nothing."
+    } elseif ($currentBranch -ne $defaultBranch -and -not $currentMerged) {
+        # A clean tree only shows the work was committed. In a shared clone this
+        # branch may be someone else's, still waiting on its pull request.
+        $position = if ($currentBranch) {
+            "'$currentBranch', which has not merged (its upstream still exists, or it was never pushed)"
+        } else {
+            "a detached HEAD"
+        }
+        Write-Warning "Staying on $position, so -ReturnToDefault did not switch to or fast-forward '$defaultBranch'. Switch yourself once nobody is working here."
     } elseif ($currentBranch -ne $defaultBranch) {
         if ($PSCmdlet.ShouldProcess($defaultBranch, "Switch and fast-forward")) {
             Invoke-Git @("switch", $defaultBranch) | Out-Null
-            Invoke-Git @("pull", "--ff-only") -AllowFailure | Out-Null
-            Write-Host "  switch $defaultBranch (fast-forwarded)"
+            Write-Host "  switch $defaultBranch (left merged '$currentBranch')"
+            Update-DefaultBranch $defaultBranch
         }
     } else {
         if ($PSCmdlet.ShouldProcess($defaultBranch, "Fast-forward")) {
-            Invoke-Git @("pull", "--ff-only") -AllowFailure | Out-Null
-            Write-Host "  pull   $defaultBranch (fast-forwarded)"
+            Update-DefaultBranch $defaultBranch
         }
     }
 }
