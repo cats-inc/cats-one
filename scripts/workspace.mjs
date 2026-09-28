@@ -12,7 +12,7 @@ Usage:
   node cats-one/scripts/workspace.mjs check --root <parent> [--agent codex|claude|all]
 
 Options:
-  --root <parent>   Required existing parent of all four Cats checkouts
+  --root <parent>   Required existing parent of all five Cats checkouts
   --agent <target>  Selected skill mirror; defaults to codex
   --dry-run        Preview sync without writing or recovering interrupted work
   -h, --help       Show help without a root or installed developer dependencies

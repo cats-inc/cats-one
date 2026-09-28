@@ -23,7 +23,7 @@ Developer workspace bootstrap is defined in
 [PLAN-001](docs/plans/PLAN-001-developer-workspace-bootstrap.md). The checkout
 command `scripts/workspace.mjs sync` materializes parent guidance/skills and
 ownership with interruption recovery. `check` and `sync --dry-run` remain
-strictly read-only. The Node CLI requires an explicit `--root` and four members.
+strictly read-only. The Node CLI requires an explicit `--root` and five members.
 OS helpers infer that root from the cats-one checkout and select both agents.
 
 - Canonical npm name: `@cats-inc/cats-one`. The unscoped `cats-one` is a live,

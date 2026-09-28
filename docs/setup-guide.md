@@ -3,7 +3,7 @@
 ## Requirements
 
 Use Node.js 22+ and npm 12+. Product launcher usage is in the [README](../README.md).
-The developer command requires all four sibling source checkouts:
+The developer command requires all five sibling source checkouts:
 
 ```text
 <chosen parent>/
@@ -11,6 +11,7 @@ The developer command requires all four sibling source checkouts:
   cats-runtime/   skills/
   cats-platform/  skills/
   cats-apps/      skills/
+  cats-plugins/   skills/
 ```
 
 The parent can have any name and need not be a Git repository. Each member needs
@@ -91,7 +92,7 @@ with other machines.
 Platform's nested maintenance skills are discovered recursively; runtime's
 separate product `runtime-skills/` library is excluded.
 
-All four members use `skills/` for developer skills. Workspaces synchronized
+All five members use `skills/` for developer skills. Workspaces synchronized
 before the 2026-09-11 directory alignment may record the runtime maintenance
 package's former `developer-skills/` source. Normal sync updates that one known
 ownership entry through existing digest checks and journal recovery. Edited

@@ -279,7 +279,7 @@ test('CLI sync materializes selected files and check returns success afterward',
   const result = spawnSync(process.execPath, [cli, 'sync', '--root', workspace.root], { cwd: workspace.base, encoding: 'utf8', timeout: 60000 });
   assert.ifError(result.error);
   assert.equal(result.status, 0, result.stderr);
-  assert.match(result.stdout, /Sync: 4 members, 3 canonical skills/);
+  assert.match(result.stdout, /Sync: 5 members, 3 canonical skills/);
   await assertSettled(workspace);
   const before = await snapshot(workspace.base);
   const check = spawnSync(process.execPath, [cli, 'check', '--root', workspace.root], { cwd: workspace.base, encoding: 'utf8', timeout: 60000 });

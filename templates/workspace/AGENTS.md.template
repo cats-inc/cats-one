@@ -28,7 +28,8 @@ spanning repositories can require reading several members' instructions.
 Run repository-relative commands with the owning checkout as the working
 directory. Each checkout has independent Git state; this parent need not be a
 repository. Runtime owns generic product workspace capabilities; platform owns
-Desktop/App selection and installation; apps owns utility artifact production.
+Desktop/App selection and installation; apps owns utility artifact production;
+plugins owns plugin producer recipes and packaged plugin artifacts.
 
 ## Version and upgrade policy
 
