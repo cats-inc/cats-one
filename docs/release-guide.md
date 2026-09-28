@@ -134,9 +134,8 @@ is not a prerequisite. Record the chosen revisions and App hashes.
 
 - Official: push the matching `vX.Y.Z` tag in cats-platform to trigger the Desktop
   workflow. The workflow's guard requires the tag and package/lockfile versions
-  to agree. Currently each OS build resolves Runtime from `main` and records its
-  SHA; the Platform tag does not pin Runtime. Resolving one immutable Runtime SHA
-  before official builds is a separate workflow improvement, not implemented here.
+  to agree. The release guard resolves Runtime from `main` once and supplies that
+  immutable commit to every OS build and the complete Desktop source bundle.
 - Preview: dispatch desktop-release.yml from the intended source with the unused
   matching tag and an immutable `runtime_ref`. The workflow creates the preview
   tag/release itself. Do not push the tag first: that selects the official path.
@@ -150,6 +149,14 @@ is not a prerequisite. Record the chosen revisions and App hashes.
   Current preview tags still use `vX.Y.Z`, without a prerelease suffix.
 
 Follow the [Desktop SOP](https://github.com/cats-inc/cats-platform/blob/main/docs/deployment.md#desktop-publication).
+
+Desktop's complete source ZIP includes its exact Platform/Runtime commits and the
+producer source for each selected App, with licenses, lockfiles and build guidance.
+The matching manifest/checksum and all three packaged source receipts gate draft
+publication. GitHub's automatic source archives remain Platform-only. The separate
+cats-one launcher and unbundled Plugins are not part of the Desktop input set; this
+packaging change does not require their release or an App version bump. See the
+[complete-source SOP](https://github.com/cats-inc/cats-platform/blob/main/docs/deployment.md#complete-desktop-source-downloads).
 
 ## Individually versioned Apps
 
@@ -215,4 +222,4 @@ for examples and when a changed declaration requires a new App artifact.
 - Keep entrypoint verification proportional to launcher/package changes. Do not
   repeat full-stack startup exercises solely for a version or documentation edit.
 
-*Last updated: 2026-09-23*
+*Last updated: 2026-09-29*
