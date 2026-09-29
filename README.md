@@ -8,6 +8,12 @@ The software is provided under the [MIT License](LICENSE), including its warrant
 disclaimer and limitation of liability. Back up important files before allowing
 agents to modify them.
 
+Cats drives third-party agent CLIs, model APIs and local models that you install
+and sign in to yourself. Runtime only launches the official CLIs and never reads or
+reuses their credentials, but each provider's terms decide what your plan allows.
+Check the terms that apply to your account before connecting a provider; staying
+within them is your responsibility.
+
 `cats-one` boots the whole Cats stack in one shot: it starts
 [`@cats-inc/cats-runtime`](https://github.com/cats-inc/cats-runtime) (unless one is
 already serving), waits for its `/health` endpoint, then launches
