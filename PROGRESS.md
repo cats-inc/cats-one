@@ -10,6 +10,7 @@
 | Developer workspace planning | Accepted for implementation | ADR-001 accepted; SPEC-001 and PLAN-001 track phased delivery |
 | Developer workspace command | Phases 1–2 implemented | Inventory, check/preview, managed copies/ownership and interruption recovery |
 | Launcher Platform 0.6 alignment | Published in 0.3.0 | Platform range `^0.6.0` (Runtime `^0.3.1` unchanged) adopts the companion-role migration line; next minor because the supported dependency contract crosses Platform's breaking minor; recorded in PLAN-002 |
+| Launcher Runtime 0.4 / Platform 0.7 alignment | Prepared in 0.4.0 | Platform range `^0.7.0` and Runtime range `^0.4.0`; next launcher minor because both supported dependency contracts cross a breaking minor (Runtime listener default, Platform bundling it); no launcher behavior change; recorded in PLAN-002 |
 | Launcher dependency alignment | Published in 0.2.0 | Minimum Platform 0.5.1 and Runtime 0.3.1 adopt the schema-2 catalog line and the Desktop 0.5.1 fixes; next minor because the supported dependency contract crosses their breaking minors; recorded in PLAN-002 |
 | Unscoped npm alias release tooling | Implemented | Generated matching version/exact dependency, paired publish workflow and release checklist |
 | Cross-repository build/dev and release coordination | Deferred | Outside the first workspace synchronization slice |
@@ -75,4 +76,4 @@ cleanup and concurrent writers. CI runs the same workspace suites on Node 22/24
 on Windows/macOS/Linux. Live parent-session discovery remains pending.
 See [testing](docs/testing.md) and the implementation PR for verification evidence.
 
-*Last updated: 2026-09-23*
+*Last updated: 2026-09-30*
