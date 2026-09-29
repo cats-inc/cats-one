@@ -2,6 +2,12 @@
 
 Bootstrap installer entrypoint for the Cats ecosystem.
 
+Cats / Cats Inc. is a software project name maintained by the individual
+developer [sammykenny2](https://github.com/sammykenny2), not a registered company.
+The software is provided under the [MIT License](LICENSE), including its warranty
+disclaimer and limitation of liability. Back up important files before allowing
+agents to modify them.
+
 `cats-one` boots the whole Cats stack in one shot: it starts
 [`@cats-inc/cats-runtime`](https://github.com/cats-inc/cats-runtime) (unless one is
 already serving), waits for its `/health` endpoint, then launches

@@ -2,6 +2,7 @@
   "name": "@cats-inc/cats-one",
   "version": "0.2.0",
   "description": "Bootstrap installer entrypoint for the Cats ecosystem.",
+  "author": "sammykenny2 <sammykenny2@gmail.com>",
   "bin": {
     "cats-one": "bin/cli.js"
   },

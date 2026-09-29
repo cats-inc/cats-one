@@ -15,6 +15,7 @@ export function createAliasManifest(canonical) {
     bin: { 'cats-one': 'bin/cli.js' },
     dependencies: { '@cats-inc/cats-one': canonical.version },
     license: canonical.license,
+    author: canonical.author,
     repository: canonical.repository,
     homepage: canonical.homepage,
     bugs: canonical.bugs,
