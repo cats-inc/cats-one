@@ -96,6 +96,19 @@ passing. Any other path, a manual run or a failed detection runs them. Tests,
 scripts and launcher files must not read repository documentation, and
 `test/docs-boundary.test.js` enforces that.
 
+Code that already passed is skipped the same way. `changes` fingerprints the mode,
+blob and path of every tracked file outside `docs/` (for a pull request, the merge
+result) and looks up the Actions cache key `ci-green-v1-<fingerprint>`. The
+`record-tested` job saves that key only after the whole `workspace` matrix and `test`
+passed. A pull request rebased only because main gained documentation keeps its
+fingerprint and reuses the earlier green run. Any change outside `docs/`, including the
+workflow or lockfile, a missing or evicted cache entry, or a manual run runs everything.
+Pull-request caches stay within that pull request, so the post-merge push runs in full.
+A pull request can also reuse a green run from main when its code outside `docs/` equals
+main's, which means that exact code already passed there. The skip trusts everyone who can
+push to the branch: such a person could save a marker for untested code. Pull requests from
+forks cannot write to the base branch's cache scope.
+
 ## Validation Record
 
 The Windows full suite passed 95 tests with two filesystem-specific skips

@@ -12,12 +12,16 @@ permissions:
 jobs:
   # A change confined to docs/ skips the workspace matrix and the required
   # test job; branch protection accepts a skipped required job as passing.
-  # Any other path, a manual run or a failed detection runs them.
+  # So does code that already passed: the fingerprint covers every tracked file
+  # outside docs/, so a rebase that only brings in docs from main reuses the
+  # earlier green run. Any other path, a manual run or a failed detection runs them.
   # test/docs-boundary.test.js keeps tests, scripts and the launcher from reading docs/.
   changes:
     runs-on: ubuntu-latest
     outputs:
       code: ${{ steps.paths.outputs.code }}
+      fingerprint: ${{ steps.fingerprint.outputs.fingerprint }}
+      tested: ${{ steps.green.outputs.cache-hit }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -41,11 +45,27 @@ jobs:
             if [ -n "$changed" ] && ! grep -qv '^docs/' <<< "$changed"; then code=false; fi
           fi
           echo "code=$code" | tee -a "$GITHUB_OUTPUT"
+      - name: Fingerprint the code under test
+        id: fingerprint
+        run: |
+          set -euo pipefail
+          # Mode, blob and path of every tracked file outside docs/. For a pull
+          # request this is the merge result that the tests would exercise.
+          fingerprint=$(git ls-tree -r --full-tree HEAD | awk -F '\t' '$2 !~ /^docs\//' | sha256sum | cut -d ' ' -f 1)
+          echo "fingerprint=$fingerprint" | tee -a "$GITHUB_OUTPUT"
+      - name: Look for an earlier green run of this exact code
+        id: green
+        if: steps.paths.outputs.code == 'true' && github.event_name != 'workflow_dispatch'
+        uses: actions/cache/restore@v4
+        with:
+          path: .ci-green
+          key: ci-green-v1-${{ steps.fingerprint.outputs.fingerprint }}
+          lookup-only: true
 
   workspace:
     name: workspace (${{ matrix.os }}, Node ${{ matrix.node }})
     needs: changes
-    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.code == 'true') }}
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || (needs.changes.outputs.code == 'true' && needs.changes.outputs.tested != 'true')) }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -66,7 +86,7 @@ jobs:
 
   test:
     needs: changes
-    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.code == 'true') }}
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || (needs.changes.outputs.code == 'true' && needs.changes.outputs.tested != 'true')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -146,3 +166,20 @@ jobs:
           done
           echo "platform_down=$PLATFORM_DOWN runtime_down=$RUNTIME_DOWN"
           test "$PLATFORM_DOWN" = "1" -a "$RUNTIME_DOWN" = "1"
+
+  # Saved only after the whole matrix and the test job passed on this exact code.
+  record-tested:
+    needs: [changes, workspace, test]
+    if: ${{ needs.changes.result == 'success' && needs.changes.outputs.code == 'true' && needs.changes.outputs.tested != 'true' && needs.workspace.result == 'success' && needs.test.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Record this code as tested
+        env:
+          FINGERPRINT: ${{ needs.changes.outputs.fingerprint }}
+        run: |
+          mkdir -p .ci-green
+          echo "$FINGERPRINT $GITHUB_RUN_ID" > .ci-green/marker
+      - uses: actions/cache/save@v4
+        with:
+          path: .ci-green
+          key: ci-green-v1-${{ needs.changes.outputs.fingerprint }}
