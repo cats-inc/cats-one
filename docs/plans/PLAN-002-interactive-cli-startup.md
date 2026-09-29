@@ -84,6 +84,14 @@ Release evidence:
 
 ## Progress Log
 
+- 2026-09-30 follow-up: cats-one 0.4.0 raises the Platform range to `^0.7.0` and the
+  Runtime range to `^0.4.0`. Runtime 0.4.0 is a breaking minor (an API key no longer
+  implies binding every interface; remote deployments set `CATS_RUNTIME_HOST`
+  explicitly) and Platform 0.7.0 is a minor because it bundles that Runtime and adds
+  features; the launcher's own behavior is unchanged and it implements no migration.
+  Both ranges cross a breaking minor, so this is the next launcher minor. The lockfile
+  resolves Platform 0.7.0 and Runtime 0.4.0 from npm; the alias payload
+  holds its four files with an exact 0.4.0 pin. Publication evidence follows.
 - 2026-09-29 follow-up: cats-one 0.3.0 raises the Platform range to `^0.6.0`;
   Runtime stays `^0.3.1`. Platform 0.6 is a breaking minor
   ([Platform ADR-124](https://github.com/cats-inc/cats-platform/blob/main/docs/decisions/124-model-companion-as-a-cat-role-not-a-skill-profile.md)):
