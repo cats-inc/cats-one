@@ -207,6 +207,24 @@ are explanatory equivalents, not accepted manifest values today. See the
 [App compatibility SOP](https://github.com/cats-inc/cats-apps/blob/main/docs/deployment.md#host-and-sdk-compatibility)
 for examples and when a changed declaration requires a new App artifact.
 
+### Apps build with the Platform App SDK
+
+Platform npm carries the public `@cats-inc/cats-platform/app-sdk` entry from
+Platform 0.6.0 onward ([Platform ADR-123](https://github.com/cats-inc/cats-platform/blob/main/docs/decisions/123-expose-app-sdk-contract-as-platform-npm-subpath.md)):
+manifest and browser SDK types, the installer's own package validation and an
+encoder whose bytes are identical on every OS. cats-apps pins one exact Platform
+version as a root devDependency and builds and validates every App with it.
+
+- A Platform npm release does not change cats-apps. Raising that pin is a cats-apps
+  change, and it can change archive bytes, so never rebuild a released App version
+  under a new pin.
+- An App that needs a new SDK capability, or validation against a newer host, needs
+  that Platform version published to npm first. A Desktop-only release is not enough.
+- Platform 0.6.0's `exports` allows only `.`, `./package.json` and `./app-sdk`; other deep
+  package paths no longer resolve. Removing a public path later needs a Platform minor.
+- cats-one depends on neither the SDK nor any App, and Apps and Plugins are not npm
+  packages. A standalone `@cats-inc/app-sdk` is a later stage with its own authorization.
+
 ## Validation and completion
 
 - Documentation/rules-only changes check the diff, links and described commands;
