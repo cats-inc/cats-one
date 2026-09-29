@@ -13,6 +13,7 @@ test('alias version and exact dependency follow every canonical release', async 
     const manifest = createAliasManifest({ ...canonical, version });
     assert.equal(manifest.name, 'cats-one');
     assert.equal(manifest.version, version);
+    assert.equal(manifest.author, 'sammykenny2 <sammykenny2@gmail.com>');
     assert.deepEqual(manifest.dependencies, { '@cats-inc/cats-one': version });
   }
 });

@@ -23,6 +23,11 @@ tag, for example with `npm version <version> --no-git-tag-version`. Reuse a prep
 unpublished version where appropriate. Git tags are not required for this npm
 workflow: pushing the source runs CI; the separate manual dispatch publishes it.
 
+Normal CI creates temporary tarballs and alias fixtures for verification; it does
+not publish either npm package. Keep these checks enabled for non-release changes
+instead of using a skip marker to prevent publication. Confirm the required PR
+check is satisfied; a successful manual run may not populate the PR check result.
+
 Apply the [compatibility and data-upgrade policy](release-guide.md#compatibility-and-data-upgrades)
 when selecting versions: breaking launcher CLI, configuration or supported
 dependency contracts move `0.x` to its next minor, or stable versions to the next
@@ -44,7 +49,7 @@ The 2026-09-23 correction addresses exactly this: the canonical package was
 0.1.22 while the alias remained 0.1.0.
 
 `node scripts/prepare-npm-alias.mjs` derives the alias version, exact canonical
-dependency, engine requirements and repository metadata from root `package.json`.
+dependency, author, engine requirements and repository metadata from root `package.json`.
 It copies the maintained forwarder, README and license into ignored `.npm/alias/`.
 Do not hand-edit the generated manifest or maintain a second version counter.
 The alias contains no duplicate Runtime/Platform orchestration implementation.
