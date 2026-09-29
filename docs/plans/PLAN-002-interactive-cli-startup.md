@@ -94,7 +94,12 @@ Release evidence:
   written by 0.5.8 migrated with a backup equal to its original bytes, a repeat start left it
   unchanged, a blocked backup path left the stored value intact until cleared (0.6.1), and a
   clean profile started. The lockfile resolves Platform 0.6.1 and Runtime 0.3.1; 109 launcher
-  tests pass and the alias payload holds its four files with an exact 0.3.0 pin.
+  tests pass and the alias payload holds its four files with an exact 0.3.0 pin. Both
+  names were published at 0.3.0 on `latest` from `03aa385` (npm-publish run
+  36522102470). The registry shows `@cats-inc/cats-one` and `cats-one` at 0.3.0, with the
+  alias pinning canonical 0.3.0 exactly. A fresh-cache
+  `npx --yes cats-one@latest --platform-only --help` installed cats-one 0.3.0,
+  Platform 0.6.1 and Runtime 0.3.2.
 
 - 2026-09-26 follow-up: cats-one 0.2.0 raises dependency minima to Runtime
   0.3.1 and Platform 0.5.1, both published to npm `latest` alongside the
