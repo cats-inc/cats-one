@@ -91,7 +91,18 @@ Release evidence:
   features; the launcher's own behavior is unchanged and it implements no migration.
   Both ranges cross a breaking minor, so this is the next launcher minor. The lockfile
   resolves Platform 0.7.0 and Runtime 0.4.0 from npm; the alias payload
-  holds its four files with an exact 0.4.0 pin. Publication evidence follows.
+  holds its four files with an exact 0.4.0 pin. Published 2026-09-30 from
+  `4879c25eb8068d530de9f0f767b7c6a35d16bcc9` by the
+  [npm publish workflow](https://github.com/cats-inc/cats-one/actions/runs/36614342536):
+  tests passed, the alias was prepared from the canonical package, and both names were
+  published with Sigstore provenance
+  ([transparency log 3004229635](https://search.sigstore.dev/?logIndex=3004229635)).
+  Verified after propagation: `@cats-inc/cats-one@latest` and `cats-one@latest` are
+  0.4.0 and the alias depends on exactly `0.4.0`; a fresh-cache
+  `npx --yes cats-one@latest --platform-only --help` resolved cats-one 0.4.0,
+  Platform 0.7.0 and Runtime 0.4.0. Follow-up: `engines.npm` declares `>=12.0.0`,
+  which no released npm satisfies, so every install prints an `EBADENGINE` warning;
+  correct it in the next launcher patch.
 - 2026-09-29 follow-up: cats-one 0.3.0 raises the Platform range to `^0.6.0`;
   Runtime stays `^0.3.1`. Platform 0.6 is a breaking minor
   ([Platform ADR-124](https://github.com/cats-inc/cats-platform/blob/main/docs/decisions/124-model-companion-as-a-cat-role-not-a-skill-profile.md)):
