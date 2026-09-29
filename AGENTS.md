@@ -29,7 +29,7 @@ OS helpers infer that root from the cats-one checkout and select both agents.
 - Canonical npm name: `@cats-inc/cats-one`. The unscoped `cats-one` is a live,
   separately published alias used by `npx cats-one`; it is not a reserved stub.
 - Bin command: `cats-one`.
-- History note: this package was extracted from the `one-man-digital-company`
+- History note: this package was extracted from the maintainer's private
   monorepo in 2026-07 with full history. It was named `cats-can` between
   2026-03-30 and 2026-07-21; npm's name-similarity rule blocks that unscoped
   name (`cat-scan` collision), so it returned to its original `cats-one` name.
