@@ -84,6 +84,18 @@ Release evidence:
 
 ## Progress Log
 
+- 2026-09-29 follow-up: cats-one 0.3.0 raises the Platform range to `^0.6.0`;
+  Runtime stays `^0.3.1`. Platform 0.6 is a breaking minor
+  ([Platform ADR-124](https://github.com/cats-inc/cats-platform/blob/main/docs/decisions/124-model-companion-as-a-cat-role-not-a-skill-profile.md)):
+  the API no longer accepts the `'companion'` skill profile, and Platform migrates stored
+  chat state once, keeping a dedicated backup. The launcher implements no migration of its
+  own. Its supported dependency contract crosses that minor, so this is the next launcher
+  minor. Platform npm 0.6.0 and 0.6.1 were verified on isolated profiles: an existing profile
+  written by 0.5.8 migrated with a backup equal to its original bytes, a repeat start left it
+  unchanged, a blocked backup path left the stored value intact until cleared (0.6.1), and a
+  clean profile started. The lockfile resolves Platform 0.6.1 and Runtime 0.3.1; 109 launcher
+  tests pass and the alias payload holds its four files with an exact 0.3.0 pin.
+
 - 2026-09-26 follow-up: cats-one 0.2.0 raises dependency minima to Runtime
   0.3.1 and Platform 0.5.1, both published to npm `latest` alongside the
   Desktop 0.5.1 standard-profile preview. The supported dependency contract
