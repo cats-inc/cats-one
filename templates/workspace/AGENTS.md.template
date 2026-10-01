@@ -46,11 +46,11 @@ needed boundary now; bump or publish only within the user's release authorizatio
 
 For all members and agents, prepare release notes, version fields, exact source
 and artifact pins, compatibility/migration notes and signing policy in the
-original bump commit/PR. After publication, run required verification and report
-the results; GitHub Release descriptions and Actions run results/logs are hosted
-evidence, not new Git-tracked reports. Do not create post-release tracking files,
-status-only commits or PRs merely to mark a version published or append checksums
-and validation. This rule overrides generic project-memory sync for routine
+original bump commit/PR. After publication, run required verification, report
+the results in the final response, and stop; Actions run results/logs and release
+assets are the hosted evidence. Do not edit a published GitHub Release, create
+post-release tracking files, status-only commits or PRs, or offer any of these as
+optional follow-ups. This rule overrides generic project-memory sync for routine
 publication outcomes. Further repository edits need an explicit request or a
 concrete release defect within authorized scope. After successful verification,
 perform authorized cleanup and finish; do not chase unrelated main commits for

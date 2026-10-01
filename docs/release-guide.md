@@ -50,23 +50,22 @@ to GitHub Releases or the npm registry for that list.
 
 After publication, complete the existing workflow, registry and artifact checks
 for the selected target, reuse applicable passing evidence, and report the actual
-results and limitations in the final response. The existing GitHub Release
-description may hold the concise result; GitHub Actions automatically retains
-run results/logs, and npm registry metadata identifies npm publications. These
-are hosted records, not new Git-tracked files. Do not create a GitHub Release for
-an npm-only publication. Existing tracked workflow definitions change only when
-their behavior needs changing, not to record each version's outcome. Required
-generated checksums/provenance/source receipts remain ordinary release assets.
-Updating a Release description is optional, not another mandatory completion
-gate; existing workflow evidence and the final response are sufficient.
+results and limitations in the final response. That report ends the release.
+GitHub Actions run results/logs, the generated release assets and npm registry
+metadata are the hosted records. Do not create a GitHub Release for an npm-only
+publication. Existing tracked workflow definitions change only when their
+behavior needs changing, not to record each version's outcome. Required generated
+checksums/provenance/source receipts remain ordinary release assets.
 
-MUST NOT create post-publication tracking files, status edits, commits or PRs
-solely to flip "prepared" to "published", append verification/checksums, or update
-release history in README, PROGRESS or repository docs. This release-specific rule
-overrides generic durable project-memory and documentation-sync requirements for
-routine publication outcomes. A new explicit documentation request or a concrete
-release defect within authorized scope is separate work; do not manufacture one
-as a completion requirement.
+MUST NOT, after publication, edit the published GitHub Release (description,
+title, assets or flags) or create tracking files, status edits, commits or PRs to
+flip "prepared" to "published", append verification/checksums, or update release
+history in README, PROGRESS or repository docs. MUST NOT offer any of these as an
+optional follow-up either. This release-specific rule overrides generic durable
+project-memory and documentation-sync requirements for routine publication
+outcomes. Only a concrete release defect within authorized scope, or the owner's
+explicit request for that specific change, justifies a post-publication change.
+Do not propose one.
 
 Once the selected immutable release is published and its required checks pass,
 perform only its authorized branch/worktree cleanup and finish. Later unrelated
