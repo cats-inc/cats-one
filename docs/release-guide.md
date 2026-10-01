@@ -40,6 +40,14 @@ Pin external Runtime/App inputs in that change. Select this repository's source
 SHA from the completed bump commit; do not create another tracked edit to insert
 that commit's own SHA. The existing workflow records resolved source identities.
 
+Write that preparation so it stays true after publication. Keep status words such
+as "prepared" or "published" out of headings and sentences, and do not phrase
+hosted checks as pending work. State the planned trigger, expected trust and the
+checks the workflow enforces, then point to the hosted record for results, for
+example "Publication results: the `vX.Y.Z` GitHub Release and its workflow run."
+Repository docs keep procedures, not a running list of published versions; point
+to GitHub Releases or the npm registry for that list.
+
 After publication, complete the existing workflow, registry and artifact checks
 for the selected target, reuse applicable passing evidence, and report the actual
 results and limitations in the final response. The existing GitHub Release
