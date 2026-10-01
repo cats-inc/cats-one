@@ -26,6 +26,45 @@ scope, rather than silently releasing every repository.
 Ordinary branch pushes run the configured CI. A successful CI run or uploaded
 CI artifact is not a published npm package, Desktop release, or App release.
 
+## Release preparation and completion
+
+Owner instruction accepted 2026-10-01, for all Cats repositories and agents.
+
+Prepare the version fields, release notes, exact source/artifact pins,
+compatibility and migration notes, and applicable signing profile together in
+the original bump commit/PR before publication. State expected trust and planned
+checks honestly; results that do not exist yet must not be described as passed.
+Use the user's authorized Git workflow, including direct commit/push to main
+when requested. Preparation does not require a second documentation delivery.
+Pin external Runtime/App inputs in that change. Select this repository's source
+SHA from the completed bump commit; do not create another tracked edit to insert
+that commit's own SHA. The existing workflow records resolved source identities.
+
+After publication, complete the existing workflow, registry and artifact checks
+for the selected target, reuse applicable passing evidence, and report the actual
+results and limitations in the final response. The existing GitHub Release
+description may hold the concise result; GitHub Actions automatically retains
+run results/logs, and npm registry metadata identifies npm publications. These
+are hosted records, not new Git-tracked files. Do not create a GitHub Release for
+an npm-only publication. Existing tracked workflow definitions change only when
+their behavior needs changing, not to record each version's outcome. Required
+generated checksums/provenance/source receipts remain ordinary release assets.
+Updating a Release description is optional, not another mandatory completion
+gate; existing workflow evidence and the final response are sufficient.
+
+MUST NOT create post-publication tracking files, status edits, commits or PRs
+solely to flip "prepared" to "published", append verification/checksums, or update
+release history in README, PROGRESS or repository docs. This release-specific rule
+overrides generic durable project-memory and documentation-sync requirements for
+routine publication outcomes. A new explicit documentation request or a concrete
+release defect within authorized scope is separate work; do not manufacture one
+as a completion requirement.
+
+Once the selected immutable release is published and its required checks pass,
+perform only its authorized branch/worktree cleanup and finish. Later unrelated
+main commits do not invalidate that release or require rebasing, rebuilding,
+republishing, or keeping the task open for a documentation PR.
+
 ## Compatibility and data upgrades
 
 The owner adopted this rule on 2026-09-23 for every Cats package and App:
@@ -240,4 +279,4 @@ version as a root devDependency and builds and validates every App with it.
 - Keep entrypoint verification proportional to launcher/package changes. Do not
   repeat full-stack startup exercises solely for a version or documentation edit.
 
-*Last updated: 2026-09-29*
+*Last updated: 2026-10-01*
