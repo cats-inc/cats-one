@@ -84,6 +84,15 @@ Release evidence:
 
 ## Progress Log
 
+- 2026-10-14 follow-up: cats-one 0.5.0 raises the Platform range to `^0.8.0` and the
+  Runtime range to `^0.5.0`. Runtime 0.5.0 is a breaking minor: Kiro runs on its V3
+  engine and `sessions_dir`/`KIRO_SESSIONS_DIR` replace `db_path`/`KIRO_DB_PATH`, whose
+  old values are ignored (Runtime ADR-045). Platform 0.8.0 is a minor because it bundles
+  that Runtime. The launcher's own behavior is unchanged and it implements no migration.
+  Both ranges cross a breaking minor, so this is the next launcher minor. The lockfile
+  resolves Platform 0.8.0 and Runtime 0.5.0 from npm, and the alias payload holds its
+  four files with an exact 0.5.0 pin. The `npm-publish.yml` run and the npm registry
+  entries for both names record the publication.
 - 2026-09-30 follow-up: cats-one 0.4.0 raises the Platform range to `^0.7.0` and the
   Runtime range to `^0.4.0`. Runtime 0.4.0 is a breaking minor (an API key no longer
   implies binding every interface; remote deployments set `CATS_RUNTIME_HOST`
