@@ -63,6 +63,7 @@ and the full-member, discovery and conflict contracts.
 | cats-platform | Product/Desktop host, App SDK, App selection/install/load and Desktop packaging; its own maintenance skills |
 | cats-apps | Official utility source and individually versioned `.catsapp` builds; its own maintenance skills when added |
 | cats-plugins | Pinned upstream plugin producer recipes and packaged plugin artifacts; its own maintenance skills when added |
+| cats-bots | Standalone always-alive desktop bots that wrap agent CLIs through the runtime process and HTTP contract; its own maintenance skills when added |
 
 The Cats developer profile does not supersede
 [runtime ADR-015](../../cats-runtime/docs/decisions/015-own-workspace-substrate-tools-in-cats-runtime.md).
