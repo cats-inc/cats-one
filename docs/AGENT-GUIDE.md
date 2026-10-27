@@ -72,12 +72,16 @@ only when cleanup is requested:
 ```
 
 The macOS copy provides the same interface. Helpers stop on dirty worktrees, skip
-other worktrees and never remove the default branch or never-pushed branches.
-Read their help before execution. `-ReturnToDefault` / `--return-to-default`
-also switches to and fast-forwards the default branch, but only leaves a branch
-whose upstream is gone: on an unmerged branch or a detached HEAD it stays and
-warns, and a failed fast-forward is reported as a warning. Do not change global
-Git settings as an implicit step; use repository-scoped or explicit user choices.
+other worktrees and never remove the default branch or never-pushed branches. A
+gone upstream is only the trigger: a branch is deleted only when the default
+branch already contains all of its changes (Git 2.38 or newer), so a pull request
+closed without merging, or a branch that gained commits after its merge, is kept
+and reported with the manual delete command. Read their help before execution.
+`-ReturnToDefault` / `--return-to-default` also switches to and fast-forwards
+the default branch, but only leaves a branch that has landed: on an unmerged
+branch or a detached HEAD it stays and warns, and a failed fast-forward is
+reported as a warning. Do not change global Git settings as an implicit step;
+use repository-scoped or explicit user choices.
 
 ## Handoff
 
