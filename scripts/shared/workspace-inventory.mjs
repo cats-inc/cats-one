@@ -13,6 +13,7 @@ const PROFILE = {
   'cats-platform': 'skills',
   'cats-apps': 'skills',
   'cats-plugins': 'skills',
+  'cats-bots': 'skills',
 };
 export const validSkillName = name => typeof name === 'string' && name.length <= 64
   && /^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(name)
@@ -34,7 +35,7 @@ function validateManifest(manifest) {
     requireCondition(typeof member.role === 'string' && member.role.trim() && !/[|\r\n<>]/u.test(member.role),
       `Invalid member role: ${member.id}`);
   }
-  requireCondition(ids.size === Object.keys(PROFILE).length, 'The v1 workspace requires all five Cats members');
+  requireCondition(ids.size === Object.keys(PROFILE).length, 'The v1 workspace requires all six Cats members');
   return manifest;
 }
 
