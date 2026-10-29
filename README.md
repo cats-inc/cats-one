@@ -81,7 +81,7 @@ manual opening and the service running.
 ## Developer Workspace
 
 `cats-one` owns the development workspace definition for sibling `cats-one`,
-`cats-runtime`, `cats-platform`, `cats-apps`, `cats-plugins`, and `cats-bots` checkouts. Their parent directory
+`cats-runtime`, `cats-platform`, `cats-apps`, `cats-plugins`, and `cats-bot` checkouts. Their parent directory
 can remain outside Git. The checkout command inventories canonical maintenance
 skills and synchronizes root guidance and discovery copies.
 

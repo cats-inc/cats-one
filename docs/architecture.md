@@ -30,7 +30,7 @@ project's `skills/` and discovery directories.
 Platform [ADR-142](https://github.com/cats-inc/cats-platform/blob/main/docs/decisions/142-publish-reusable-platform-packages-for-independent-products.md)
 and [ADR-143](https://github.com/cats-inc/cats-platform/blob/main/docs/decisions/143-separate-product-repositories-after-platform-contracts-stabilize.md)
 propose shared packages before separate Desktop/Mobile repositories, following
-merged [Bot #51](https://github.com/cats-inc/cats-bots/pull/51).
+merged [Bot #51](https://github.com/cats-inc/cats-bot/pull/51).
 cats-one keeps its two existing responsibilities: user launch composition and
 developer-workspace composition. Products do not import it as a library or need
 it installed alongside their standalone installers.
@@ -82,7 +82,7 @@ and the full-member, discovery and conflict contracts.
 | cats-platform | Product/Desktop host, App SDK, App selection/install/load and Desktop packaging; its own maintenance skills |
 | cats-apps | Official utility source and individually versioned `.catsapp` builds; its own maintenance skills when added |
 | cats-plugins | Pinned upstream plugin producer recipes and packaged plugin artifacts; its own maintenance skills when added |
-| cats-bots | Standalone always-alive desktop bots that wrap agent CLIs through the runtime process and HTTP contract; its own maintenance skills when added |
+| cats-bot | Standalone always-alive desktop bots that wrap agent CLIs through the runtime process and HTTP contract; its own maintenance skills when added |
 
 The Cats developer profile does not supersede
 [runtime ADR-015](../../cats-runtime/docs/decisions/015-own-workspace-substrate-tools-in-cats-runtime.md).

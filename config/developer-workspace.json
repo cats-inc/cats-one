@@ -37,9 +37,9 @@
       "role": "Pinned upstream plugin producer recipes and packaged plugin artifacts"
     },
     {
-      "id": "cats-bots",
-      "path": "cats-bots",
-      "packageName": "@cats-inc/cats-bots",
+      "id": "cats-bot",
+      "path": "cats-bot",
+      "packageName": "@cats-inc/cats-bot",
       "skillRoots": ["skills"],
       "role": "Standalone always-alive desktop bots that wrap agent CLIs through cats-runtime"
     }
