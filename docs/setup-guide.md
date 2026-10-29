@@ -12,11 +12,15 @@ The developer command requires all six sibling source checkouts:
   cats-platform/  skills/
   cats-apps/      skills/
   cats-plugins/   skills/
-  cats-bots/      skills/
+  cats-bot/       skills/
 ```
 
 The parent can have any name and need not be a Git repository. Each member needs
 its expected package name, `AGENTS.md`, Git metadata and declared skill root.
+The Bot repository was renamed from `cats-inc/cats-bots` to `cats-inc/cats-bot`
+on 2026-10-30. A workspace that still has `cats-bots/` must rename that folder
+to `cats-bot/` and point its `origin` at
+`https://github.com/cats-inc/cats-bot.git` before the next check or sync.
 Empty roots and Git worktrees are supported. Source/output links and junctions
 are rejected; ordinary ancestor aliases are normalized physically.
 

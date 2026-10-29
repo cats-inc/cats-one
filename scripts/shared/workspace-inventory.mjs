@@ -13,7 +13,7 @@ const PROFILE = {
   'cats-platform': 'skills',
   'cats-apps': 'skills',
   'cats-plugins': 'skills',
-  'cats-bots': 'skills',
+  'cats-bot': 'skills',
 };
 export const validSkillName = name => typeof name === 'string' && name.length <= 64
   && /^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(name)
