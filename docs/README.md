@@ -2,6 +2,11 @@
 
 ## Current Work
 
+The proposed [product repository separation](architecture.md#proposed-product-repository-separation-2026-10-29)
+retains cats-one's launch/workspace composition role. Platform owns the shared
+package and Desktop/Mobile extraction design; no members, launcher contracts or
+dependency minima have changed in this documentation update.
+
 [Interactive npm entrypoints](specs/SPEC-002-interactive-cli-startup.md) specifies
 automatic browser opening, o/q controls, terminal ownership and graceful shutdown
 across cats-one, Platform and Runtime.
