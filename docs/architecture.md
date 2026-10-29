@@ -25,6 +25,25 @@ project's `skills/` and discovery directories.
 
 ## Developer Workspace
 
+### Proposed product repository separation (2026-10-29)
+
+Platform [ADR-142](https://github.com/cats-inc/cats-platform/blob/main/docs/decisions/142-publish-reusable-platform-packages-for-independent-products.md)
+and [ADR-143](https://github.com/cats-inc/cats-platform/blob/main/docs/decisions/143-separate-product-repositories-after-platform-contracts-stabilize.md)
+propose shared packages before separate Desktop/Mobile repositories, following
+merged [Bot #51](https://github.com/cats-inc/cats-bots/pull/51).
+cats-one keeps its two existing responsibilities: user launch composition and
+developer-workspace composition. Products do not import it as a library or need
+it installed alongside their standalone installers.
+
+The self-hosted Platform CLI remains the launcher's default product target.
+Member paths/skill ownership change only when real repository moves land under
+[PLAN-128](https://github.com/cats-inc/cats-platform/blob/main/docs/plans/PLAN-128-product-repository-extraction.md);
+the current six-member manifest and dependency ranges are unchanged. Workspace
+inventory is not a tested product compatibility set or release lock. New launcher
+profiles or integration orchestration need their own scoped implementation.
+
+### Current implementation
+
 [ADR-001](decisions/ADR-001-own-developer-workspace-bootstrap.md) defines a second,
 explicit developer entrypoint in the `cats-one` checkout. Tracked configuration
 and templates describe the source workspace; generated files live in its parent.
