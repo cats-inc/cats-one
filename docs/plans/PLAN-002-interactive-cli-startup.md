@@ -84,6 +84,35 @@ Release evidence:
 
 ## Progress Log
 
+- 2026-10-30 follow-up: cats-one 0.6.0 raises the Platform range to `^0.12.3` and the
+  Runtime range to `^0.6.2`. Runtime 0.6.0 was a breaking minor (image contract 2
+  changed the HTTP request and capabilities contract); 0.6.2 adds opt-in provider
+  interactions. Platform crosses four minors from the launcher's 0.8.x line:
+  - 0.9: the participant-model cutover. Its required one-time reset applies to
+    launcher profiles with 0.8.x conversations: export what is needed, then use
+    **Settings > Data > Reset Platform data**. There is no automatic conversion
+    (Platform ADR-132 §9).
+  - 0.10: ingress schema-3 credentials, with a validated protected migration that
+    needs the native broker when headless.
+  - 0.11: the image service's operating-hours fields are removed.
+  - 0.12: the Core snapshot moves to format 6 with a one-time backed-up upgrade.
+
+  The launcher's own behavior is unchanged, and it implements no migration or reset.
+  Both ranges cross breaking minors, so this is the next launcher minor.
+  `engines.npm` stays `>=12.0.0`: npm 12 is the current npm, and Runtime and Platform
+  require it too. The lockfile resolves Platform 0.12.3 and Runtime 0.6.2 from npm,
+  and the alias payload holds its four files with an exact 0.6.0 pin. `npm test`
+  passed.
+
+  In isolated homes with non-default ports, this checkout started Runtime 0.6.2,
+  which answered `/health`, and Platform 0.12.3, which served its page, on a clean
+  profile and on a profile cats-one 0.5.0 had just created (Platform 0.8.0, Core
+  format 5). That profile's snapshot moved to format 6, with the original kept as
+  `chat-state.local.json.pre-provider-policy.bak`. It had no completed setup or
+  conversations, so the 0.9 reset path was not exercised.
+
+  The `npm-publish.yml` run and the npm registry entries for both names record the
+  publication.
 - 2026-10-14 follow-up: cats-one 0.5.0 raises the Platform range to `^0.8.0` and the
   Runtime range to `^0.5.0`. Runtime 0.5.0 is a breaking minor: Kiro runs on its V3
   engine and `sessions_dir`/`KIRO_SESSIONS_DIR` replace `db_path`/`KIRO_DB_PATH`, whose
