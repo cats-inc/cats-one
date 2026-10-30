@@ -1,14 +1,14 @@
 {
   "name": "@cats-inc/cats-one",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Bootstrap installer entrypoint for the Cats ecosystem.",
   "author": "sammykenny2 <sammykenny2@gmail.com>",
   "bin": {
     "cats-one": "bin/cli.js"
   },
   "dependencies": {
-    "@cats-inc/cats-platform": "^0.8.0",
-    "@cats-inc/cats-runtime": "^0.5.0"
+    "@cats-inc/cats-platform": "^0.12.3",
+    "@cats-inc/cats-runtime": "^0.6.2"
   },
   "devDependencies": {
     "proper-lockfile": "^4.1.2",
