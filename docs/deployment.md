@@ -91,8 +91,10 @@ to republish Runtime and Platform for every later cats-one release.
    gh workflow run npm-publish.yml --repo cats-inc/cats-one --ref main -f dist_tag=latest
    ```
 
-   The workflow tests, prepares the alias, publishes the canonical package, then
-   publishes the alias. `--ref main` selects main's source at dispatch time; choose
+   The workflow runs the test gate unless CI already passed on that commit on main,
+   prepares the alias, publishes the canonical package, then publishes the alias.
+   Dispatching after main's CI finishes saves the repeated gate. `--ref main` selects
+   main's source at dispatch time; choose
    the intended release branch when necessary. Set the channel explicitly: the
    workflow defaults to `next`, not `latest`.
 5. Confirm the workflow succeeded and verify **both** registry entries:
