@@ -103,7 +103,23 @@ result) and looks up the Actions cache key `ci-green-v1-<fingerprint>`. The
 passed. A pull request rebased only because main gained documentation keeps its
 fingerprint and reuses the earlier green run. Any change outside `docs/`, including the
 workflow or lockfile, a missing or evicted cache entry, or a manual run runs everything.
-Pull-request caches stay within that pull request, so the post-merge push runs in full.
+
+Pull-request caches stay within that pull request, so the push to main after a merge
+cannot find one. Instead, `changes` reuses the merged pull request's own run when all of
+these hold:
+
+- the push adds one commit on the previous main;
+- the GitHub API names that commit as a pull request's merge;
+- the request's final head, fetched from `refs/pull/<n>/head`, contains the previous
+  main and has the pushed commit's tree;
+- CI passed on that head as a `pull_request` run.
+
+Main requires up-to-date branches, so an ordinary squash merge meets these, and the
+`workspace` matrix and `test` job are skipped. Any other push, or a failed lookup, runs
+everything. `npm-publish.yml` likewise skips its test gate when CI passed on the
+dispatched commit on main, and runs it otherwise. `test/ci-workflow.test.js` runs both
+steps against a local origin with a stubbed `gh`.
+
 A pull request can also reuse a green run from main when its code outside `docs/` equals
 main's, which means that exact code already passed there. The skip trusts everyone who can
 push to the branch: such a person could save a marker for untested code. Pull requests from

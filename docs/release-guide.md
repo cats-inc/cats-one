@@ -131,7 +131,9 @@ Release commands in member guides are examples to run only for an authorized tar
 2. Prepare only the selected package versions and root lockfiles, then commit/push
    using the user's authorized Git workflow.
 3. Dispatch each selected repository's npm-publish.yml. The workflows run their
-   existing gates and trusted publication; pushing source alone does not publish.
+   existing gates, skipping a test gate that CI already passed on that commit on
+   main, then publish through trusted publication; pushing source alone does not
+   publish.
 4. Confirm workflow success, the registry version/dist-tag and tarball availability.
 
 Release Runtime and Platform together only when requested or required by the
