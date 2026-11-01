@@ -55,4 +55,17 @@ target one repository's `skills/`. Use the new `Sync-WorkspaceSkills.ps1` /
 `sync-workspace-skills.sh` helpers above for the six-repository parent workspace.
 Read each helper's help before running it.
 
+Repository skill helpers share `shared/sync-agent-skills.mjs`: recursive package
+discovery stops at SKILL.md, rejects duplicate names and source/destination links,
+preflights both hosts and preserves unrelated skills, including with `--clean`.
+`--dry-run` validates without writing. Platform and Bot pin these maintenance
+sources, the merged-branch helpers and this repository's license.
+
+`sync-shared-tools.mjs` verifies a consumer's tracked source hashes without
+requiring siblings. Use `--source cats-inc/cats-one=CHECKOUT` to also verify the
+pinned Git objects. `--refresh` explicitly refreshes from committed producer
+sources; uncommitted producer edits are rejected. Consumers supply their own
+`scripts/shared-tools.provenance.json`. Existing provider helper manifests are
+also supported with `--manifest assets/setup/provenance.json`.
+
 Follow [script standards](../docs/SCRIPT-STANDARDS.md) for naming and help.
