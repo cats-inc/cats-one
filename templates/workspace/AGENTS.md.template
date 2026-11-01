@@ -68,6 +68,13 @@ member's merged-branch sweep from its main checkout; the sweep skips any branch 
 worktree still holds. Remove only worktrees you created, and keep one past its
 merge only when the user asks.
 
+## Command aliases
+
+`cnp` commits and pushes straight to a member's default branch (`main` or
+`master`) without a PR; `cnr` commits on a branch and opens a PR with squash
+auto-merge armed. Each member's `AGENTS.md` holds the exact steps. Run an alias
+in the owning member's checkout; a change spanning members runs it in each one.
+
 ## Maintenance skills
 
 {{SKILLS}}

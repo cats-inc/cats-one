@@ -131,6 +131,16 @@ OS helpers infer that root from the cats-one checkout and select both agents.
   under the Git-ignored `.claude/worktrees/`, not sibling directories that
   folder-wide tools such as bulk `git pull` scripts also scan.
 
+## Command Aliases
+
+| Alias | Required behavior |
+|-------|-------------------|
+| `cnp` | Check secrets and scope; `git add .` and Conventional Commit; rebase onto the latest `origin/<default>` (`main` or `master`) and push straight to it, no PR (`git push origin HEAD:<default>` from a worktree branch). An explicit `cnp` authorizes this direct push whatever the change size. Never force-push; if the push is rejected, stop and report |
+| `cnr` | Check secrets and scope; `git add .` and Conventional Commit on a `<type>/<slug>` branch (create one when on the default branch); push it, `gh pr create` with a Conventional Commit title and a summary and validation body, then `gh pr merge <n> --auto --squash`. Report the PR URL; armed auto-merge is not a merge until `gh pr view` shows `MERGED`, and a PR behind the default branch must be updated to land |
+
+Aliases do not authorize force-pushes, destructive cleanup or additional external
+actions. Report completion or a precise blocker.
+
 ## Agent Skills
 
 - Canonical skills live in `skills/`; edit them there, not in discovery copies.
