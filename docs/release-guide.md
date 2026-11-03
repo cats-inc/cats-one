@@ -40,6 +40,16 @@ Pin external Runtime/App inputs in that change. Select this repository's source
 SHA from the completed bump commit; do not create another tracked edit to insert
 that commit's own SHA. The existing workflow records resolved source identities.
 
+Choose a Runtime input by reading what Runtime `main` has after it; an existing pin
+is not a decision. Cats Bot and Desktop guards share one check before any build. It
+refuses a commit that is not on Runtime `main`. It also refuses one lacking other
+changes on `main`, unless the version's notes list each on a `Left out of this
+release:` line, as `cats-runtime#N` or by the first 8 characters of its SHA. Only
+commits changing nothing outside `docs/` and `.github/` are exempt. Another mention
+or a bare `#N` does not count, because notes also cite what they include and pull
+request numbers collide between repositories. Reviewers check that the line gives a
+reason. The check lives in Platform's `scripts/shared/source-selection.mjs`.
+
 Write that preparation so it stays true after publication. Keep status words such
 as "prepared" or "published" out of headings and sentences, and do not phrase
 hosted checks as pending work. State the planned trigger, expected trust and the
