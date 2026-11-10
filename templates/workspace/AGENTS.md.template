@@ -47,7 +47,15 @@ needed boundary now; bump or publish only within the user's release authorizatio
 
 For all members and agents, prepare release notes, version fields, exact source
 and artifact pins, compatibility/migration notes and signing policy in the
-original bump commit/PR. After publication, run required verification, report
+original bump commit/PR. Freeze the release source and all pins when preparation
+is complete: "latest" means latest at that selection, not at every later CI or
+dispatch. Later PRs/main commits do not require repinning, rebasing or rebuilding
+the selected release. Desktop and Bot use a fixed `release/vX.Y.Z` branch and
+exact-source CI; update a separate integration branch if main's PR rules require
+it. Other publication targets follow their member SOP. Reopen the
+selection only for an explicit owner addition or a concrete release defect,
+then revalidate the changed inputs. See the member SOP for frozen Runtime baselines.
+After publication, run required verification, report
 the results in the final response, and stop; Actions run results/logs and release
 assets are the hosted evidence. Do not edit a published GitHub Release, create
 post-release tracking files, status-only commits or PRs, or offer any of these as

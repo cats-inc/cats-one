@@ -40,11 +40,40 @@ Pin external Runtime/App inputs in that change. Select this repository's source
 SHA from the completed bump commit; do not create another tracked edit to insert
 that commit's own SHA. The existing workflow records resolved source identities.
 
+Freeze the selected source and all dependency/artifact pins when the bump is
+prepared. **Latest means latest at selection**, not a moving target at each CI run
+or dispatch. Record each producer's main SHA considered at selection. Later PRs,
+including documentation PRs, do not require merging, rebasing, repinning or
+rebuilding that release. Only an explicit owner addition or a concrete defect in
+the selected release reopens the selection; record the reason and revalidate the
+affected inputs. Ordinary new work belongs to the next release.
+
+For Desktop and Bot, preserve the completed bump SHA in `release/vX.Y.Z`. Push
+that branch, run `ci.yaml` manually on it, then dispatch packaging from that same
+unchanged branch. Verify the CI run and packaging run name the exact frozen SHA.
+A successful main-push CI for that exact SHA is also valid. Never move the release
+branch merely to satisfy main's up-to-date PR rule: prepare/update a separate
+integration branch for that merge. Main integration is not a packaging prerequisite
+once the authorized release source has passed its required CI and review. Do not
+disable branch protections, use force pushes, or substitute a PR merge's CI for
+the frozen source's CI. Keep the release branch until publication verification
+and authorized cleanup are complete.
+
 Choose a Runtime input by reading what Runtime `main` has after it; an existing pin
-is not a decision. Cats Bot and Desktop guards share one check before any build. It
-refuses a commit that is not on Runtime `main`. It also refuses one lacking other
-changes on `main`, unless the version's notes list each on a `Left out of this
-release:` line, as `cats-runtime#N` or by the first 8 characters of its SHA. Only
+is not a decision. Record the pin and that main baseline in the current version's
+notes, using full 40-character SHAs:
+
+```md
+- **Source selection:** cats-runtime@FULL_COMMIT_SHA; main@FULL_BASELINE_SHA.
+```
+
+Cats Bot and Desktop guards share one check before any build. They require
+`selected commit ≤ recorded baseline ≤ Runtime main` in Git ancestry. They
+compare omissions only between the selected commit and the recorded baseline;
+later Runtime commits do not invalidate dispatches or retries. The guard refuses
+a selected commit lacking changes at that baseline unless the notes list each on
+a `Left out of this release:` line, as `cats-runtime#N` or by the first 8
+characters of its SHA. Only
 commits changing nothing outside `docs/` and `.github/` are exempt. Another mention
 or a bare `#N` does not count, because notes also cite what they include and pull
 request numbers collide between repositories. Reviewers check that the line gives a
@@ -192,11 +221,13 @@ is not a prerequisite. Record the chosen revisions and App hashes.
 
 - Official: push the matching `vX.Y.Z` tag in cats-platform to trigger the Desktop
   workflow. The workflow's guard requires the tag and package/lockfile versions
-  to agree. The release guard resolves Runtime from `main` once and supplies that
-  immutable commit to every OS build and the complete Desktop source bundle.
+  to agree. The release guard reads Runtime's frozen Source selection from the
+  version's notes and supplies that immutable commit to every OS build and the
+  complete Desktop source bundle.
 - Preview: dispatch desktop-release.yml from the intended source with the unused
-  matching tag and an immutable `runtime_ref`. The workflow creates the preview
-  tag/release itself. Do not push the tag first: that selects the official path.
+  matching tag; optional `runtime_ref` must equal the recorded full SHA. The
+  workflow creates the preview tag/release itself. Do not push the tag first:
+  that selects the official path.
 - Preview status and signing are separate. A preview uses the *standard* signing
   profile (each platform signs with the credentials it has) unless `unsigned=true`
   selects the *unsigned override*, which today breaks macOS self-update. Do not
