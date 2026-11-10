@@ -50,6 +50,12 @@ OS helpers infer that root from the cats-one checkout and select both agents.
 - Prepare version fields, release notes, exact source/artifact pins, compatibility
   and migration notes, and the applicable signing profile in the original bump
   commit/PR before publication. Do not claim future verification has passed.
+- Freeze the selected source and all pins after the bump is prepared. "Latest"
+  means latest at selection; later PRs do not reopen it. Follow the target's SOP
+  for fixed-source CI and dispatch; Desktop/Bot use a separate integration
+  branch for any main merge. Reopen only for an explicit owner addition or a
+  concrete release defect, and revalidate the changed inputs. See the shared
+  release guide.
 - After publication, verify the required workflow and public assets/registry,
   report the results in the final response, and stop. Actions run results/logs
   and release assets are the hosted evidence; do not create a GitHub Release for
