@@ -122,9 +122,12 @@ these hold:
 
 Main requires up-to-date branches, so an ordinary squash merge meets these, and the
 `workspace` matrix and `test` job are skipped. Any other push, or a failed lookup, runs
-everything. `npm-publish.yml` likewise skips its test gate only when a successful CI
-run on the dispatched commit on main ran its `test` job and that job passed; a run that
-skipped `test`, for documentation or for code that passed elsewhere, does not count.
+everything. The `changes` job's `Already tested` step runs when a green marker or the
+merged pull request's run covers the code, and its `Documentation-only change` step runs
+when only documentation changed. `npm-publish.yml` likewise skips its test gate when a
+successful CI run on the dispatched commit on main either passed its `test` job or ran
+`Already tested`; a run that ran `Documentation-only change` did not test this code and
+does not count.
 `test/ci-workflow.test.js` runs the detection, fingerprint, merge and publish steps
 against scratch repositories, a local origin and a stubbed `gh`.
 

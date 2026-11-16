@@ -38,11 +38,13 @@ jobs:
       - name: Update npm for trusted publishing
         run: npm install -g npm@^11.5.1
 
-      # When CI's test job passed on this exact commit on main, it ran the test
-      # gate and more, so the publish does not repeat it. A successful CI run can
-      # skip that job (documentation only, or code that passed elsewhere), so the
-      # job itself must have succeeded. Anything else, such as a release branch
-      # or a failed lookup, runs the gate here as before.
+      # When CI passed on this exact commit on main, it ran the test gate and
+      # more, or skipped them because this exact code already passed, so the
+      # publish does not repeat it. A run that skipped them because only
+      # documentation changed did not test this code, so it does not count; the
+      # changes job's "Already tested" and "Documentation-only change" steps tell
+      # the skips apart. Anything else, such as a release branch or a failed
+      # lookup, runs the gate here as before.
       - name: Check whether CI passed on this commit on main
         id: ci
         env:
@@ -52,10 +54,12 @@ jobs:
           runs=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?head_sha=$GITHUB_SHA&event=push&branch=main&status=success&per_page=10" --jq '.workflow_runs[].id' 2>/dev/null || true)
           for run in $runs; do
             [[ "$run" =~ ^[0-9]+$ ]] || continue
-            test_job=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run/jobs?filter=latest&per_page=100" --jq '[.jobs[] | select(.name == "test") | .conclusion] | join(",")' 2>/dev/null || true)
-            if [ "$test_job" = success ]; then
+            # One "<name>=<conclusion>" line for the test job and each skip step.
+            results=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run/jobs?filter=latest&per_page=100" --jq '.jobs[] | if .name == "test" then "test=\(.conclusion)" elif .name == "changes" then (.steps[] | select(.name == "Already tested" or .name == "Documentation-only change") | "\(.name)=\(.conclusion)") else empty end' 2>/dev/null || true)
+            if grep -qx 'Documentation-only change=success' <<< "$results"; then continue; fi
+            if grep -qxE 'test=success|Already tested=success' <<< "$results"; then
               tested=true
-              echo "CI run $run passed its test job on $GITHUB_SHA."
+              echo "CI run $run tested this exact code on $GITHUB_SHA."
               break
             fi
           done

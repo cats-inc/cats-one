@@ -13,15 +13,17 @@ jobs:
   # A change confined to docs/ and the root agent instruction files (AGENTS.md,
   # CLAUDE.md, CODEX.md and GEMINI.md, added or edited; deleting, renaming or
   # changing the type of one counts as code) skips the workspace matrix and the
-  # required test job, which npm-publish.yml therefore checks by name; branch
-  # protection accepts a skipped required job as passing. So does code that
-  # already passed: the fingerprint covers every tracked file outside docs/ but
-  # only the presence of those agent files, so a rebase that only brings in
-  # documentation from main reuses the earlier green run. A pull request's cache
-  # is scoped to that request, so a push to main instead reuses its merged pull
-  # request's run when that run tested the same tree. Any other path, a manual
-  # run or a failed detection runs them. test/docs-boundary.test.js keeps tests,
-  # scripts and the launcher from reading docs/ or those agent files.
+  # required test job; branch protection accepts a skipped required job as
+  # passing. So does code that already passed: the fingerprint covers every
+  # tracked file outside docs/ but only the presence of those agent files, so a
+  # rebase that only brings in documentation from main reuses the earlier green
+  # run. A pull request's cache is scoped to that request, so a push to main
+  # instead reuses its merged pull request's run when that run tested the same
+  # tree. Any other path, a manual run or a failed detection runs them.
+  # The "Already tested" and "Documentation-only change" steps record which skip
+  # applied, so npm-publish.yml can accept the first and reject the second.
+  # test/docs-boundary.test.js keeps tests, scripts and the launcher from reading
+  # docs/ or those agent files.
   changes:
     runs-on: ubuntu-latest
     # Job permissions replace the workflow's: checkout and the merge lookups read
@@ -122,6 +124,13 @@ jobs:
             fi
           fi
           echo "tested=$tested" | tee -a "$GITHUB_OUTPUT"
+      # npm-publish.yml reads these two steps' conclusions to tell the skips apart.
+      - name: Already tested
+        if: steps.green.outputs.cache-hit == 'true' || steps.merged.outputs.tested == 'true'
+        run: echo "This exact code already passed CI; the workspace matrix and test job are skipped."
+      - name: Documentation-only change
+        if: steps.paths.outputs.code == 'false'
+        run: echo "Only docs/ or root agent instruction files changed; the workspace matrix and test job are skipped."
 
   workspace:
     name: workspace (${{ matrix.os }}, Node ${{ matrix.node }})

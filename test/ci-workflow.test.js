@@ -9,8 +9,9 @@ const { parse } = require('yaml');
 // CI skips the matrix and test job for documentation (docs/ and the root agent
 // instruction files) and for code whose fingerprint already passed. A push to
 // main skips them only when its merged pull request already passed on the same
-// tree, and npm publication skips its gate only when CI's test job passed on the
-// commit on main. These tests run the workflows' own shell steps against scratch
+// tree, and npm publication skips its gate only when CI on the commit on main
+// tested that exact code, not when it skipped for documentation alone. These
+// tests run the workflows' own shell steps against scratch
 // repositories, a local origin and a stubbed gh.
 const ci = parse(readFileSync('.github/workflows/ci.yml', 'utf8'));
 const publish = parse(readFileSync('.github/workflows/npm-publish.yml', 'utf8'));
@@ -227,10 +228,24 @@ test('a main push reuses its merged pull request\'s green run only for that exac
     'a head without the previous main was tested on other code');
 });
 
-test('npm publication skips its test gate only after CI\'s test job passed on the commit on main', (t) => {
-  assert.equal(publish.permissions.actions, 'read');
-  // The lookup finds CI's test job by name, so that job keeps its key as its name.
+test('CI records which skip applied in steps that npm publication reads', () => {
+  const changes = ci.jobs.changes;
+  const tested = changes.steps.find((step) => step.name === 'Already tested');
+  const documentation = changes.steps.find((step) => step.name === 'Documentation-only change');
+  // The tested skip mirrors the job's tested output; documentation is code=false.
+  assert.equal(`\${{ ${tested.if} }}`, changes.outputs.tested);
+  assert.equal(documentation.if, "steps.paths.outputs.code == 'false'");
+  for (const step of [tested, documentation]) {
+    assert.equal(step.id, undefined, step.name);
+    assert.match(step.run, /^echo /, step.name);
+    assert.ok(changes.steps.indexOf(step) > changes.steps.findIndex((other) => other.id === 'merged'), step.name);
+  }
+  // The publish lookup finds CI's test job by name, so that job keeps its key as its name.
   assert.equal(ci.jobs.test.name, undefined);
+});
+
+test('npm publication skips its test gate only after CI tested this exact code on main', (t) => {
+  assert.equal(publish.permissions.actions, 'read');
   const steps = publish.jobs.publish.steps;
   for (const name of ['Install dependencies', 'Run test gate']) {
     assert.equal(steps.find((step) => step.name === name)?.if, "steps.ci.outputs.tested != 'true'", name);
@@ -247,13 +262,21 @@ test('npm publication skips its test gate only after CI\'s test job passed on th
     PATH: `${bin}${delimiter}${process.env.PATH}`, GITHUB_REPOSITORY: 'cats-inc/cats-one', GITHUB_SHA: sha,
     STUB_PASSED: runs, STUB_JOBS: jobs, STUB_LOG: join(root, 'gh.log'),
   });
-  assert.equal(lookup('42', 'success'), 'tested=true');
+  // The stub prints the jobs filter's result: one "<name>=<conclusion>" line for
+  // the test job and each of the changes job's skip steps.
+  const ran = ['test=success', 'Already tested=skipped', 'Documentation-only change=skipped'].join('\n');
+  const reused = ['test=skipped', 'Already tested=success', 'Documentation-only change=skipped'].join('\n');
+  const documentation = ['test=skipped', 'Already tested=skipped', 'Documentation-only change=success'].join('\n');
+  assert.equal(lookup('42', ran), 'tested=true', 'a run whose test job passed tested this code');
   const log = readFileSync(join(root, 'gh.log'), 'utf8');
   assert.match(log, new RegExp(`actions/workflows/ci\\.yml/runs\\?head_sha=${sha}&event=push&branch=main&status=success`));
   assert.match(log, /actions\/runs\/42\/jobs\?filter=latest/);
-  assert.equal(lookup('42', 'skipped'), 'tested=false',
-    'a successful run that skipped the test job, such as a documentation-only push, runs the gate');
+  assert.equal(lookup('42', reused), 'tested=true', 'a green marker or merged pull request run tested this exact code');
+  assert.equal(lookup('42', documentation), 'tested=false', 'a documentation-only skip runs the gate');
+  assert.equal(lookup('42', 'test=success\nDocumentation-only change=success'), 'tested=false',
+    'a documentation-only run never counts');
+  assert.equal(lookup('42', 'test=skipped'), 'tested=false', 'a skip with no recorded reason runs the gate');
   assert.equal(lookup('42', ''), 'tested=false', 'a failed job lookup runs the gate');
-  assert.equal(lookup('', 'success'), 'tested=false', 'without a passing main run the gate runs as before');
-  assert.equal(lookup('not-a-run', 'success'), 'tested=false');
+  assert.equal(lookup('', ran), 'tested=false', 'without a passing main run the gate runs as before');
+  assert.equal(lookup('not-a-run', ran), 'tested=false');
 });
