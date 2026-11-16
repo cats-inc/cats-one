@@ -90,19 +90,25 @@ The Ubuntu `test` CI job runs the full suite and isolated tarball
 resolution/startup/shutdown checks. The `workspace` matrix runs all four
 workspace suites on Windows/macOS/Linux with Node 22 and 24, without live services.
 
-When every changed file is under `docs/`, a `changes` job skips the `workspace`
+When every changed file is documentation, a `changes` job skips the `workspace`
 matrix and the required `test` job; branch protection accepts the skipped job as
-passing. Any other path, a manual run or a failed detection runs them. Tests,
-scripts and launcher files must not read repository documentation, and
-`test/docs-boundary.test.js` enforces that.
+passing. Documentation is any path under `docs/`, plus a root `AGENTS.md`,
+`CLAUDE.md`, `CODEX.md` or `GEMINI.md` that is added or edited and so still exists.
+Deleting, renaming or changing the type of one of those files counts as code, as does
+a nested copy such as `sub/AGENTS.md`. Any other path, a manual run or a failed
+detection runs them. Tests, scripts and launcher files must not read repository
+documentation or those root agent files, and `test/docs-boundary.test.js` enforces
+that; a line that names one without reading this repository's copy carries a
+`docs-boundary-ignore: <reason>` comment.
 
 Code that already passed is skipped the same way. `changes` fingerprints the mode,
 blob and path of every tracked file outside `docs/` (for a pull request, the merge
-result) and looks up the Actions cache key `ci-green-v1-<fingerprint>`. The
-`record-tested` job saves that key only after the whole `workspace` matrix and `test`
-passed. A pull request rebased only because main gained documentation keeps its
-fingerprint and reuses the earlier green run. Any change outside `docs/`, including the
-workflow or lockfile, a missing or evicted cache entry, or a manual run runs everything.
+result), keeping only the mode, type and path of the four root agent files, and looks
+up the Actions cache key `ci-green-v2-<fingerprint>`. The `record-tested` job saves
+that key only after the whole `workspace` matrix and `test` passed. A pull request
+rebased only because main gained documentation keeps its fingerprint and reuses the
+earlier green run. Any other change, including the workflow or lockfile, a missing or
+evicted cache entry, or a manual run runs everything.
 
 Pull-request caches stay within that pull request, so the push to main after a merge
 cannot find one. Instead, `changes` reuses the merged pull request's own run when all of
@@ -116,12 +122,17 @@ these hold:
 
 Main requires up-to-date branches, so an ordinary squash merge meets these, and the
 `workspace` matrix and `test` job are skipped. Any other push, or a failed lookup, runs
-everything. `npm-publish.yml` likewise skips its test gate when CI passed on the
-dispatched commit on main, and runs it otherwise. `test/ci-workflow.test.js` runs both
-steps against a local origin with a stubbed `gh`.
+everything. The `changes` job's `Already tested` step runs when a green marker or the
+merged pull request's run covers the code, and its `Documentation-only change` step runs
+when only documentation changed. `npm-publish.yml` likewise skips its test gate when a
+successful CI run on the dispatched commit on main either passed its `test` job or ran
+`Already tested`; a run that ran `Documentation-only change` did not test this code and
+does not count.
+`test/ci-workflow.test.js` runs the detection, fingerprint, merge and publish steps
+against scratch repositories, a local origin and a stubbed `gh`.
 
-A pull request can also reuse a green run from main when its code outside `docs/` equals
-main's, which means that exact code already passed there. The skip trusts everyone who can
+A pull request can also reuse a green run from main when its fingerprint equals main's,
+which means that exact code already passed there. The skip trusts everyone who can
 push to the branch: such a person could save a marker for untested code. Pull requests from
 forks cannot write to the base branch's cache scope.
 

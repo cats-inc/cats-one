@@ -151,7 +151,7 @@ export async function inventoryWorkspace(options) {
     'Workspace template must contain exactly one MEMBERS and one SKILLS placeholder');
   const rendered = template.replace('{{MEMBERS}}', () => memberTable).replace('{{SKILLS}}', () => skillTable);
   requireCondition(!/\{\{[^}]*\}\}/u.test(rendered), 'Unknown workspace template placeholder');
-  const desired = [{ path: 'AGENTS.md', agent: 'shared', member: 'cats-one', source: TEMPLATE, snapshot: fileSnapshot(rendered) }];
+  const desired = [{ path: 'AGENTS.md', agent: 'shared', member: 'cats-one', source: TEMPLATE, snapshot: fileSnapshot(rendered) }]; // docs-boundary-ignore: generated workspace AGENTS.md
   for (const [agent, destination] of Object.entries(TARGETS)) {
     for (const skill of skills) {
       desired.push({ path: `${destination}/${skill.name}`, agent, member: skill.member, source: skill.source, snapshot: skill.snapshot });

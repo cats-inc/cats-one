@@ -45,7 +45,7 @@ test('empty required roots are valid and still plan root instructions', async t 
   const workspace = await fixture(t, { skills: false });
   const report = await inspect(workspace, 'all');
   assert.equal(report.skills.length, 0);
-  assert.deepEqual(report.actions.map(action => action.path), ['AGENTS.md']);
+  assert.deepEqual(report.actions.map(action => action.path), ['AGENTS.md']); // docs-boundary-ignore: fixture workspace AGENTS.md
 });
 
 test('YAML supports CRLF, BOM, literal descriptions and additional structured metadata without rewriting bytes', async t => {
@@ -109,12 +109,12 @@ test('executing checkout must be the declared cats-one member', async t => {
 test('AC-7/8: custom root conflicts, identical unmanaged adoption, and fully managed no-op', async t => {
   const workspace = await fixture(t);
   const fresh = await inspect(workspace);
-  await write(workspace.root, 'AGENTS.md', '# Personal instructions\n');
+  await write(workspace.root, 'AGENTS.md', '# Personal instructions\n'); // docs-boundary-ignore: fixture workspace AGENTS.md
   const conflict = await inspect(workspace);
   assert.equal(conflict.hasConflicts, true);
-  assert.equal(conflict.actions.find(action => action.path === 'AGENTS.md').action, 'conflict');
-  await write(workspace.root, 'AGENTS.md', fresh.desired[0].snapshot.content);
-  assert.equal((await inspect(workspace)).actions.find(action => action.path === 'AGENTS.md').action, 'adopt');
+  assert.equal(conflict.actions.find(action => action.path === 'AGENTS.md').action, 'conflict'); // docs-boundary-ignore: fixture workspace AGENTS.md
+  await write(workspace.root, 'AGENTS.md', fresh.desired[0].snapshot.content); // docs-boundary-ignore: fixture workspace AGENTS.md
+  assert.equal((await inspect(workspace)).actions.find(action => action.path === 'AGENTS.md').action, 'adopt'); // docs-boundary-ignore: fixture workspace AGENTS.md
   await arrangeManaged(workspace, fresh);
   const before = await snapshot(workspace.base);
   const current = await inspect(workspace, 'all');
@@ -136,7 +136,7 @@ test('AC-5/7/8 planner: edits, renames and stale ownership preserve other agents
   assert.equal(report.actions.find(action => action.path.endsWith('/a2a-handoff')).action, 'update');
   assert.equal(report.actions.find(action => action.path.endsWith('/project-memory-sync')).action, 'remove');
   assert.equal(report.actions.find(action => action.path.endsWith('/replacement-skill')).action, 'create');
-  assert.equal(report.actions.find(action => action.path === 'AGENTS.md').action, 'update');
+  assert.equal(report.actions.find(action => action.path === 'AGENTS.md').action, 'update'); // docs-boundary-ignore: fixture workspace AGENTS.md
   assert.ok(!report.actions.some(action => action.path.startsWith('.claude/') || action.path.includes('personal-skill')));
   assert.deepEqual(report.nextManaged.filter(entry => entry.agent === 'claude'), previous.filter(entry => entry.agent === 'claude'));
   assert.deepEqual(await snapshot(workspace.base), before);

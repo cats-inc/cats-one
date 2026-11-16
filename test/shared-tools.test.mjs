@@ -15,7 +15,7 @@ async function fixture(run) {
 }
 
 test('recursive skill sync keeps resources, skips bootstrap packages and preserves unrelated skills', async () => fixture(async (root, put) => {
-  await put('AGENTS.md');
+  await put('AGENTS.md'); // docs-boundary-ignore: temporary project
   await put('skills/orchestration/example/SKILL.md', 'current');
   await put('skills/orchestration/example/resources/data.txt', 'resource');
   await put('skills/ignored.bootstrap/SKILL.md');
@@ -31,7 +31,7 @@ test('recursive skill sync keeps resources, skips bootstrap packages and preserv
 }));
 
 test('duplicate names and linked destinations fail before either host changes', async () => fixture(async (root, put) => {
-  await put('AGENTS.md');
+  await put('AGENTS.md'); // docs-boundary-ignore: temporary project
   await put('skills/a/example/SKILL.md');
   await put('skills/b/example/SKILL.md');
   await put('.claude/skills/example/SKILL.md', 'preserve');
@@ -73,7 +73,7 @@ test('source refresh reads the pinned Git object, catches drift and refuses unco
 }));
 
 test('a non-directory second host is rejected before updating the first', async () => fixture(async (root, put) => {
-  await put('AGENTS.md');
+  await put('AGENTS.md'); // docs-boundary-ignore: temporary project
   await put('skills/example/SKILL.md', 'new');
   await put('.claude/skills/example/SKILL.md', 'preserve');
   await put('.agents/skills', 'owner file');
