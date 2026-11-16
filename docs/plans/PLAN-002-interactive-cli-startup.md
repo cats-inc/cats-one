@@ -84,6 +84,33 @@ Release evidence:
 
 ## Progress Log
 
+- 2026-11-17 follow-up: cats-one 0.7.0 raises the Platform range to `^0.18.0` and the
+  Runtime range to `^0.7.0`. Runtime 0.7.0 is a breaking minor: a lost native
+  provider session now answers HTTP 410 `provider_session_unavailable`. Platform npm
+  moves from 0.12.4 to 0.18.0 and crosses every minor in between; the
+  [Platform release notes](https://github.com/cats-inc/cats-platform/blob/main/docs/release-notes.md)
+  hold each boundary. The one that matters most for launcher profiles is 0.17's
+  conversation database: Platform expects a 0.12.x profile to be imported on first
+  start after a pre-database backup (its notes record a check on a synthetic version
+  6 profile only), and the database needs `node:sqlite`, so Platform 0.18.0 is tested
+  on Node.js 24 only. `engines` stays as Platform declares it
+  (`node >=22.0.0`, `npm >=12.0.0`); on an older Node.js, Platform's driver refuses
+  to start and names Node.js 24.
+
+  The launcher's own behavior is unchanged, and it implements no migration. Both
+  ranges cross breaking minors, so this is the next launcher minor. The lockfile
+  resolves Platform 0.18.0 and Runtime 0.7.0 from npm, and the alias payload holds
+  its four files with an exact 0.7.0 pin. `npm test` passed (121 passed, 2 skipped).
+
+  On Node.js 26.13.0, in isolated homes with non-default ports, this checkout started
+  Runtime 0.7.0, which answered `/health`, and Platform 0.18.0, which served its page,
+  on a clean profile and on a profile cats-one 0.6.0 had just created (Platform
+  0.12.4, Core version 6). That profile's snapshot moved to version 8 and gained the
+  conversation database, with the original kept under
+  `chat-state.local.json.pre-state-db-*`. It had no completed setup or conversations,
+  so the import of existing conversations was not exercised. Both runs stopped
+  cleanly on SIGINT.
+
 - 2026-10-30 follow-up: cats-one 0.6.0 raises the Platform range to `^0.12.3` and the
   Runtime range to `^0.6.2`. Runtime 0.6.0 was a breaking minor (image contract 2
   changed the HTTP request and capabilities contract); 0.6.2 adds opt-in provider
