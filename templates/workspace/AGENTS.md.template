@@ -65,6 +65,31 @@ concrete release defect within authorized scope. After successful verification,
 perform authorized cleanup and finish; do not chase unrelated main commits for
 documentation. See cats-one/docs/release-guide.md#release-preparation-and-completion.
 
+## Run CI once per reviewed commit
+
+Owner instruction, 2026-11-16, for every member and agent. Every push reruns the
+full CI matrix, and every packaging run signs and notarizes, so repeated runs
+cost the owner hours.
+
+- Finish a change locally, including its independent review and the fixes the
+  review asks for, before the first push. Do not push to show a reviewer and then
+  push again for its findings.
+- After changing a pinned or vendored dependency (for example a Runtime tgz pin),
+  reinstall (`npm ci`) before testing. Otherwise the tests exercise the old
+  dependency and must be run again.
+- Locally, run only the checks the change affects. Leave the full suite to the
+  hosted CI that runs anyway, and never run it locally just to commit, bump or
+  publish.
+- For a release, push `release/vX.Y.Z` at the reviewed bump commit and run its CI
+  once. Open the integration PR to main only after packaging is dispatched, and
+  update it only when it is behind, so its CI runs once, at merge.
+- Cancel a run that a newer push, or the release CI on the same commit, has made
+  redundant (`gh run cancel`).
+- Dispatch packaging once, from the commit whose CI passed. Retry a failed
+  packaging run from the same source rather than changing the release.
+
+See cats-one/docs/release-guide.md#order-of-work.
+
 ## Branches and worktrees
 
 Several agents can work in these checkouts at once. Keep each member's main

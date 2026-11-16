@@ -59,6 +59,30 @@ disable branch protections, use force pushes, or substitute a PR merge's CI for
 the frozen source's CI. Keep the release branch until publication verification
 and authorized cleanup are complete.
 
+### Order of work
+
+Owner instruction, 2026-11-16. Every push reruns the full CI matrix and every
+packaging run signs and notarizes, so a release runs each of them once:
+
+1. **Prepare locally.**
+   - Prepare the version fields, the pins and the notes. Compute every pin and
+     SHA with a command, never copied from the previous notes.
+   - After changing a pinned or vendored dependency, reinstall (`npm ci`) before
+     testing.
+   - Run the repository's pin and source-selection validators and the tests the
+     changed inputs affect. The release CI runs the full suite; do not repeat it
+     locally.
+2. **Review before any push.** Get the independent review of the complete bump
+   and apply its fixes locally. A product-code fix the review finds goes in its
+   own commit before the bump commit, since the release branch carries both.
+3. **Release branch and CI.** Push `release/vX.Y.Z` at the reviewed bump commit
+   and run `ci.yaml` on it once.
+4. **Packaging.** After that CI passes at the exact SHA, dispatch packaging once.
+   Retry a failed job from the same source.
+5. **Integration.** Only then open the integration PR to main, or update it if it
+   is behind, and arm auto-merge, so its CI runs once at merge. Cancel any CI run
+   that a newer push or the release CI on the same commit has made redundant.
+
 Choose a Runtime input by reading what Runtime `main` has after it; an existing pin
 is not a decision. Record the pin and that main baseline in the current version's
 notes, using full 40-character SHAs:
@@ -329,4 +353,4 @@ version as a root devDependency and builds and validates every App with it.
 - Keep entrypoint verification proportional to launcher/package changes. Do not
   repeat full-stack startup exercises solely for a version or documentation edit.
 
-*Last updated: 2026-10-01*
+*Last updated: 2026-11-16*
