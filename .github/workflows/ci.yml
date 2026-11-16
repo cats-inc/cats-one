@@ -10,14 +10,17 @@ permissions:
   contents: read
 
 jobs:
-  # A change confined to docs/ skips the workspace matrix and the required
-  # test job; branch protection accepts a skipped required job as passing.
-  # So does code that already passed: the fingerprint covers every tracked file
-  # outside docs/, so a rebase that only brings in docs from main reuses the
-  # earlier green run. A pull request's cache is scoped to that request, so a push
-  # to main instead reuses its merged pull request's run when that run tested the
-  # same tree. Any other path, a manual run or a failed detection runs them.
-  # test/docs-boundary.test.js keeps tests, scripts and the launcher from reading docs/.
+  # A change confined to docs/ and the root agent instruction files (AGENTS.md,
+  # CLAUDE.md, CODEX.md and GEMINI.md, added or edited; deleting or renaming one
+  # counts as code) skips the workspace matrix and the required test job; branch
+  # protection accepts a skipped required job as passing. So does code that
+  # already passed: the fingerprint covers every tracked file outside docs/ but
+  # only the presence of those agent files, so a rebase that only brings in
+  # documentation from main reuses the earlier green run. A pull request's cache
+  # is scoped to that request, so a push to main instead reuses its merged pull
+  # request's run when that run tested the same tree. Any other path, a manual
+  # run or a failed detection runs them. test/docs-boundary.test.js keeps tests,
+  # scripts and the launcher from reading docs/ or those agent files.
   changes:
     runs-on: ubuntu-latest
     # Job permissions replace the workflow's: checkout and the merge lookups read
@@ -48,18 +51,34 @@ jobs:
           esac
           code=true
           if [ -n "$base" ] && git rev-parse --verify --quiet "$base^{commit}" > /dev/null; then
-            changed=$(git diff --name-only "$base" HEAD)
+            # Without rename detection a rename lists its old path as deleted.
+            changed=$(git diff --no-renames --name-status "$base" HEAD)
             printf 'Changed files:\n%s\n' "$changed"
-            if [ -n "$changed" ] && ! grep -qv '^docs/' <<< "$changed"; then code=false; fi
+            # Documentation is any path under docs/, and a root AGENTS.md,
+            # CLAUDE.md, CODEX.md or GEMINI.md that is added or modified, so it
+            # still exists at HEAD. A deleted agent file, a nested copy and every
+            # other path are code. awk exits 0 only when every path is
+            # documentation, so a failure of its own also runs everything.
+            if [ -n "$changed" ] && awk -F '\t' '
+              $2 ~ /^docs\// { next }
+              $1 ~ /^[AM]$/ && $2 ~ /^(AGENTS|CLAUDE|CODEX|GEMINI)\.md$/ { next }
+              { code = 1 }
+              END { exit code + 0 }' <<< "$changed"; then code=false; fi
           fi
           echo "code=$code" | tee -a "$GITHUB_OUTPUT"
       - name: Fingerprint the code under test
         id: fingerprint
         run: |
           set -euo pipefail
-          # Mode, blob and path of every tracked file outside docs/. For a pull
-          # request this is the merge result that the tests would exercise.
-          fingerprint=$(git ls-tree -r --full-tree HEAD | awk -F '\t' '$2 !~ /^docs\//' | sha256sum | cut -d ' ' -f 1)
+          # Mode, blob and path of every tracked file outside docs/. The root
+          # agent instruction files keep their mode, type and path but print a
+          # fixed placeholder for the blob, so their presence counts and their
+          # content does not. For a pull request this is the merge result that
+          # the tests would exercise.
+          fingerprint=$(git ls-tree -r --full-tree HEAD | awk -F '\t' '
+            $2 ~ /^docs\// { next }
+            $2 ~ /^(AGENTS|CLAUDE|CODEX|GEMINI)\.md$/ { split($1, entry, " "); print entry[1] " " entry[2] " agent-instructions\t" $2; next }
+            { print }' | sha256sum | cut -d ' ' -f 1)
           echo "fingerprint=$fingerprint" | tee -a "$GITHUB_OUTPUT"
       - name: Look for an earlier green run of this exact code
         id: green
@@ -67,7 +86,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: .ci-green
-          key: ci-green-v1-${{ steps.fingerprint.outputs.fingerprint }}
+          key: ci-green-v2-${{ steps.fingerprint.outputs.fingerprint }}
           lookup-only: true
       - name: Reuse the merged pull request's green run
         id: merged
@@ -223,4 +242,4 @@ jobs:
       - uses: actions/cache/save@v4
         with:
           path: .ci-green
-          key: ci-green-v1-${{ needs.changes.outputs.fingerprint }}
+          key: ci-green-v2-${{ needs.changes.outputs.fingerprint }}
