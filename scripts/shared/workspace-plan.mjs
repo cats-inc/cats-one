@@ -26,7 +26,7 @@ export function validateOwnership(record, manifest) {
       `Invalid ownership digest: ${entry.path}`);
     requireCondition(!paths.has(entry.path.toLowerCase()), `Duplicate ownership path: ${entry.path}`);
     paths.add(entry.path.toLowerCase());
-    if (entry.path === 'AGENTS.md') {
+    if (entry.path === 'AGENTS.md') { // docs-boundary-ignore: generated workspace AGENTS.md
       requireCondition(entry.agent === 'shared' && entry.member === 'cats-one' && entry.source === TEMPLATE,
         'Invalid root instruction ownership');
     } else {

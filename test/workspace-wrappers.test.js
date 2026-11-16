@@ -99,7 +99,7 @@ for (const wrapper of wrappers) {
 
   test(`${label}: a root guidance conflict fails before any copy or follow-up check`, async t => {
     const workspace = await prepare(t, wrapper);
-    await write(workspace.root, 'AGENTS.md', 'Keep these personal workspace instructions.\n');
+    await write(workspace.root, 'AGENTS.md', 'Keep these personal workspace instructions.\n'); // docs-boundary-ignore: fixture workspace AGENTS.md
     const before = await snapshot(workspace.base);
     const result = run(workspace, wrapper);
     assert.equal(result.status, 2, result.stderr);

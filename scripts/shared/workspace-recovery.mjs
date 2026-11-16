@@ -21,7 +21,7 @@ export function validateRecovery(record, manifest) {
   const after = validateOwnership(JSON.parse(record.afterMetadata), manifest);
   const beforeByPath = new Map(before.map(entry => [entry.path, entry]));
   const afterByPath = new Map(after.map(entry => [entry.path, entry]));
-  requireCondition(afterByPath.has('AGENTS.md'), 'Recovery must retain shared root ownership');
+  requireCondition(afterByPath.has('AGENTS.md'), 'Recovery must retain shared root ownership'); // docs-boundary-ignore: generated workspace AGENTS.md
   const retained = entries => entries.filter(entry => !selected(entry.agent, record.agent)).sort((a, b) => compare(a.path, b.path));
   requireCondition(JSON.stringify(retained(before)) === JSON.stringify(retained(after)), 'Recovery changes an unselected agent');
   requireCondition(Array.isArray(record.operations) && record.operations.length > 0, 'Recovery operations are missing');

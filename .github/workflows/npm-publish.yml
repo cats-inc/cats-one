@@ -38,16 +38,27 @@ jobs:
       - name: Update npm for trusted publishing
         run: npm install -g npm@^11.5.1
 
-      # When CI already passed on this exact commit on main, it ran the test gate
-      # and more, so the publish does not repeat it. Anything else, such as a
-      # release branch or a failed lookup, runs the gate here as before.
+      # When CI's test job passed on this exact commit on main, it ran the test
+      # gate and more, so the publish does not repeat it. A successful CI run can
+      # skip that job (documentation only, or code that passed elsewhere), so the
+      # job itself must have succeeded. Anything else, such as a release branch
+      # or a failed lookup, runs the gate here as before.
       - name: Check whether CI passed on this commit on main
         id: ci
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          passed=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?head_sha=$GITHUB_SHA&event=push&branch=main&status=success&per_page=1" --jq '.total_count' 2>/dev/null || true)
-          if [[ "$passed" =~ ^[1-9][0-9]*$ ]]; then tested=true; else tested=false; fi
+          tested=false
+          runs=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?head_sha=$GITHUB_SHA&event=push&branch=main&status=success&per_page=10" --jq '.workflow_runs[].id' 2>/dev/null || true)
+          for run in $runs; do
+            [[ "$run" =~ ^[0-9]+$ ]] || continue
+            test_job=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run/jobs?filter=latest&per_page=100" --jq '[.jobs[] | select(.name == "test") | .conclusion] | join(",")' 2>/dev/null || true)
+            if [ "$test_job" = success ]; then
+              tested=true
+              echo "CI run $run passed its test job on $GITHUB_SHA."
+              break
+            fi
+          done
           echo "tested=$tested" | tee -a "$GITHUB_OUTPUT"
 
       # Workspace tests import developer dependencies. Install the locked

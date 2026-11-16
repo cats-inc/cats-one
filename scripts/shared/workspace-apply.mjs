@@ -117,7 +117,7 @@ async function applyPlan(options, report, agent, guard, event) {
       await assertApplied(report, record);
     } else {
       const source = report.desired.find(entry => entry.path === operation.path);
-      if (source && source.path !== 'AGENTS.md') {
+      if (source && source.path !== 'AGENTS.md') { // docs-boundary-ignore: generated workspace AGENTS.md
         await assertDigest(root, `${source.member}/${source.source}`, source.snapshot.digest);
       }
     }

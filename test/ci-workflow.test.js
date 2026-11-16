@@ -9,8 +9,8 @@ const { parse } = require('yaml');
 // CI skips the matrix and test job for documentation (docs/ and the root agent
 // instruction files) and for code whose fingerprint already passed. A push to
 // main skips them only when its merged pull request already passed on the same
-// tree, and npm publication skips its gate only when CI passed on the commit on
-// main. These tests run the workflows' own shell steps against scratch
+// tree, and npm publication skips its gate only when CI's test job passed on the
+// commit on main. These tests run the workflows' own shell steps against scratch
 // repositories, a local origin and a stubbed gh.
 const ci = parse(readFileSync('.github/workflows/ci.yml', 'utf8'));
 const publish = parse(readFileSync('.github/workflows/npm-publish.yml', 'utf8'));
@@ -51,10 +51,21 @@ function scratchRepository(t, prefix) {
     git(work, 'commit', '-m', message);
     return git(work, 'rev-parse', 'HEAD');
   };
+  // Commit a tracked file's change into a symbolic link through the index alone,
+  // which needs no symbolic link support from the filesystem.
+  const commitTypeChange = (path, message) => {
+    git(work, 'update-index', '--cacheinfo', `120000,${git(work, 'rev-parse', `HEAD:${path}`)},${path}`);
+    git(work, 'commit', '-m', message);
+    return git(work, 'rev-parse', 'HEAD');
+  };
   mkdirSync(work);
   git(work, 'init', '--initial-branch=main');
-  return { root, work, git, write, remove, commit };
+  return { root, work, git, write, remove, commit, commitTypeChange };
 }
+
+// The scratch repositories' own agent files and documentation.
+const [AGENTS, CLAUDE, CODEX, GEMINI] = ['AGENTS.md', 'CLAUDE.md', 'CODEX.md', 'GEMINI.md']; // docs-boundary-ignore: scratch repository
+const [GUIDE, USAGE] = ['docs/guide.md', 'docs/使用說明.md']; // docs-boundary-ignore: scratch repository
 
 function stubGh(bin) {
   mkdirSync(bin, { recursive: true });
@@ -64,6 +75,7 @@ function stubGh(bin) {
     'case "$2" in',
     '  */pulls) [ -n "${STUB_PULLS:-}" ] || exit 1; printf \'%s\\n\' "$STUB_PULLS" ;;',
     '  */actions/workflows/*) [ -n "${STUB_PASSED:-}" ] || exit 1; printf \'%s\\n\' "$STUB_PASSED" ;;',
+    '  */actions/runs/*/jobs*) [ -n "${STUB_JOBS:-}" ] || exit 1; printf \'%s\\n\' "$STUB_JOBS" ;;',
     '  *) exit 1 ;;',
     'esac',
   ].join('\n') + '\n', { mode: 0o755 });
@@ -71,43 +83,49 @@ function stubGh(bin) {
 
 test('documentation is docs/ plus root agent instruction files that still exist at HEAD', (t) => {
   const paths = ci.jobs.changes.steps.find((step) => step.id === 'paths');
-  const { work, git, write, remove, commit } = scratchRepository(t, 'cats-ci-paths-');
+  const { work, git, write, remove, commit, commitTypeChange } = scratchRepository(t, 'cats-ci-paths-');
   write('bin/cli.js', 'launcher\n');
-  write('AGENTS.md', 'shared rules\n');
-  write('CLAUDE.md', 'Claude rules\n');
-  write('CODEX.md', 'Codex rules\n');
+  write(AGENTS, 'shared rules\n');
+  write(CLAUDE, 'Claude rules\n');
+  write(CODEX, 'Codex rules\n');
   write('sub/AGENTS.md', 'nested rules\n');
-  write('docs/guide.md', 'guide\n'); // docs-boundary-ignore: scratch repository
+  write(GUIDE, 'guide\n');
   const base = commit('base');
   const detect = (change, event = 'push') => {
-    git(work, 'checkout', '--quiet', '--detach', base);
+    git(work, 'checkout', '--quiet', '--force', '--detach', base);
     change();
     commit('change');
     return runStep(paths.run, work, { EVENT: event, BEFORE: base });
   };
-  assert.equal(detect(() => write('AGENTS.md', 'edited shared rules\n')), 'code=false',
+  assert.equal(detect(() => write(AGENTS, 'edited shared rules\n')), 'code=false',
     'a root AGENTS.md edit is documentation');
-  assert.equal(runStep(`awk() { return 2; }\n${paths.run}`, work, { EVENT: 'push', BEFORE: base }), 'code=true',
-    'a failed classification runs everything');
-  assert.equal(detect(() => write('AGENTS.md', 'edited shared rules\n'), 'pull_request'), 'code=false');
+  const failingDiff = 'git() { case " $* " in *" --diff-filter="*) return 128 ;; esac; command git "$@"; }\n';
+  assert.equal(runStep(failingDiff + paths.run, work, { EVENT: 'push', BEFORE: base }), 'code=true',
+    'a failed git diff runs everything');
+  assert.equal(detect(() => write(AGENTS, 'edited shared rules\n'), 'pull_request'), 'code=false');
   assert.equal(detect(() => {
-    write('CLAUDE.md', 'edited Claude rules\n');
-    write('GEMINI.md', 'new Gemini rules\n');
-    write('docs/guide.md', 'edited guide\n'); // docs-boundary-ignore: scratch repository
+    write(CLAUDE, 'edited Claude rules\n');
+    write(GEMINI, 'new Gemini rules\n');
+    write(GUIDE, 'edited guide\n');
   }), 'code=false', 'added and edited agent files with docs are documentation');
-  assert.equal(detect(() => remove('CLAUDE.md')), 'code=true', 'a deleted root CLAUDE.md is code');
-  assert.equal(detect(() => git(work, 'mv', 'CODEX.md', 'docs/CODEX.md')), 'code=true', // docs-boundary-ignore: scratch repository
+  assert.equal(detect(() => write(USAGE, 'usage\n')), 'code=false', 'a non-ASCII docs/ path is documentation');
+  assert.equal(detect(() => remove(CLAUDE)), 'code=true', 'a deleted root CLAUDE.md is code');
+  assert.equal(detect(() => git(work, 'mv', CODEX, 'docs/CODEX.md')), 'code=true', // docs-boundary-ignore: scratch repository
     'a root CODEX.md moved into docs/ is code');
   assert.equal(detect(() => git(work, 'mv', 'bin/cli.js', 'docs/cli.js')), 'code=true', // docs-boundary-ignore: scratch repository
     'code moved into docs/ is code');
   assert.equal(detect(() => write('sub/AGENTS.md', 'edited nested rules\n')), 'code=true',
     'a nested sub/AGENTS.md is code');
   assert.equal(detect(() => {
-    write('AGENTS.md', 'edited shared rules\n');
+    write(AGENTS, 'edited shared rules\n');
     write('bin/cli.js', 'edited launcher\n');
   }), 'code=true');
-  assert.equal(detect(() => write('AGENTS.md', 'edited shared rules\n'), 'workflow_dispatch'), 'code=true',
+  assert.equal(detect(() => write(AGENTS, 'edited shared rules\n'), 'workflow_dispatch'), 'code=true',
     'a manual run runs everything');
+  git(work, 'checkout', '--quiet', '--force', '--detach', base);
+  commitTypeChange(AGENTS, 'AGENTS.md becomes a link');
+  assert.equal(runStep(paths.run, work, { EVENT: 'push', BEFORE: base }), 'code=true',
+    'a root AGENTS.md type change is code');
   assert.equal(runStep(paths.run, work, { EVENT: 'push', BEFORE: '' }), 'code=true', 'an unknown base runs everything');
   assert.equal(runStep(paths.run, work, { EVENT: 'push', BEFORE: 'f'.repeat(40) }), 'code=true',
     'a base missing from the clone runs everything');
@@ -120,29 +138,30 @@ test('the fingerprint keeps root agent instruction files by presence, not conten
   // The agent-file placeholder changed the fingerprint format, hence v2 markers.
   assert.equal(green.with.key, 'ci-green-v2-${{ steps.fingerprint.outputs.fingerprint }}');
   assert.equal(save.with.key, 'ci-green-v2-${{ needs.changes.outputs.fingerprint }}');
-  const { work, write, remove, commit } = scratchRepository(t, 'cats-ci-fingerprint-');
+  const { work, write, remove, commit, commitTypeChange } = scratchRepository(t, 'cats-ci-fingerprint-');
   const print = () => runStep(fingerprint.run, work, {});
   write('bin/cli.js', 'launcher\n');
-  write('AGENTS.md', 'shared rules\n');
+  write(AGENTS, 'shared rules\n');
   write('sub/AGENTS.md', 'nested rules\n');
-  write('docs/guide.md', 'guide\n'); // docs-boundary-ignore: scratch repository
+  write(GUIDE, 'guide\n');
   commit('base');
   const base = print();
   assert.match(base, /^fingerprint=[0-9a-f]{64}$/);
-  write('AGENTS.md', 'edited shared rules\n');
+  write(AGENTS, 'edited shared rules\n');
   commit('edit AGENTS.md');
   assert.equal(print(), base, 'an AGENTS.md content edit keeps the fingerprint');
-  write('docs/guide.md', 'edited guide\n'); // docs-boundary-ignore: scratch repository
+  write(GUIDE, 'edited guide\n');
+  write(USAGE, 'usage\n');
   commit('edit docs');
-  assert.equal(print(), base);
-  write('CLAUDE.md', 'Claude rules\n');
+  assert.equal(print(), base, 'edits under docs/, including non-ASCII paths, keep the fingerprint');
+  write(CLAUDE, 'Claude rules\n');
   commit('add CLAUDE.md');
   const withClaude = print();
   assert.notEqual(withClaude, base, 'adding an agent file changes the fingerprint');
-  write('CLAUDE.md', 'edited Claude rules\n');
+  write(CLAUDE, 'edited Claude rules\n');
   commit('edit CLAUDE.md');
   assert.equal(print(), withClaude);
-  remove('CLAUDE.md');
+  remove(CLAUDE);
   commit('delete CLAUDE.md');
   assert.equal(print(), base, 'deleting an agent file changes the fingerprint back');
   write('sub/AGENTS.md', 'edited nested rules\n');
@@ -151,7 +170,10 @@ test('the fingerprint keeps root agent instruction files by presence, not conten
   assert.notEqual(nested, base, 'a nested AGENTS.md is code');
   write('bin/cli.js', 'edited launcher\n');
   commit('edit launcher');
-  assert.notEqual(print(), nested);
+  const launcher = print();
+  assert.notEqual(launcher, nested);
+  commitTypeChange(AGENTS, 'AGENTS.md becomes a link');
+  assert.notEqual(print(), launcher, 'an agent file type change changes the fingerprint');
 });
 
 test('a main push reuses its merged pull request\'s green run only for that exact tree on the previous main', (t) => {
@@ -205,8 +227,10 @@ test('a main push reuses its merged pull request\'s green run only for that exac
     'a head without the previous main was tested on other code');
 });
 
-test('npm publication skips its test gate only after CI passed on the commit on main', (t) => {
+test('npm publication skips its test gate only after CI\'s test job passed on the commit on main', (t) => {
   assert.equal(publish.permissions.actions, 'read');
+  // The lookup finds CI's test job by name, so that job keeps its key as its name.
+  assert.equal(ci.jobs.test.name, undefined);
   const steps = publish.jobs.publish.steps;
   for (const name of ['Install dependencies', 'Run test gate']) {
     assert.equal(steps.find((step) => step.name === name)?.if, "steps.ci.outputs.tested != 'true'", name);
@@ -219,13 +243,17 @@ test('npm publication skips its test gate only after CI passed on the commit on 
   const bin = join(root, 'bin');
   stubGh(bin);
   const sha = 'a'.repeat(40);
-  const lookup = (passed) => runStep(check.run, root, {
+  const lookup = (runs, jobs) => runStep(check.run, root, {
     PATH: `${bin}${delimiter}${process.env.PATH}`, GITHUB_REPOSITORY: 'cats-inc/cats-one', GITHUB_SHA: sha,
-    STUB_PASSED: passed, STUB_LOG: join(root, 'gh.log'),
+    STUB_PASSED: runs, STUB_JOBS: jobs, STUB_LOG: join(root, 'gh.log'),
   });
-  assert.equal(lookup('1'), 'tested=true');
-  assert.match(readFileSync(join(root, 'gh.log'), 'utf8'),
-    new RegExp(`actions/workflows/ci\\.yml/runs\\?head_sha=${sha}&event=push&branch=main&status=success`));
-  assert.equal(lookup('0'), 'tested=false', 'without a passing main run the gate runs as before');
-  assert.equal(lookup(''), 'tested=false', 'a failed lookup runs the gate');
+  assert.equal(lookup('42', 'success'), 'tested=true');
+  const log = readFileSync(join(root, 'gh.log'), 'utf8');
+  assert.match(log, new RegExp(`actions/workflows/ci\\.yml/runs\\?head_sha=${sha}&event=push&branch=main&status=success`));
+  assert.match(log, /actions\/runs\/42\/jobs\?filter=latest/);
+  assert.equal(lookup('42', 'skipped'), 'tested=false',
+    'a successful run that skipped the test job, such as a documentation-only push, runs the gate');
+  assert.equal(lookup('42', ''), 'tested=false', 'a failed job lookup runs the gate');
+  assert.equal(lookup('', 'success'), 'tested=false', 'without a passing main run the gate runs as before');
+  assert.equal(lookup('not-a-run', 'success'), 'tested=false');
 });

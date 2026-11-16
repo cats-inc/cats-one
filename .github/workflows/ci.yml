@@ -11,8 +11,9 @@ permissions:
 
 jobs:
   # A change confined to docs/ and the root agent instruction files (AGENTS.md,
-  # CLAUDE.md, CODEX.md and GEMINI.md, added or edited; deleting or renaming one
-  # counts as code) skips the workspace matrix and the required test job; branch
+  # CLAUDE.md, CODEX.md and GEMINI.md, added or edited; deleting, renaming or
+  # changing the type of one counts as code) skips the workspace matrix and the
+  # required test job, which npm-publish.yml therefore checks by name; branch
   # protection accepts a skipped required job as passing. So does code that
   # already passed: the fingerprint covers every tracked file outside docs/ but
   # only the presence of those agent files, so a rebase that only brings in
@@ -51,19 +52,18 @@ jobs:
           esac
           code=true
           if [ -n "$base" ] && git rev-parse --verify --quiet "$base^{commit}" > /dev/null; then
-            # Without rename detection a rename lists its old path as deleted.
-            changed=$(git diff --no-renames --name-status "$base" HEAD)
-            printf 'Changed files:\n%s\n' "$changed"
             # Documentation is any path under docs/, and a root AGENTS.md,
             # CLAUDE.md, CODEX.md or GEMINI.md that is added or modified, so it
-            # still exists at HEAD. A deleted agent file, a nested copy and every
-            # other path are code. awk exits 0 only when every path is
-            # documentation, so a failure of its own also runs everything.
-            if [ -n "$changed" ] && awk -F '\t' '
-              $2 ~ /^docs\// { next }
-              $1 ~ /^[AM]$/ && $2 ~ /^(AGENTS|CLAUDE|CODEX|GEMINI)\.md$/ { next }
-              { code = 1 }
-              END { exit code + 0 }' <<< "$changed"; then code=false; fi
+            # still exists at HEAD. Without rename detection a rename lists its
+            # old path as deleted, so a deleted, renamed or type-changed agent
+            # file, a nested copy and every other path are code. Any git
+            # failure keeps code=true.
+            if changed=$(git -c core.quotePath=false diff --no-renames --name-status "$base" HEAD) &&
+              code_changed=$(git diff --no-renames --name-only "$base" HEAD -- . ':(top,exclude)docs/' ':(top,exclude)AGENTS.md' ':(top,exclude)CLAUDE.md' ':(top,exclude)CODEX.md' ':(top,exclude)GEMINI.md') &&
+              agents_removed=$(git diff --no-renames --name-only --diff-filter=am "$base" HEAD -- ':(top)AGENTS.md' ':(top)CLAUDE.md' ':(top)CODEX.md' ':(top)GEMINI.md'); then
+              printf 'Changed files:\n%s\n' "$changed"
+              if [ -n "$changed" ] && [ -z "$code_changed" ] && [ -z "$agents_removed" ]; then code=false; fi
+            fi
           fi
           echo "code=$code" | tee -a "$GITHUB_OUTPUT"
       - name: Fingerprint the code under test
@@ -73,9 +73,10 @@ jobs:
           # Mode, blob and path of every tracked file outside docs/. The root
           # agent instruction files keep their mode, type and path but print a
           # fixed placeholder for the blob, so their presence counts and their
-          # content does not. For a pull request this is the merge result that
-          # the tests would exercise.
-          fingerprint=$(git ls-tree -r --full-tree HEAD | awk -F '\t' '
+          # content does not. Unquoted paths keep non-ASCII names under docs/
+          # out. For a pull request this is the merge result that the tests
+          # would exercise.
+          fingerprint=$(git -c core.quotePath=false ls-tree -r --full-tree HEAD | awk -F '\t' '
             $2 ~ /^docs\// { next }
             $2 ~ /^(AGENTS|CLAUDE|CODEX|GEMINI)\.md$/ { split($1, entry, " "); print entry[1] " " entry[2] " agent-instructions\t" $2; next }
             { print }' | sha256sum | cut -d ' ' -f 1)
